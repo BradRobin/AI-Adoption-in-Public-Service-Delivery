@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { ParticleBackground } from '@/components/ParticleBackground'
 
 export default function LoginPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
+      <ParticleBackground />
       <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">
         <h1 className="mb-6 text-2xl font-medium text-white sm:text-3xl">
           Sign in to continue
