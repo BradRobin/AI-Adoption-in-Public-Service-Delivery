@@ -91,16 +91,25 @@ export default function Home() {
     return null
   }
 
+  const rawUsername =
+    (session.user?.user_metadata as { username?: string } | null | undefined)
+      ?.username
+
+  const formatName = (name?: string | null) => {
+    if (!name || typeof name !== 'string') return undefined
+    return name.charAt(0).toUpperCase() + name.slice(1)
+  }
+
+  const displayName =
+    formatName(rawUsername) ?? session.user?.email ?? 'User'
+
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 font-sans">
+    <div className="relative flex min-h-screen w-full justify-center overflow-hidden bg-black px-4 font-sans">
       <ParticleBackground />
-      <main className="relative z-10 flex w-full max-w-2xl flex-col items-center gap-8 py-8">
-        <h1 className="text-center text-2xl font-medium text-white md:text-3xl">
-          Welcome
+      <main className="relative z-10 flex w-full max-w-2xl flex-col items-center gap-6 pt-16 pb-10">
+        <h1 className="text-center text-3xl font-bold text-white md:text-4xl">
+          Welcome {displayName}
         </h1>
-        <p className="text-center text-base text-white/90 md:text-lg">
-          {session.user?.email}
-        </p>
         <button
           type="button"
           onClick={handleSignOut}
