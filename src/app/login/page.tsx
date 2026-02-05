@@ -83,13 +83,21 @@ export default function LoginPage() {
         return
       }
 
+      // Keep copies for the request but immediately clear the inputs
+      const signupEmail = trimmedEmail
+      const signupUsername = trimmedUsername
+      const signupPassword = password
+      setEmail('')
+      setUsername('')
+      setPassword('')
+
       try {
         setIsSubmitting(true)
         const { error: signUpError } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password,
+          email: signupEmail,
+          password: signupPassword,
           options: {
-            data: { username: trimmedUsername },
+            data: { username: signupUsername },
             emailRedirectTo:
               typeof window !== 'undefined'
                 ? `${window.location.origin}/login`
@@ -107,7 +115,6 @@ export default function LoginPage() {
 
         setSuccessMessage('Sign up successful. Please log in.')
         setMode('login')
-        setPassword('')
       } catch {
         setError('Unable to sign up. Please try again.')
       } finally {
@@ -117,30 +124,21 @@ export default function LoginPage() {
     }
 
     // Login mode
+    const loginPassword = password
+    // Immediately clear the password field but keep the email
+    setPassword('')
+
     try {
       setIsSubmitting(true)
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
-        password,
+        password: loginPassword,
       })
 
       if (signInError) {
         await supabase.auth.signOut()
-        const msg = signInError.message?.toLowerCase() ?? ''
-        const isEmailNotConfirmed =
-          msg.includes('email not confirmed') ||
-          msg.includes('email_not_confirmed') ||
-          (msg.includes('invalid') && msg.includes('credentials'))
-        if (isEmailNotConfirmed) {
-          setError(
-            'Your account was created but your email is not confirmed yet. Check your inbox for a confirmation link. If you want to log in immediately without email confirmation, disable "Confirm email" in Supabase: Authentication → Providers → Email.',
-          )
-        } else {
-          setError(
-            signInError.message ||
-              'Credentials not found. Please sign up to create an account.',
-          )
-        }
+        // For any auth error, keep the email and prompt user to re‑enter password
+        setError('Incorrect Password')
         return
       }
 
@@ -163,47 +161,49 @@ export default function LoginPage() {
     <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur">
-          <div className="mb-6 flex justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => handleModeChange('login')}
-              className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
-                mode === 'login'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-transparent text-white/70 hover:bg-white/10'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeChange('signup')}
-              className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
-                mode === 'signup'
-                  ? 'bg-white text-black'
-                  : 'bg-transparent text-white/70 hover:bg-white/10'
-              }`}
-            >
-              Sign up
-            </button>
+        <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur h-[520px] md:h-[560px]">
+          <div className="mb-6 flex min-h-[150px] flex-col items-center justify-start gap-3">
+            <div className="flex justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleModeChange('login')}
+                className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
+                  mode === 'login'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-transparent text-white/70 hover:bg-white/10'
+                }`}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModeChange('signup')}
+                className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
+                  mode === 'signup'
+                    ? 'bg-white text-black'
+                    : 'bg-transparent text-white/70 hover:bg-white/10'
+                }`}
+              >
+                Sign up
+              </button>
+            </div>
+
+            <h1 className="text-center text-2xl font-medium text-white sm:text-3xl">
+              {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
+            </h1>
+
+            {error && (
+              <p className="text-center text-sm text-red-400">{error}</p>
+            )}
+
+            {successMessage && (
+              <p className="text-center text-sm text-green-400">
+                {successMessage}
+              </p>
+            )}
           </div>
 
-          <h1 className="mb-4 text-center text-2xl font-medium text-white sm:text-3xl">
-            {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
-          </h1>
-
-          {error && (
-            <p className="mb-4 text-center text-sm text-red-400">{error}</p>
-          )}
-
-          {successMessage && (
-            <p className="mb-4 text-center text-sm text-green-400">
-              {successMessage}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex-1 space-y-4">
             <div>
               <label
                 htmlFor="email"
@@ -299,43 +299,37 @@ export default function LoginPage() {
                     <div className="mt-3 space-y-1 text-xs text-white/70">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`inline-flex h-3 w-3 items-center justify-center rounded-sm border ${
+                          className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
                             hasMinLength
-                              ? 'border-green-400 bg-green-500'
-                              : 'border-white/40'
+                              ? 'border-green-400 bg-green-500 text-black'
+                              : 'border-white/40 text-transparent'
                           }`}
                         >
-                          {hasMinLength && (
-                            <span className="block h-2 w-2 bg-black" />
-                          )}
+                          ✓
                         </span>
                         <span>Password should be no less than 8 characters.</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span
-                          className={`inline-flex h-3 w-3 items-center justify-center rounded-sm border ${
+                          className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
                             hasLetter
-                              ? 'border-green-400 bg-green-500'
-                              : 'border-white/40'
+                              ? 'border-green-400 bg-green-500 text-black'
+                              : 'border-white/40 text-transparent'
                           }`}
                         >
-                          {hasLetter && (
-                            <span className="block h-2 w-2 bg-black" />
-                          )}
+                          ✓
                         </span>
                         <span>Password should include a letter(s).</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span
-                          className={`inline-flex h-3 w-3 items-center justify-center rounded-sm border ${
+                          className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
                             hasNumberOrSymbol
-                              ? 'border-green-400 bg-green-500'
-                              : 'border-white/40'
+                              ? 'border-green-400 bg-green-500 text-black'
+                              : 'border-white/40 text-transparent'
                           }`}
                         >
-                          {hasNumberOrSymbol && (
-                            <span className="block h-2 w-2 bg-black" />
-                          )}
+                          ✓
                         </span>
                         <span>
                           Password should include a number(s) or symbol(s).
