@@ -12,6 +12,9 @@ export default function Home() {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [sessionExpired, setSessionExpired] = useState(false)
+  const greetings = ['Hi', 'Sasa', 'Rada'] as const
+  const [greetingIndex, setGreetingIndex] = useState(0)
+  const [isGreetingVisible, setIsGreetingVisible] = useState(true)
 
   useEffect(() => {
     const checkSession = async () => {
@@ -42,6 +45,25 @@ export default function Home() {
       subscription.unsubscribe()
     }
   }, [router])
+
+  useEffect(() => {
+    const DISPLAY_MS = 2500
+    const FADE_MS = 500
+
+    const hideTimeout = setTimeout(() => {
+      setIsGreetingVisible(false)
+    }, DISPLAY_MS)
+
+    const showTimeout = setTimeout(() => {
+      setGreetingIndex((prev) => (prev + 1) % greetings.length)
+      setIsGreetingVisible(true)
+    }, DISPLAY_MS + FADE_MS)
+
+    return () => {
+      clearTimeout(hideTimeout)
+      clearTimeout(showTimeout)
+    }
+  }, [greetings.length, greetingIndex])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -104,20 +126,73 @@ export default function Home() {
     formatName(rawUsername) ?? session.user?.email ?? 'User'
 
   return (
-    <div className="relative flex min-h-screen w-full justify-center overflow-hidden bg-black px-4 font-sans">
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
-      <main className="relative z-10 flex w-full max-w-2xl flex-col items-center gap-6 pt-16 pb-10">
-        <h1 className="text-center text-3xl font-bold text-white md:text-4xl">
-          Welcome {displayName}
-        </h1>
+      <nav className="absolute right-4 top-4 z-20 flex items-center gap-3 text-sm md:text-base">
+        <Link
+          href="/"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Home
+        </Link>
+        <Link
+          href="/assess"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Assess
+        </Link>
+        <Link
+          href="/chat"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Chat
+        </Link>
+        <Link
+          href="/privacy"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Privacy
+        </Link>
+        <Link
+          href="/report"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Report
+        </Link>
         <button
           type="button"
           onClick={handleSignOut}
-          className="flex h-12 min-w-[140px] items-center justify-center rounded-lg bg-red-500 px-6 font-medium text-white transition-colors hover:bg-red-600"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          SignOut
+        </button>
+      </nav>
+      <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
+        <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
+          <h1
+            className={`text-center text-6xl font-bold text-white transition-all duration-500 ease-out md:text-7xl ${
+              isGreetingVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-2'
+            }`}
+          >
+            {greetings[greetingIndex]} {displayName}
+          </h1>
+        </div>
+        <p className="mt-4 max-w-xl text-base text-white/80 md:text-lg">
+          Assess your Technology–Organization–Environment (TOE) readiness and
+          understand how your capabilities create meaningful public value.
+        </p>
+      </main>
+      <div className="absolute bottom-4 right-4 z-20">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-5 text-sm font-medium text-white transition-colors hover:bg-red-600 md:h-11 md:min-w-[140px] md:px-6 md:text-base"
         >
           Sign Out
         </button>
-      </main>
+      </div>
     </div>
   )
 }
