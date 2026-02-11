@@ -8,13 +8,18 @@ import { useForm } from 'react-hook-form'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { LikertScale } from '@/components/LikertScale'
+import { ToeResults } from '@/components/ToeResults'
 import { supabase } from '@/lib/supabase/client'
+import {
+  computeScores,
+  getInterpretation,
+  type ToeFormValues,
+  type ToeScores,
+} from '@/lib/toe-scoring'
 import {
   TOE_QUESTIONS,
   type ToeSection,
 } from '@/data/toe-questions'
-
-type ToeFormValues = Record<string, number>
 
 const SECTION_LABELS: Record<ToeSection, string> = {
   technological: 'Technological Factors',
@@ -33,10 +38,14 @@ export default function AssessPage() {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [submittedData, setSubmittedData] = useState<ToeFormValues | null>(null)
+  const [scores, setScores] = useState<ToeScores | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors, isValid },
   } = useForm<ToeFormValues>({
     mode: 'onChange',
@@ -85,8 +94,45 @@ export default function AssessPage() {
     }
   }, [router])
 
-  const onSubmit = (data: ToeFormValues) => {
+  const onSubmit = async (data: ToeFormValues) => {
+    setSaveError(null)
+    const computed = computeScores(data)
+    setScores(computed)
     setSubmittedData(data)
+    setIsSaving(true)
+
+    const userId = session?.user?.id
+    if (userId) {
+      const { error } = await supabase.from('assessments').insert({
+        user_id: userId,
+        score: computed.overall,
+        dimension_scores: computed.dimensionScores,
+      })
+
+      if (error) {
+        setSaveError(error.message)
+      }
+    }
+
+    setIsSaving(false)
+  }
+
+  const handleRetake = () => {
+    reset(
+      SECTION_ORDER.reduce(
+        (acc, section) => {
+          TOE_QUESTIONS[section].forEach((q) => {
+            acc[q.id] = undefined
+          })
+          return acc
+        },
+        {} as Record<string, undefined>,
+      ),
+    )
+    setSubmittedData(null)
+    setScores(null)
+    setSaveError(null)
+    window.scrollTo(0, 0)
   }
 
   const handleSignOut = async () => {
@@ -109,6 +155,8 @@ export default function AssessPage() {
   if (!session) {
     return null
   }
+
+  const showResults = submittedData && scores
 
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
@@ -157,44 +205,73 @@ export default function AssessPage() {
           <h1 className="text-xl font-semibold text-white md:text-2xl">
             AI Readiness Assessment (TOE Framework)
           </h1>
-          <p className="mt-3 text-sm text-white/80 md:text-base">
-            Rate each statement on a scale of 1 (Strongly Disagree) to 5
-            (Strongly Agree).
-          </p>
 
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="mt-8 space-y-8"
-          >
-            {SECTION_ORDER.map((section) => (
-              <section key={section} className="space-y-4">
-                <h2 className="text-lg font-medium text-white">
-                  {SECTION_LABELS[section]}
-                </h2>
-                <div className="space-y-6">
-                  {TOE_QUESTIONS[section].map((q) => (
-                    <LikertScale
-                      key={q.id}
-                      name={q.id}
-                      control={control}
-                      label={q.text}
-                      error={errors[q.id]?.message}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
+          {showResults ? (
+            <>
+              <p className="mt-3 text-sm text-white/80 md:text-base">
+                Your assessment results are below.
+              </p>
+              {isSaving && (
+                <p className="mt-2 text-sm text-white/70">
+                  Saving...
+                </p>
+              )}
+              {saveError && (
+                <p className="mt-2 text-sm text-red-400">
+                  Could not save to server: {saveError}
+                </p>
+              )}
+              <div className="mt-8">
+                <ToeResults
+                  overall={scores.overall}
+                  dimensionScores={scores.dimensionScores}
+                  interpretation={getInterpretation(scores.dimensionScores)}
+                  onRetake={handleRetake}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 text-sm text-white/80 md:text-base">
+                Rate each statement on a scale of 1 (Strongly Disagree) to 5
+                (Strongly Agree).
+              </p>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={!isValid}
-                className="w-full rounded-lg bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="mt-8 space-y-8"
               >
-                Submit
-              </button>
-            </div>
-          </form>
+                {SECTION_ORDER.map((section) => (
+                  <section key={section} className="space-y-4">
+                    <h2 className="text-lg font-medium text-white">
+                      {SECTION_LABELS[section]}
+                    </h2>
+                    <div className="space-y-6">
+                      {TOE_QUESTIONS[section].map((q) => (
+                        <LikertScale
+                          key={q.id}
+                          name={q.id}
+                          control={control}
+                          label={q.text}
+                          error={errors[q.id]?.message}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={!isValid || isSaving}
+                    className="w-full rounded-lg bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
 
           <Link
             href="/"

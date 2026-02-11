@@ -33,3 +33,29 @@ If you keep "Confirm email" enabled:
 - Configure email templates under **Authentication** → **Email Templates**
 
 The app sends users back to `/login` after they confirm their email.
+
+## 4. Assessments table (for TOE readiness scores)
+
+To store assessment results, run this SQL in the Supabase SQL Editor (Dashboard → SQL Editor):
+
+```sql
+create table assessments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  score numeric not null,
+  dimension_scores jsonb not null,
+  created_at timestamptz default now()
+);
+
+alter table assessments enable row level security;
+
+create policy "Users can insert own assessments"
+  on assessments for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can select own assessments"
+  on assessments for select
+  using (auth.uid() = user_id);
+```
+
+`dimension_scores` stores `{ technological: number, organizational: number, environmental: number }` (averages 1–5 per section). `score` is the overall readiness percentage (0–100).
