@@ -144,9 +144,22 @@ export default function AssessPage() {
     return (
       <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
         <ParticleBackground />
-        <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          <p className="text-white/80">Checking session...</p>
+        <div className="relative z-10 flex w-full max-w-md flex-col gap-4 px-4">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            <p className="text-sm text-white/80 md:text-base">Checking session...</p>
+          </div>
+          <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur">
+            <div className="h-4 w-40 animate-pulse rounded-full bg-white/10" />
+            <div className="space-y-2">
+              <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />
+              <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/10" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />
+              <div className="h-3 w-4/6 animate-pulse rounded-full bg-white/10" />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -161,7 +174,7 @@ export default function AssessPage() {
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
-      <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-3 text-sm md:text-base">
+      <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
         <Link
           href="/"
           className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"

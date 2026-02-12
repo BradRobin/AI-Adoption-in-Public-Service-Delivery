@@ -63,7 +63,7 @@ export function ToeResults({
             <YAxis
               type="category"
               dataKey="name"
-              width={110}
+              width={96}
               tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 12 }}
               tickLine={false}
               axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}

@@ -128,7 +128,7 @@ export default function Home() {
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
-      <nav className="absolute right-4 top-4 z-20 flex items-center gap-3 text-sm md:text-base">
+      <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
         <Link
           href="/"
           className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
@@ -170,7 +170,7 @@ export default function Home() {
       <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
         <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
           <h1
-            className={`text-center text-6xl font-bold text-white transition-all duration-500 ease-out md:text-7xl ${
+            className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${
               isGreetingVisible
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2'
@@ -184,11 +184,11 @@ export default function Home() {
           understand how your capabilities create meaningful public value.
         </p>
       </main>
-      <div className="absolute bottom-4 right-4 z-20">
+      <div className="absolute bottom-3 right-3 z-20">
         <button
           type="button"
           onClick={handleSignOut}
-          className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-5 text-sm font-medium text-white transition-colors hover:bg-red-600 md:h-11 md:min-w-[140px] md:px-6 md:text-base"
+          className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-4 text-xs font-medium text-white transition-colors hover:bg-red-600 sm:text-sm md:h-11 md:min-w-[140px] md:px-6 md:text-base"
         >
           Sign Out
         </button>

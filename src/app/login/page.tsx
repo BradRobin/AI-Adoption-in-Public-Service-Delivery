@@ -161,7 +161,7 @@ export default function LoginPage() {
     <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur h-[520px] md:h-[560px]">
+        <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-[420px] max-h-[90vh]">
           <div className="mb-6 flex min-h-[150px] flex-col items-center justify-start gap-3">
             <div className="flex justify-center gap-3">
               <button
@@ -203,7 +203,10 @@ export default function LoginPage() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="flex-1 space-y-4 overflow-y-auto"
+          >
             <div>
               <label
                 htmlFor="email"
