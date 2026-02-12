@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
@@ -62,17 +63,20 @@ export default function LoginPage() {
 
     if (trimmedEmail.length === 0 || password.length === 0) {
       setError('Email and password are required.')
+      toast.error('Email and password are required.')
       return
     }
 
     if (trimmedEmail.length > 50 || password.length > 50) {
       setError('Email and password must be at most 50 characters.')
+      toast.error('Email and password must be at most 50 characters.')
       return
     }
 
     if (mode === 'signup') {
       if (trimmedUsername.length === 0) {
         setError('Username is required.')
+        toast.error('Username is required.')
         return
       }
 
@@ -80,6 +84,7 @@ export default function LoginPage() {
         setError(
           'Please choose a stronger password that meets all requirements.',
         )
+        toast.error('Please choose a stronger password that meets all requirements.')
         return
       }
 
@@ -107,6 +112,7 @@ export default function LoginPage() {
 
         if (signUpError) {
           setError(signUpError.message || 'Unable to sign up. Please try again.')
+          toast.error(signUpError.message || 'Unable to sign up. Please try again.')
           return
         }
 
@@ -114,9 +120,11 @@ export default function LoginPage() {
         await supabase.auth.signOut()
 
         setSuccessMessage('Sign up successful. Please log in.')
+        toast.success('Account created. Please check your email, then log in.')
         setMode('login')
       } catch {
         setError('Unable to sign up. Please try again.')
+        toast.error('Unable to sign up. Please try again.')
       } finally {
         setIsSubmitting(false)
       }
@@ -139,6 +147,7 @@ export default function LoginPage() {
         await supabase.auth.signOut()
         // For any auth error, keep the email and prompt user to re‑enter password
         setError('Incorrect Password')
+        toast.error('Incorrect password. Please try again.')
         return
       }
 
@@ -151,6 +160,11 @@ export default function LoginPage() {
         message.includes('fetch') || message.includes('network')
           ? 'Unable to reach the server. Check that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set correctly in .env.local.'
           : message || 'Credentials not found. Please sign up to create an account.',
+      )
+      toast.error(
+        message.includes('fetch') || message.includes('network')
+          ? 'Unable to reach Supabase. Check your connection and configuration.'
+          : 'Sign in failed. Please check your details and try again.',
       )
     } finally {
       setIsSubmitting(false)
@@ -369,18 +383,21 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`mt-2 flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+              className={`mt-2 inline-flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed ${
                 mode === 'login'
                   ? 'bg-green-500 text-white hover:bg-green-600 disabled:bg-green-500/60'
                   : 'border border-white bg-white text-black hover:bg-gray-100 disabled:bg-white/70'
               }`}
             >
-              {isSubmitting
-                ? mode === 'login'
+              {isSubmitting && (
+                <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-white border-t-transparent" />
+              )}
+              {mode === 'login'
+                ? isSubmitting
                   ? 'Signing in...'
-                  : 'Creating account...'
-                : mode === 'login'
-                  ? 'Login'
+                  : 'Login'
+                : isSubmitting
+                  ? 'Creating account...'
                   : 'Sign up'}
             </button>
           </form>

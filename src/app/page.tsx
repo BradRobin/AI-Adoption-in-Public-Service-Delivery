@@ -4,8 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
+import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
+
+const FEEDBACK_URL =
+  process.env.NEXT_PUBLIC_FEEDBACK_URL ||
+  'https://forms.gle/your-feedback-form-id-here'
 
 export default function Home() {
   const router = useRouter()
@@ -67,6 +72,7 @@ export default function Home() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    toast.success('You have been signed out.')
     router.replace('/login')
   }
 
@@ -183,6 +189,14 @@ export default function Home() {
           Assess your Technology–Organization–Environment (TOE) readiness and
           understand how your capabilities create meaningful public value.
         </p>
+        <a
+          href={FEEDBACK_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
+        >
+          Give feedback on this prototype
+        </a>
       </main>
       <div className="absolute bottom-3 right-3 z-20">
         <button

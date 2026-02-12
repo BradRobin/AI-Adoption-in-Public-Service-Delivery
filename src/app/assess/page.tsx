@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Session } from '@supabase/supabase-js'
@@ -111,6 +112,9 @@ export default function AssessPage() {
 
       if (error) {
         setSaveError(error.message)
+        toast.error('Could not save assessment. Your results are still shown locally.')
+      } else {
+        toast.success('Assessment saved. Results are now recorded for this session.')
       }
     }
 
@@ -137,6 +141,7 @@ export default function AssessPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    toast.success('You have been signed out.')
     router.replace('/login')
   }
 

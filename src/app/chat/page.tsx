@@ -1,6 +1,7 @@
- 'use client'
+'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -109,6 +110,7 @@ export default function ChatPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    toast.success('You have been signed out.')
     router.replace('/login')
   }
 
@@ -232,6 +234,7 @@ export default function ChatPage() {
             : m,
         ),
       )
+      toast.error('Chat service is unavailable right now. Please try again.')
     } finally {
       setIsThinking(false)
     }
@@ -373,6 +376,9 @@ export default function ChatPage() {
                 disabled={isThinking || input.trim().length === 0}
                 className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
               >
+                {isThinking && (
+                  <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" />
+                )}
                 {isThinking ? 'Thinking...' : 'Send'}
               </button>
             </div>
