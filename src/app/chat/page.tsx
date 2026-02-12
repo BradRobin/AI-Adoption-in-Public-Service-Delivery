@@ -15,6 +15,46 @@ type ChatMessage = {
   content: string
 }
 
+type SseEvent =
+  | { event: 'open'; data: string }
+  | { event: 'info'; data: string }
+  | { event: 'token'; data: string }
+  | { event: 'error'; data: string }
+  | { event: 'done'; data: string }
+
+function parseSseEvents(raw: string): SseEvent[] {
+  // Minimal SSE parser for our server format: "event: X\ndata: Y\n\n"
+  const events: SseEvent[] = []
+  const chunks = raw.split('\n\n')
+  for (const chunk of chunks) {
+    const lines = chunk.split('\n')
+    let event: string | null = null
+    const dataParts: string[] = []
+
+    for (const line of lines) {
+      if (line.startsWith('event:')) {
+        event = line.slice('event:'.length).trim()
+      } else if (line.startsWith('data:')) {
+        dataParts.push(line.slice('data:'.length).trimStart())
+      }
+    }
+
+    if (!event) continue
+    const data = dataParts.join('\n')
+
+    if (
+      event === 'open' ||
+      event === 'info' ||
+      event === 'token' ||
+      event === 'error' ||
+      event === 'done'
+    ) {
+      events.push({ event, data } as SseEvent)
+    }
+  }
+  return events
+}
+
 export default function ChatPage() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
@@ -72,10 +112,11 @@ export default function ChatPage() {
     router.replace('/login')
   }
 
-  const handleSend = (event: FormEvent) => {
+  const handleSend = async (event: FormEvent) => {
     event.preventDefault()
 
     if (isThinking) return
+    if (!session?.access_token) return
 
     const trimmed = input.trim()
     if (!trimmed) return
@@ -90,28 +131,110 @@ export default function ChatPage() {
     const thinkingMessage: ChatMessage = {
       id: placeholderId,
       role: 'assistant',
-      content: 'AI is thinking...',
+      content: '',
     }
 
-    setMessages((prev) => [...prev, userMessage, thinkingMessage])
+    const nextMessages = [...messages, userMessage, thinkingMessage]
+    setMessages(nextMessages)
     setInput('')
     setIsThinking(true)
 
-    // Simulated placeholder API call.
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          messages: nextMessages
+            .filter((m) => m.role === 'user' || m.role === 'assistant')
+            .map((m) => ({ role: m.role, content: m.content })),
+        }),
+      })
+
+      if (!res.ok || !res.body) {
+        const text = await res.text().catch(() => '')
+        throw new Error(text || `Request failed (${res.status}).`)
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      const appendToAssistant = (delta: string) => {
+        if (!delta) return
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === placeholderId ? { ...m, content: m.content + delta } : m,
+          ),
+        )
+      }
+
+      const setAssistantText = (text: string) => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === placeholderId ? { ...m, content: text } : m)),
+        )
+      }
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+
+        // Process complete SSE frames.
+        while (true) {
+          const frameIdx = buffer.indexOf('\n\n')
+          if (frameIdx === -1) break
+          const frame = buffer.slice(0, frameIdx + 2)
+          buffer = buffer.slice(frameIdx + 2)
+
+          const events = parseSseEvents(frame)
+          for (const evt of events) {
+            if (evt.event === 'token') appendToAssistant(evt.data)
+            if (evt.event === 'info') {
+              // Only show info if we have no content yet.
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === placeholderId && m.content.length === 0
+                    ? { ...m, content: `${evt.data}\n` }
+                    : m,
+                ),
+              )
+            }
+            if (evt.event === 'error') {
+              setAssistantText(`Sorry — I couldn’t reach the AI service.\n\n${evt.data}`)
+            }
+            if (evt.event === 'done') {
+              // no-op; loop will end when stream closes
+            }
+          }
+        }
+      }
+
+      // If the model streamed nothing (rare), show a minimal message.
       setMessages((prev) =>
-        prev.map((message) =>
-          message.id === placeholderId
-            ? {
-                ...message,
-                content:
-                  "I'm still being built - ask me about TOE factors!",
-              }
-            : message,
+        prev.map((m) =>
+          m.id === placeholderId && m.content.trim().length === 0
+            ? { ...m, content: 'No response received. Please try again.' }
+            : m,
         ),
       )
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error.'
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === placeholderId
+            ? {
+                ...m,
+                content: `Sorry — I couldn’t reach the AI service. Please try again.\n\n${msg}`,
+              }
+            : m,
+        ),
+      )
+    } finally {
       setIsThinking(false)
-    }, 900)
+    }
   }
 
   if (isLoading) {
