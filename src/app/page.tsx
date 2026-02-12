@@ -17,21 +17,31 @@ export default function Home() {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [sessionExpired, setSessionExpired] = useState(false)
+  const [redirectTakingLong, setRedirectTakingLong] = useState(false)
   const greetings = ['Hi', 'Sasa', 'Rada'] as const
   const [greetingIndex, setGreetingIndex] = useState(0)
   const [isGreetingVisible, setIsGreetingVisible] = useState(true)
 
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession()
-      setSession(currentSession)
-      setIsLoading(false)
+      try {
+        const {
+          data: { session: currentSession },
+        } = await supabase.auth.getSession()
 
-      if (!currentSession) {
-        router.replace('/login')
-        return
+        setSession(currentSession)
+
+        if (!currentSession) {
+          router.replace('/login')
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.error('Error checking session on home page:', error)
+        }
+        setSession(null)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -50,6 +60,23 @@ export default function Home() {
       subscription.unsubscribe()
     }
   }, [router])
+
+  useEffect(() => {
+    if (session) {
+      setRedirectTakingLong(false)
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      if (!session) {
+        setRedirectTakingLong(true)
+      }
+    }, 3000)
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [session])
 
   useEffect(() => {
     const DISPLAY_MS = 2500
@@ -76,7 +103,7 @@ export default function Home() {
     router.replace('/login')
   }
 
-  if (isLoading) {
+  if (isLoading && !redirectTakingLong) {
     return (
       <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
         <ParticleBackground />
@@ -116,7 +143,27 @@ export default function Home() {
   }
 
   if (!session) {
-    return null
+    return (
+      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
+        <ParticleBackground />
+        <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 text-center">
+          <h1 className="text-lg font-semibold text-white md:text-xl">
+            Not logged in.
+          </h1>
+          <p className="text-sm text-white/80 md:text-base">
+            {redirectTakingLong
+              ? 'Redirecting to the login page...'
+              : 'Preparing to redirect you to the login page...'}
+          </p>
+          <Link
+            href="/login"
+            className="mt-2 inline-flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-black transition-colors hover:bg-green-600"
+          >
+            Go to login
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const rawUsername =
