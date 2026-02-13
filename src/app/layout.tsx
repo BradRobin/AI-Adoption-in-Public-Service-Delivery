@@ -1,3 +1,4 @@
+// Basic Next.js font and metadata imports
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -21,6 +22,10 @@ export const metadata: Metadata = {
   themeColor: "#000000",
 };
 
+/**
+ * RootLayout is the top-most layout component that wraps all pages.
+ * It sets the html lang, loads fonts, and includes the ToasterClient for notifications.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

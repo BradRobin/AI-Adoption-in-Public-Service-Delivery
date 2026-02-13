@@ -2,6 +2,11 @@
 
 import { Toaster } from 'react-hot-toast';
 
+/**
+ * ToasterClient Component
+ * Initializes the react-hot-toast notifications provider.
+ * Should be mounted in the root layout to ensure potential global availability.
+ */
 export function ToasterClient() {
   return (
     <Toaster

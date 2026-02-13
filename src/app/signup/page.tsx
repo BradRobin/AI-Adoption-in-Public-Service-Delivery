@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { AuthForm } from '@/components/AuthForm'
 
+/**
+ * SignupPage
+ * Wraps the AuthForm in 'signup' mode.
+ */
 export default function SignupPage() {
   const router = useRouter()
 

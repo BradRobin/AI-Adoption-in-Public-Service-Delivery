@@ -13,6 +13,11 @@ type AuthFormProps = {
   onLoginSuccess?: () => void
 }
 
+/**
+ * Analyzes password strength based on length, letters, and numbers/symbols.
+ * @param password The password string to analyze.
+ * @returns An object containing the score (0-3) and specific criteria met.
+ */
 function analyzePassword(password: string) {
   const hasMinLength = password.length >= 8
   const hasLetter = /[A-Za-z]/.test(password)
@@ -26,6 +31,11 @@ function analyzePassword(password: string) {
   return { score, hasMinLength, hasLetter, hasNumberOrSymbol }
 }
 
+/**
+ * AuthForm Component
+ * Renders a login or signup form with Supabase authentication.
+ * Includes password strength validation and error handling.
+ */
 export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [email, setEmail] = useState('')
@@ -176,22 +186,20 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
           <button
             type="button"
             onClick={() => handleModeChange('login')}
-            className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
-              mode === 'login'
+            className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${mode === 'login'
                 ? 'bg-green-500 text-white'
                 : 'bg-transparent text-white/70 hover:bg-white/10'
-            }`}
+              }`}
           >
             Login
           </button>
           <button
             type="button"
             onClick={() => handleModeChange('signup')}
-            className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${
-              mode === 'signup'
+            className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${mode === 'signup'
                 ? 'bg-white text-black'
                 : 'bg-transparent text-white/70 hover:bg-white/10'
-            }`}
+              }`}
           >
             Sign up
           </button>
@@ -304,11 +312,10 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                 <div className="mt-3 space-y-1 text-xs text-white/70">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
-                        hasMinLength
+                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasMinLength
                           ? 'border-green-400 bg-green-500 text-black'
                           : 'border-white/40 text-transparent'
-                      }`}
+                        }`}
                     >
                       ✓
                     </span>
@@ -316,11 +323,10 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
-                        hasLetter
+                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasLetter
                           ? 'border-green-400 bg-green-500 text-black'
                           : 'border-white/40 text-transparent'
-                      }`}
+                        }`}
                     >
                       ✓
                     </span>
@@ -328,11 +334,10 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${
-                        hasNumberOrSymbol
+                      className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasNumberOrSymbol
                           ? 'border-green-400 bg-green-500 text-black'
                           : 'border-white/40 text-transparent'
-                      }`}
+                        }`}
                     >
                       ✓
                     </span>
@@ -371,11 +376,10 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`mt-2 inline-flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed ${
-            mode === 'login'
+          className={`mt-2 inline-flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed ${mode === 'login'
               ? 'bg-green-500 text-white hover:bg-green-600 disabled:bg-green-500/60'
               : 'border border-white bg-white text-black hover:bg-gray-100 disabled:bg-white/70'
-          }`}
+            }`}
         >
           {isSubmitting && (
             <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-white border-t-transparent" />

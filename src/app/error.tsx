@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Global Error Boundary
+ * Catch-all for unhandled errors in the application.
+ * Displays a friendly error message and a reset button.
+ */
+
 import Link from 'next/link';
 
 import { ParticleBackground } from '@/components/ParticleBackground';

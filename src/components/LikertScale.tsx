@@ -3,6 +3,7 @@
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'
 import { Controller } from 'react-hook-form'
 
+// Standard Likert options from 1 (Strongly Disagree) to 5 (Strongly Agree)
 const LIKERT_OPTIONS = [
   { value: 1, label: 'Strongly Disagree' },
   { value: 2, label: 'Disagree' },
@@ -18,6 +19,11 @@ type LikertScaleProps<T extends FieldValues> = {
   error?: string
 }
 
+/**
+ * LikertScale Component
+ * Renders a row of 5 radio buttons representing a Likert scale.
+ * Integrated with react-hook-form for validation and state management.
+ */
 export function LikertScale<T extends FieldValues>({
   name,
   control,
@@ -38,11 +44,10 @@ export function LikertScale<T extends FieldValues>({
               return (
                 <label
                   key={opt.value}
-                  className={`flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm ${
-                    isSelected
+                  className={`flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm ${isSelected
                       ? 'border-white/50 bg-white/10'
                       : 'border-white/10 bg-black/40 hover:border-white/20'
-                  }`}
+                    }`}
                 >
                   <input
                     type="radio"

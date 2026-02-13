@@ -16,6 +16,7 @@ type ChatMessage = {
   content: string
 }
 
+// SSE event types for handling stream chunks
 type SseEvent =
   | { event: 'open'; data: string }
   | { event: 'info'; data: string }
@@ -56,6 +57,11 @@ function parseSseEvents(raw: string): SseEvent[] {
   return events
 }
 
+/**
+ * ChatPage Component
+ * Provides a chat interface for users to interact with the AI assistant.
+ * Handles message history, real-time streaming response, and auto-scrolling.
+ */
 export default function ChatPage() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
@@ -142,6 +148,7 @@ export default function ChatPage() {
     setIsThinking(true)
 
     try {
+      // Send message to backend API and handle streaming response
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -228,9 +235,9 @@ export default function ChatPage() {
         prev.map((m) =>
           m.id === placeholderId
             ? {
-                ...m,
-                content: `Sorry — I couldn’t reach the AI service. Please try again.\n\n${msg}`,
-              }
+              ...m,
+              content: `Sorry — I couldn’t reach the AI service. Please try again.\n\n${msg}`,
+            }
             : m,
         ),
       )
@@ -342,16 +349,14 @@ export default function ChatPage() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm md:text-base ${
-                    message.role === 'user'
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm md:text-base ${message.role === 'user'
                       ? 'rounded-br-sm bg-green-500 text-black'
                       : 'rounded-bl-sm bg-black/70 text-white'
-                  }`}
+                    }`}
                 >
                   {message.content}
                 </div>

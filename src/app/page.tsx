@@ -8,10 +8,17 @@ import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 
+// Fallback feedback URL if environment variable is not set
 const FEEDBACK_URL =
   process.env.NEXT_PUBLIC_FEEDBACK_URL ||
   'https://forms.gle/your-feedback-form-id-here'
 
+/**
+ * Home Page Component
+ * Displays the landing page with authentication status, personalized greeting,
+ * and links to other sections of the app (Assess, Chat, Privacy, Report).
+ * handles session checking and redirects unauthenticated users to login.
+ */
 export default function Home() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
@@ -22,6 +29,7 @@ export default function Home() {
   const [greetingIndex, setGreetingIndex] = useState(0)
   const [isGreetingVisible, setIsGreetingVisible] = useState(true)
 
+  // Effect: Check for active session on mount and subscribe to auth changes
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -78,6 +86,7 @@ export default function Home() {
     }
   }, [session])
 
+  // Effect: Cycle through greetings (Hi, Sasa, Rada) with fade animation
   useEffect(() => {
     const DISPLAY_MS = 2500
     const FADE_MS = 500
@@ -223,11 +232,10 @@ export default function Home() {
       <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
         <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
           <h1
-            className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${
-              isGreetingVisible
+            className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${isGreetingVisible
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-2'
-            }`}
+              }`}
           >
             {greetings[greetingIndex]} {displayName}
           </h1>

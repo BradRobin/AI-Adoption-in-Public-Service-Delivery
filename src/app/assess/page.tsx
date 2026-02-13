@@ -22,18 +22,25 @@ import {
   type ToeSection,
 } from '@/data/toe-questions'
 
+// Maps TOE section keys to human-readable labels
 const SECTION_LABELS: Record<ToeSection, string> = {
   technological: 'Technological Factors',
   organizational: 'Organizational Factors',
   environmental: 'Environmental Factors',
 }
 
+// Order in which sections are presented
 const SECTION_ORDER: ToeSection[] = [
   'technological',
   'organizational',
   'environmental',
 ]
 
+/**
+ * AssessPage Component
+ * Provides a form for users to evaluate their readiness across TOE dimensions.
+ * Handles form state, submission to Supabase, and displays results.
+ */
 export default function AssessPage() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
@@ -43,6 +50,7 @@ export default function AssessPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
+  // React Hook Form initialization with default values
   const {
     control,
     handleSubmit,
@@ -95,6 +103,7 @@ export default function AssessPage() {
     }
   }, [router])
 
+  // Handle form submission: compute scores and save to database
   const onSubmit = async (data: ToeFormValues) => {
     setSaveError(null)
     const computed = computeScores(data)

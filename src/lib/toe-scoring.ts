@@ -1,6 +1,7 @@
 import type { ToeSection } from '@/data/toe-questions'
 import { TOE_QUESTIONS } from '@/data/toe-questions'
 
+// Order of sections for consistent processing
 const SECTION_ORDER: ToeSection[] = [
   'technological',
   'organizational',
@@ -16,6 +17,12 @@ export type ToeScores = {
 
 export type ToeFormValues = Record<string, number>
 
+/**
+ * Computes the TOE assessment scores from form values.
+ * Calculates average scores per dimension and an overall score out of 100.
+ * @param data Key-value pairs of question IDs and their numeric answers (1-5).
+ * @returns An object containing the overall score and scored by dimension.
+ */
 export function computeScores(data: ToeFormValues): ToeScores {
   const dimensionScores: Partial<DimensionScores> = {}
   let totalSum = 0
@@ -52,6 +59,12 @@ const DIMENSION_LABELS: Record<ToeSection, string> = {
 const STRONG_THRESHOLD = 3.5
 const MODERATE_THRESHOLD = 2.5
 
+/**
+ * Generates an interpretation string based on dimension scores.
+ * Categorizes each dimension as Strong, Moderate, or Needs Improvement.
+ * @param dimensionScores calculated scores for each TOE dimension.
+ * @returns A descriptive string summarizing the assessment results.
+ */
 export function getInterpretation(dimensionScores: DimensionScores): string {
   const entries = SECTION_ORDER.map((s) => ({
     section: s,

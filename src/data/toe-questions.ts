@@ -5,6 +5,7 @@ export type ToeQuestion = {
   text: string
 }
 
+// Define the TOE data structure
 export const TOE_QUESTIONS: Record<ToeSection, ToeQuestion[]> = {
   technological: [
     {

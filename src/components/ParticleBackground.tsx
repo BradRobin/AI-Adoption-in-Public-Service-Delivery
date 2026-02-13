@@ -1,5 +1,10 @@
 'use client'
 
+/**
+ * ParticleBackground Component
+ * Renders an animated background with floating particles.
+ * Uses pure CSS animations defined in globals.css.
+ */
 export function ParticleBackground() {
   const particles = [
     { top: '10%', left: '15%', size: 2, delay: 0 },

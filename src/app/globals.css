@@ -1,3 +1,4 @@
+/* Tailwind CSS directives */
 @import "tailwindcss";
 
 :root {
@@ -25,6 +26,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Custom keyframe for particle animation */
 @keyframes particle-float {
   0%, 100% {
     transform: translate(0, 0) scale(1);

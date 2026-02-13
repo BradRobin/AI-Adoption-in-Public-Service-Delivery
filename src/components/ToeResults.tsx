@@ -22,6 +22,11 @@ const DIMENSION_LABELS: Record<keyof DimensionScores, string> = {
   environmental: 'Environmental',
 }
 
+/**
+ * ToeResults Component
+ * Displays the assessment results using a bar chart (Recharts).
+ * Shows overall score, individual dimension scores, and a text interpretation.
+ */
 export function ToeResults({
   overall,
   dimensionScores,

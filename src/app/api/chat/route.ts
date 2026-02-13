@@ -9,9 +9,15 @@ type ChatRequestBody = {
   messages: ChatMessage[]
 }
 
+// System prompt defining the AI's persona and language preferences
 const SYSTEM_PROMPT =
   'You are PARP AI - a helpful advisor on AI adoption in Kenyan public services and freelancing. Use simple English, Kiswahili, or Sheng when appropriate. Reference Kenya AI Strategy when relevant.'
 
+/**
+ * Encodes an event and data object into Server-Sent Events (SSE) format.
+ * @param event The event name (e.g. 'token', 'error').
+ * @param data The data payload.
+ */
 function sseEncode(event: string, data: string) {
   // SSE format: event + data lines + blank line
   // Ensure no bare CRLF issues; keep it simple and consistent.
@@ -52,6 +58,10 @@ async function requireUser(req: Request) {
   return { ok: true as const, token, userId: data.user.id }
 }
 
+/**
+ * Validates and normalizes chat messages from the client.
+ * filtering out invalid roles or empty content.
+ */
 function normalizeMessages(messages: ChatMessage[]) {
   const cleaned = (messages ?? [])
     .filter((m): m is ChatMessage => !!m && (m.role === 'user' || m.role === 'assistant'))
@@ -204,12 +214,14 @@ export async function POST(req: Request) {
     ...history.map((m) => ({ role: m.role, content: m.content })),
   ]
 
+  // Retrieve configuration from environment variables
   const provider = (process.env.LLM_PROVIDER ?? 'auto').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.1:8b'
   const openAiKey = process.env.OPENAI_API_KEY ?? ''
   const openAiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
 
+  // Stream response back to the client using ReadableStream
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const encoder = new TextEncoder()
