@@ -4,32 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 
-// Fallback feedback URL if environment variable is not set
-const FEEDBACK_URL =
-  process.env.NEXT_PUBLIC_FEEDBACK_URL ||
-  'https://forms.gle/your-feedback-form-id-here'
-
-/**
- * Home Page Component
- * Displays the landing page with authentication status, personalized greeting,
- * and links to other sections of the app (Assess, Chat, Privacy, Report).
- * handles session checking and redirects unauthenticated users to login.
- */
-export default function Home() {
+export default function LandingPage() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [sessionExpired, setSessionExpired] = useState(false)
-  const [redirectTakingLong, setRedirectTakingLong] = useState(false)
-  const greetings = ['Hi', 'Sasa', 'Rada'] as const
-  const [greetingIndex, setGreetingIndex] = useState(0)
-  const [isGreetingVisible, setIsGreetingVisible] = useState(true)
 
-  // Effect: Check for active session on mount and subscribe to auth changes
+  // Effect: Check for active session. If logged in, redirect to dashboard.
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -39,229 +22,127 @@ export default function Home() {
 
         setSession(currentSession)
 
-        if (!currentSession) {
-          router.replace('/login')
+        if (currentSession) {
+          router.replace('/dashboard')
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
           // eslint-disable-next-line no-console
-          console.error('Error checking session on home page:', error)
+          console.error('Error checking session on landing page:', error)
         }
-        setSession(null)
       } finally {
         setIsLoading(false)
       }
     }
 
     checkSession()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, newSession) => {
-      setSession(newSession)
-      if (event === 'SIGNED_OUT' && !newSession) {
-        setSessionExpired(true)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
   }, [router])
 
-  useEffect(() => {
-    if (session) {
-      setRedirectTakingLong(false)
-      return
-    }
-
-    const timeout = setTimeout(() => {
-      if (!session) {
-        setRedirectTakingLong(true)
-      }
-    }, 3000)
-
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [session])
-
-  // Effect: Cycle through greetings (Hi, Sasa, Rada) with fade animation
-  useEffect(() => {
-    const DISPLAY_MS = 2500
-    const FADE_MS = 500
-
-    const hideTimeout = setTimeout(() => {
-      setIsGreetingVisible(false)
-    }, DISPLAY_MS)
-
-    const showTimeout = setTimeout(() => {
-      setGreetingIndex((prev) => (prev + 1) % greetings.length)
-      setIsGreetingVisible(true)
-    }, DISPLAY_MS + FADE_MS)
-
-    return () => {
-      clearTimeout(hideTimeout)
-      clearTimeout(showTimeout)
-    }
-  }, [greetings.length, greetingIndex])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    toast.success('You have been signed out.')
-    router.replace('/login')
-  }
-
-  if (isLoading && !redirectTakingLong) {
+  // Show loading spinner while checking auth state to prevent flash of content
+  if (isLoading) {
     return (
       <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
         <ParticleBackground />
         <div className="relative z-10 flex flex-col items-center gap-4">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          <p className="text-white/80">Checking session...</p>
         </div>
       </div>
     )
   }
 
-  if (sessionExpired) {
-    return (
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 font-sans">
-        <ParticleBackground />
-        <div className="relative z-10 flex max-w-md flex-col items-center gap-6 text-center">
-          <p className="text-lg text-red-400 md:text-xl">
-            Your session has ended. Please sign in again.
-          </p>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/login"
-              className="flex h-12 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600"
-            >
-              Login
-            </Link>
-            <Link
-              href="/login"
-              className="flex h-12 min-w-[140px] items-center justify-center rounded-lg border border-white bg-white px-6 font-medium text-black transition-colors hover:bg-gray-100"
-            >
-              Sign up
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!session) {
+  // If session exists (and redirect is happening), show nothing or a spinner
+  if (session) {
     return (
       <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
         <ParticleBackground />
-        <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 text-center">
-          <h1 className="text-lg font-semibold text-white md:text-xl">
-            Not logged in.
-          </h1>
-          <p className="text-sm text-white/80 md:text-base">
-            {redirectTakingLong
-              ? 'Redirecting to the login page...'
-              : 'Preparing to redirect you to the login page...'}
-          </p>
-          <Link
-            href="/login"
-            className="mt-2 inline-flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-black transition-colors hover:bg-green-600"
-          >
-            Go to login
-          </Link>
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <p className="text-white/80">Redirecting to dashboard...</p>
         </div>
       </div>
     )
   }
 
-  const rawUsername =
-    (session.user?.user_metadata as { username?: string } | null | undefined)
-      ?.username
-
-  const formatName = (name?: string | null) => {
-    if (!name || typeof name !== 'string') return undefined
-    return name.charAt(0).toUpperCase() + name.slice(1)
-  }
-
-  const displayName =
-    formatName(rawUsername) ?? session.user?.email ?? 'User'
-
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-black font-sans text-white">
       <ParticleBackground />
-      <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
-        <Link
-          href="/"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Home
-        </Link>
-        <Link
-          href="/assess"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Assess
-        </Link>
-        <Link
-          href="/chat"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Chat
-        </Link>
-        <Link
-          href="/privacy"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Privacy
-        </Link>
-        <Link
-          href="/report"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Report
-        </Link>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          SignOut
-        </button>
-      </nav>
-      <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
-        <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
-          <h1
-            className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${isGreetingVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-2'
-              }`}
+
+      {/* Header / Nav */}
+      <header className="relative z-20 flex w-full items-center justify-between px-6 py-4 md:px-12">
+        <div className="text-xl font-bold tracking-tight">PARP</div>
+        <div className="flex gap-4">
+          <Link
+            href="/login"
+            className="rounded-full px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
           >
-            {greetings[greetingIndex]} {displayName}
-          </h1>
+            Log In
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-gray-200"
+          >
+            Sign Up
+          </Link>
         </div>
-        <p className="mt-4 max-w-xl text-base text-white/80 md:text-lg">
-          Assess your Technology–Organization–Environment (TOE) readiness and
-          understand how your capabilities create meaningful public value.
-        </p>
-        <a
-          href={FEEDBACK_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
-        >
-          Give feedback on this prototype
-        </a>
+      </header>
+
+      {/* Hero Section */}
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 text-center">
+        <div className="max-w-3xl space-y-6">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
+            <span className="block text-white">PARP</span>
+            <span className="mt-2 block bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-2xl text-transparent sm:text-4xl md:text-5xl">
+              AI Readiness Platform
+            </span>
+          </h1>
+
+          <p className="mx-auto max-w-2xl text-lg text-gray-300 md:text-xl">
+            Assess your organization&apos;s readiness for AI adoption in Kenyan public services.
+          </p>
+
+          <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
+            <Link
+              href="/signup"
+              className="flex h-12 w-full min-w-[160px] items-center justify-center rounded-full bg-green-500 px-8 text-base font-semibold text-black transition hover:bg-green-400 sm:w-auto"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/login"
+              className="flex h-12 w-full min-w-[160px] items-center justify-center rounded-full border border-white/20 bg-white/5 px-8 text-base font-medium text-white backdrop-blur-sm transition hover:bg-white/10 sm:w-auto"
+            >
+              Log In
+            </Link>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-6 pt-8 text-left sm:grid-cols-3">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+              <h3 className="mb-2 font-semibold text-green-400">TOE Framework</h3>
+              <p className="text-sm text-gray-400">
+                Scientific assessment based on Technological, Organizational, and Environmental contexts.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+              <h3 className="mb-2 font-semibold text-blue-400">Public Value</h3>
+              <p className="text-sm text-gray-400">
+                Tailored for public service delivery to enhance efficiency and citizen satisfaction.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+              <h3 className="mb-2 font-semibold text-purple-400">Kenyan Context</h3>
+              <p className="text-sm text-gray-400">
+                Aligned with local strategies and digital transformation goals in Kenya.
+              </p>
+            </div>
+          </div>
+        </div>
       </main>
-      <div className="absolute bottom-3 right-3 z-20">
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-4 text-xs font-medium text-white transition-colors hover:bg-red-600 sm:text-sm md:h-11 md:min-w-[140px] md:px-6 md:text-base"
-        >
-          Sign Out
-        </button>
-      </div>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full border-t border-white/10 bg-black/50 py-6 text-center backdrop-blur-sm">
+        <p className="text-xs text-gray-500">
+          Powered by Next.js & Supabase · Built by Engineer Brad Robinson
+        </p>
+      </footer>
     </div>
   )
 }

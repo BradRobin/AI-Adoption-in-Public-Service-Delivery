@@ -1,0 +1,267 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase/client'
+import toast from 'react-hot-toast'
+import { ParticleBackground } from '@/components/ParticleBackground'
+import type { Session } from '@supabase/supabase-js'
+
+// Fallback feedback URL if environment variable is not set
+const FEEDBACK_URL =
+    process.env.NEXT_PUBLIC_FEEDBACK_URL ||
+    'https://forms.gle/your-feedback-form-id-here'
+
+/**
+ * Dashboard Page Component (Formerly Home)
+ * Displays the authenticated landing page with personalized greeting,
+ * and links to other sections of the app (Assess, Chat, Privacy, Report).
+ * handles session checking and redirects unauthenticated users to login.
+ */
+export default function Dashboard() {
+    const router = useRouter()
+    const [session, setSession] = useState<Session | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [sessionExpired, setSessionExpired] = useState(false)
+    const [redirectTakingLong, setRedirectTakingLong] = useState(false)
+    const greetings = ['Hi', 'Sasa', 'Rada'] as const
+    const [greetingIndex, setGreetingIndex] = useState(0)
+    const [isGreetingVisible, setIsGreetingVisible] = useState(true)
+
+    // Effect: Check for active session on mount and subscribe to auth changes
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                const {
+                    data: { session: currentSession },
+                } = await supabase.auth.getSession()
+
+                setSession(currentSession)
+
+                if (!currentSession) {
+                    router.replace('/login')
+                }
+            } catch (error) {
+                if (process.env.NODE_ENV === 'development') {
+                    // eslint-disable-next-line no-console
+                    console.error('Error checking session on dashboard:', error)
+                }
+                setSession(null)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        checkSession()
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, newSession) => {
+            setSession(newSession)
+            if (event === 'SIGNED_OUT' && !newSession) {
+                setSessionExpired(true)
+            }
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [router])
+
+    useEffect(() => {
+        if (session) {
+            setRedirectTakingLong(false)
+            return
+        }
+
+        const timeout = setTimeout(() => {
+            if (!session) {
+                setRedirectTakingLong(true)
+            }
+        }, 3000)
+
+        return () => {
+            clearTimeout(timeout)
+        }
+    }, [session])
+
+    // Effect: Cycle through greetings (Hi, Sasa, Rada) with fade animation
+    useEffect(() => {
+        const DISPLAY_MS = 2500
+        const FADE_MS = 500
+
+        const hideTimeout = setTimeout(() => {
+            setIsGreetingVisible(false)
+        }, DISPLAY_MS)
+
+        const showTimeout = setTimeout(() => {
+            setGreetingIndex((prev) => (prev + 1) % greetings.length)
+            setIsGreetingVisible(true)
+        }, DISPLAY_MS + FADE_MS)
+
+        return () => {
+            clearTimeout(hideTimeout)
+            clearTimeout(showTimeout)
+        }
+    }, [greetings.length, greetingIndex])
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut()
+        toast.success('You have been signed out.')
+        router.replace('/login')
+    }
+
+    if (isLoading && !redirectTakingLong) {
+        return (
+            <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
+                <ParticleBackground />
+                <div className="relative z-10 flex flex-col items-center gap-4">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <p className="text-white/80">Checking session...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (sessionExpired) {
+        return (
+            <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 font-sans">
+                <ParticleBackground />
+                <div className="relative z-10 flex max-w-md flex-col items-center gap-6 text-center">
+                    <p className="text-lg text-red-400 md:text-xl">
+                        Your session has ended. Please sign in again.
+                    </p>
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                        <Link
+                            href="/login"
+                            className="flex h-12 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            href="/login"
+                            className="flex h-12 min-w-[140px] items-center justify-center rounded-lg border border-white bg-white px-6 font-medium text-black transition-colors hover:bg-gray-100"
+                        >
+                            Sign up
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (!session) {
+        return (
+            <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
+                <ParticleBackground />
+                <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 text-center">
+                    <h1 className="text-lg font-semibold text-white md:text-xl">
+                        Not logged in.
+                    </h1>
+                    <p className="text-sm text-white/80 md:text-base">
+                        {redirectTakingLong
+                            ? 'Redirecting to the login page...'
+                            : 'Preparing to redirect you to the login page...'}
+                    </p>
+                    <Link
+                        href="/login"
+                        className="mt-2 inline-flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-black transition-colors hover:bg-green-600"
+                    >
+                        Go to login
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+
+    const rawUsername =
+        (session.user?.user_metadata as { username?: string } | null | undefined)
+            ?.username
+
+    const formatName = (name?: string | null) => {
+        if (!name || typeof name !== 'string') return undefined
+        return name.charAt(0).toUpperCase() + name.slice(1)
+    }
+
+    const displayName =
+        formatName(rawUsername) ?? session.user?.email ?? 'User'
+
+    return (
+        <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
+            <ParticleBackground />
+            <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
+                <Link
+                    href="/"
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    Home
+                </Link>
+                <Link
+                    href="/assess"
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    Assess
+                </Link>
+                <Link
+                    href="/chat"
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    Chat
+                </Link>
+                <Link
+                    href="/privacy"
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    Privacy
+                </Link>
+                <Link
+                    href="/report"
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    Report
+                </Link>
+                <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                    SignOut
+                </button>
+            </nav>
+            <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
+                <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
+                    <h1
+                        className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${isGreetingVisible
+                            ? 'opacity-100 translate-y-0'
+                            : 'opacity-0 translate-y-2'
+                            }`}
+                    >
+                        {greetings[greetingIndex]} {displayName}
+                    </h1>
+                </div>
+                <p className="mt-4 max-w-xl text-base text-white/80 md:text-lg">
+                    Assess your Technology–Organization–Environment (TOE) readiness and
+                    understand how your capabilities create meaningful public value.
+                </p>
+                <a
+                    href={FEEDBACK_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
+                >
+                    Give feedback on this prototype
+                </a>
+            </main>
+            <div className="absolute bottom-3 right-3 z-20">
+                <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-4 text-xs font-medium text-white transition-colors hover:bg-red-600 sm:text-sm md:h-11 md:min-w-[140px] md:px-6 md:text-base"
+                >
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    )
+}
