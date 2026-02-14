@@ -8,25 +8,12 @@ import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 
-// Fallback feedback URL if environment variable is not set
-const FEEDBACK_URL =
-    process.env.NEXT_PUBLIC_FEEDBACK_URL ||
-    'https://forms.gle/your-feedback-form-id-here'
-
-/**
- * Dashboard Page Component (Formerly Home)
- * Displays the authenticated landing page with personalized greeting,
- * and links to other sections of the app (Assess, Chat, Privacy, Report).
- * handles session checking and redirects unauthenticated users to login.
- */
 export default function Dashboard() {
     const router = useRouter()
     const [session, setSession] = useState<Session | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [sessionExpired, setSessionExpired] = useState(false)
     const [redirectTakingLong, setRedirectTakingLong] = useState(false)
-    const greetings = ['Hi', 'Sasa', 'Rada'] as const
-    const [greetingIndex, setGreetingIndex] = useState(0)
     const [isGreetingVisible, setIsGreetingVisible] = useState(true)
 
     // Effect: Check for active session on mount and subscribe to auth changes
@@ -86,25 +73,10 @@ export default function Dashboard() {
         }
     }, [session])
 
-    // Effect: Cycle through greetings (Hi, Sasa, Rada) with fade animation
     useEffect(() => {
-        const DISPLAY_MS = 2500
-        const FADE_MS = 500
-
-        const hideTimeout = setTimeout(() => {
-            setIsGreetingVisible(false)
-        }, DISPLAY_MS)
-
-        const showTimeout = setTimeout(() => {
-            setGreetingIndex((prev) => (prev + 1) % greetings.length)
-            setIsGreetingVisible(true)
-        }, DISPLAY_MS + FADE_MS)
-
-        return () => {
-            clearTimeout(hideTimeout)
-            clearTimeout(showTimeout)
-        }
-    }, [greetings.length, greetingIndex])
+        const timer = setTimeout(() => setIsGreetingVisible(true), 100)
+        return () => clearTimeout(timer)
+    }, [])
 
     const handleSignOut = async () => {
         await supabase.auth.signOut()
@@ -118,7 +90,7 @@ export default function Dashboard() {
                 <ParticleBackground />
                 <div className="relative z-10 flex flex-col items-center gap-4">
                     <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    <p className="text-white/80">Checking session...</p>
+                    <p className="text-white/80">Loading your dashboard...</p>
                 </div>
             </div>
         )
@@ -139,12 +111,6 @@ export default function Dashboard() {
                         >
                             Login
                         </Link>
-                        <Link
-                            href="/login"
-                            className="flex h-12 min-w-[140px] items-center justify-center rounded-lg border border-white bg-white px-6 font-medium text-black transition-colors hover:bg-gray-100"
-                        >
-                            Sign up
-                        </Link>
                     </div>
                 </div>
             </div>
@@ -161,15 +127,9 @@ export default function Dashboard() {
                     </h1>
                     <p className="text-sm text-white/80 md:text-base">
                         {redirectTakingLong
-                            ? 'Redirecting to the login page...'
-                            : 'Preparing to redirect you to the login page...'}
+                            ? 'Redirecting to login...'
+                            : 'Preparing redirect...'}
                     </p>
-                    <Link
-                        href="/login"
-                        className="mt-2 inline-flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-black transition-colors hover:bg-green-600"
-                    >
-                        Go to login
-                    </Link>
                 </div>
             </div>
         )
@@ -188,80 +148,116 @@ export default function Dashboard() {
         formatName(rawUsername) ?? session.user?.email ?? 'User'
 
     return (
-        <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
+        <div className="relative min-h-screen w-full bg-black font-sans text-white selection:bg-green-500/30">
             <ParticleBackground />
-            <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
-                <Link
-                    href="/"
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    Home
-                </Link>
-                <Link
-                    href="/assess"
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    Assess
-                </Link>
-                <Link
-                    href="/chat"
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    Chat
-                </Link>
-                <Link
-                    href="/privacy"
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    Privacy
-                </Link>
-                <Link
-                    href="/report"
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    Report
-                </Link>
-                <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                    SignOut
-                </button>
-            </nav>
-            <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 pt-20 pb-24 text-center">
-                <div className="flex min-h-[4rem] items-center justify-center md:min-h-[5rem]">
-                    <h1
-                        className={`text-center text-4xl font-bold text-white transition-all duration-500 ease-out sm:text-5xl md:text-7xl ${isGreetingVisible
-                            ? 'opacity-100 translate-y-0'
-                            : 'opacity-0 translate-y-2'
-                            }`}
+
+            {/* Navigation */}
+            <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                <div className="text-xl font-bold tracking-tight text-white">PARP</div>
+                <div className="flex items-center gap-4">
+                    <span className="hidden text-sm text-white/60 sm:inline-block">
+                        {session.user?.email}
+                    </span>
+                    <button
+                        onClick={handleSignOut}
+                        className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10"
                     >
-                        {greetings[greetingIndex]} {displayName}
-                    </h1>
+                        Sign Out
+                    </button>
                 </div>
-                <p className="mt-4 max-w-xl text-base text-white/80 md:text-lg">
-                    Assess your Technology–Organization–Environment (TOE) readiness and
-                    understand how your capabilities create meaningful public value.
-                </p>
-                <a
-                    href={FEEDBACK_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
-                >
-                    Give feedback on this prototype
-                </a>
+            </nav>
+
+            {/* Main Content */}
+            <main className="relative z-10 mx-auto max-w-5xl px-6 py-12">
+                {/* Welcome Section */}
+                <div className={`mb-12 text-center transition-all duration-700 ease-out ${isGreetingVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+                    <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl">
+                        Welcome back, <span className="text-green-400">{displayName}</span>
+                    </h1>
+                    <p className="mt-4 text-lg text-white/70">
+                        Ready to continue your AI adoption journey?
+                    </p>
+                </div>
+
+                {/* Dashboard Grid */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+                    {/* Quick Stats Card (Placeholder) */}
+                    <div className="col-span-1 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20 md:col-span-2 lg:col-span-3">
+                        <h2 className="mb-4 text-xl font-semibold text-white">Your Progress</h2>
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-white/60">Current Status</p>
+                                <div className="mt-1 flex items-center gap-2">
+                                    <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
+                                    <span className="font-medium text-white">Assessment Incomplete</span>
+                                </div>
+                            </div>
+                            <Link
+                                href="/assess"
+                                className="inline-flex items-center justify-center rounded-lg bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/20"
+                            >
+                                View Details
+                            </Link>
+                        </div>
+                        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full w-[15%] rounded-full bg-green-500 transition-all duration-1000"></div>
+                        </div>
+                        <p className="mt-2 text-xs text-white/50">15% Complete</p>
+                    </div>
+
+                    {/* Action Card: Assessment */}
+                    <Link
+                        href="/assess"
+                        className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
+                    >
+                        <div className="relative z-10">
+                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                            </div>
+                            <h3 className="mb-2 text-xl font-bold text-white">Take Assessment</h3>
+                            <p className="text-sm text-white/70">
+                                Evaluate your organization&apos;s readiness using the TOE framework. Get detailed scores and insights.
+                            </p>
+                        </div>
+                        <div className="absolute inset-0 z-0 bg-green-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                    </Link>
+
+                    {/* Action Card: Chat */}
+                    <Link
+                        href="/chat"
+                        className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
+                    >
+                        <div className="relative z-10">
+                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                </svg>
+                            </div>
+                            <h3 className="mb-2 text-xl font-bold text-white">Chat with AI</h3>
+                            <p className="text-sm text-white/70">
+                                Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
+                            </p>
+                        </div>
+                        <div className="absolute inset-0 z-0 bg-blue-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                    </Link>
+
+                    {/* Feedback Link (Secondary) */}
+                    <div className="col-span-1 flex items-center justify-center p-4 md:col-span-2 lg:col-span-3">
+                        <a
+                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL || '#'}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sm text-white/40 hover:text-white hover:underline"
+                        >
+                            Provide Feedback on Beta
+                        </a>
+                    </div>
+
+                </div>
             </main>
-            <div className="absolute bottom-3 right-3 z-20">
-                <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-red-500 px-4 text-xs font-medium text-white transition-colors hover:bg-red-600 sm:text-sm md:h-11 md:min-w-[140px] md:px-6 md:text-base"
-                >
-                    Sign Out
-                </button>
-            </div>
         </div>
     )
 }
