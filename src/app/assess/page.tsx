@@ -44,9 +44,8 @@ const toeFormSchema = z.object(
     (acc, section) => {
       TOE_QUESTIONS[section].forEach((q) => {
         acc[q.id] = z.number({
-          invalid_type_error: 'Please select an option.',
-          required_error: 'This question is required.',
-        })
+          message: 'Please select an option.',
+        }).min(1, 'This question is required.')
       })
       return acc
     },

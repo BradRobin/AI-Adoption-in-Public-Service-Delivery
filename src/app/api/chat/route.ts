@@ -11,7 +11,7 @@ type ChatRequestBody = {
 
 // System prompt defining the AI's persona and language preferences
 const SYSTEM_PROMPT =
-  'You are PARP AI - a helpful advisor on AI adoption in Kenyan public services and freelancing. Use simple English, Kiswahili, or Sheng when appropriate. Reference Kenya AI Strategy when relevant.'
+  'You are PARP AI - expert on AI adoption in Kenyan public services & freelancing. Use simple English, Kiswahili or Sheng if necessary. Reference Kenya AI Strategy 2025-2030.'
 
 /**
  * Encodes an event and data object into Server-Sent Events (SSE) format.
