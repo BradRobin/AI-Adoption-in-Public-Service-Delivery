@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 import { DashboardCharts } from '@/components/DashboardCharts'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
 export default function Dashboard() {
     const router = useRouter()
@@ -78,6 +79,35 @@ export default function Dashboard() {
             subscription.unsubscribe()
         }
     }, [router])
+
+    // Effect: Realtime subscription for assessments
+    useEffect(() => {
+        if (!session?.user?.id) return
+
+        const channel = supabase
+            .channel(`dashboard_assessments_${session.user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'assessments',
+                    filter: `user_id=eq.${session.user.id}`,
+                },
+                (payload) => {
+                    // Update latest assessment immediately
+                    const newAssessment = payload.new as { score: number; dimension_scores: any }
+                    setLatestAssessment({
+                        score: newAssessment.score,
+                        dimension_scores: newAssessment.dimension_scores,
+                    })
+                    toast.success('New assessment results received!')
+                }
+            )
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [session?.user?.id])
 
     useEffect(() => {
         if (session) {
@@ -189,6 +219,8 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
+
+            <InstallPrompt />
 
             {/* Main Content */}
             <main className="relative z-10 mx-auto max-w-5xl px-6 py-12">
