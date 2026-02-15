@@ -44,8 +44,8 @@ const toeFormSchema = z.object(
     (acc, section) => {
       TOE_QUESTIONS[section].forEach((q) => {
         acc[q.id] = z.number({
-          required_error: 'This question is required.',
           invalid_type_error: 'Please select an option.',
+          required_error: 'This question is required.',
         })
       })
       return acc
@@ -68,7 +68,6 @@ export default function AssessPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  // React Hook Form initialization with default values
   // React Hook Form initialization with default values
   const {
     control,
@@ -131,6 +130,28 @@ export default function AssessPage() {
       }
 
       setSession(currentSession)
+
+      // Fetch latest assessment if session exists
+      if (currentSession?.user) {
+        const { data, error } = await supabase
+          .from('assessments')
+          .select('*')
+          .eq('user_id', currentSession.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (!error && data) {
+          setScores({
+            overall: data.score,
+            dimensionScores: data.dimension_scores as any, // Cast for simplicity, ideally validate
+          })
+          // We set submittedData to a dummy object just to trigger the "showResults" view
+          // since we only strictly need scores to display results.
+          setSubmittedData({} as ToeFormValues)
+        }
+      }
+
       setIsLoading(false)
     }
 
