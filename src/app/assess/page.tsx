@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Session } from '@supabase/supabase-js'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { LikertScale } from '@/components/LikertScale'
@@ -36,6 +38,22 @@ const SECTION_ORDER: ToeSection[] = [
   'environmental',
 ]
 
+// Zod schema for form validation
+const toeFormSchema = z.object(
+  SECTION_ORDER.reduce(
+    (acc, section) => {
+      TOE_QUESTIONS[section].forEach((q) => {
+        acc[q.id] = z.number({
+          required_error: 'This question is required.',
+          invalid_type_error: 'Please select an option.',
+        })
+      })
+      return acc
+    },
+    {} as Record<string, z.ZodNumber>,
+  ),
+)
+
 /**
  * AssessPage Component
  * Provides a form for users to evaluate their readiness across TOE dimensions.
@@ -51,13 +69,17 @@ export default function AssessPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   // React Hook Form initialization with default values
+  // React Hook Form initialization with default values
   const {
     control,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<ToeFormValues>({
     mode: 'onChange',
+    resolver: zodResolver(toeFormSchema),
     defaultValues: SECTION_ORDER.reduce(
       (acc, section) => {
         TOE_QUESTIONS[section].forEach((q) => {
@@ -68,6 +90,34 @@ export default function AssessPage() {
       {} as Record<string, undefined>,
     ),
   })
+
+  // Load draft from localStorage
+  useEffect(() => {
+    if (session?.user?.id && !submittedData) {
+      const draftKey = `toe_draft_${session.user.id}`
+      const savedDraft = localStorage.getItem(draftKey)
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft)
+          Object.keys(parsed).forEach((key) => {
+            setValue(key, parsed[key])
+          })
+          toast.success('Restored previous draft.')
+        } catch {
+          // Ignore invalid draft
+        }
+      }
+    }
+  }, [session, setValue, submittedData])
+
+  const handleSaveDraft = () => {
+    if (session?.user?.id) {
+      const draftKey = `toe_draft_${session.user.id}`
+      const currentValues = watch()
+      localStorage.setItem(draftKey, JSON.stringify(currentValues))
+      toast.success('Draft saved successfully.')
+    }
+  }
 
   useEffect(() => {
     const checkSession = async () => {
@@ -113,6 +163,9 @@ export default function AssessPage() {
 
     const userId = session?.user?.id
     if (userId) {
+      // Clear draft on successful submission
+      localStorage.removeItem(`toe_draft_${userId}`)
+
       const { error } = await supabase.from('assessments').insert({
         user_id: userId,
         score: computed.overall,
@@ -131,6 +184,7 @@ export default function AssessPage() {
   }
 
   const handleRetake = () => {
+    // Clear form and local state
     reset(
       SECTION_ORDER.reduce(
         (acc, section) => {
@@ -142,6 +196,9 @@ export default function AssessPage() {
         {} as Record<string, undefined>,
       ),
     )
+    if (session?.user?.id) {
+      localStorage.removeItem(`toe_draft_${session.user.id}`)
+    }
     setSubmittedData(null)
     setScores(null)
     setSaveError(null)
@@ -287,13 +344,20 @@ export default function AssessPage() {
                   </section>
                 ))}
 
-                <div className="pt-4">
+                <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={handleSaveDraft}
+                    className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10 md:text-base"
+                  >
+                    Save Draft
+                  </button>
                   <button
                     type="submit"
                     disabled={!isValid || isSaving}
-                    className="w-full rounded-lg bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                    className="w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
                   >
-                    Submit
+                    Submit Assessment
                   </button>
                 </div>
               </form>
