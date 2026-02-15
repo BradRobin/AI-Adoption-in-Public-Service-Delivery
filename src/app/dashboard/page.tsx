@@ -7,11 +7,16 @@ import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
+import { DashboardCharts } from '@/components/DashboardCharts'
 
 export default function Dashboard() {
     const router = useRouter()
     const [session, setSession] = useState<Session | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [latestAssessment, setLatestAssessment] = useState<{
+        score: number
+        dimension_scores: any
+    } | null>(null)
     const [sessionExpired, setSessionExpired] = useState(false)
     const [redirectTakingLong, setRedirectTakingLong] = useState(false)
     const [isGreetingVisible, setIsGreetingVisible] = useState(true)
@@ -25,6 +30,10 @@ export default function Dashboard() {
                 } = await supabase.auth.getSession()
 
                 setSession(currentSession)
+
+                if (currentSession?.user) {
+                    await fetchAssessment(currentSession.user.id)
+                }
 
                 if (!currentSession) {
                     router.replace('/login')
@@ -41,6 +50,20 @@ export default function Dashboard() {
         }
 
         checkSession()
+
+        const fetchAssessment = async (userId: string) => {
+            const { data, error } = await supabase
+                .from('assessments')
+                .select('score, dimension_scores')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
+
+            if (!error && data) {
+                setLatestAssessment(data)
+            }
+        }
 
         const {
             data: { subscription },
@@ -182,28 +205,44 @@ export default function Dashboard() {
                 {/* Dashboard Grid */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-                    {/* Quick Stats Card (Placeholder) */}
-                    <div className="col-span-1 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20 md:col-span-2 lg:col-span-3">
-                        <h2 className="mb-4 text-xl font-semibold text-white">Your Progress</h2>
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p className="text-sm text-white/60">Current Status</p>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
-                                    <span className="font-medium text-white">Assessment Incomplete</span>
+                    {/* Quick Stats / Charts Area */}
+                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                        {latestAssessment ? (
+                            <DashboardCharts
+                                overall={latestAssessment.score}
+                                dimensionScores={latestAssessment.dimension_scores}
+                            />
+                        ) : (
+                            <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
+                                <h2 className="mb-4 text-xl font-semibold text-white">
+                                    Kenya AI Adoption Insight
+                                </h2>
+                                <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                                    <div className="flex-1 space-y-2">
+                                        <p className="text-3xl font-bold text-green-400">42.1%</p>
+                                        <p className="text-white/80">
+                                            of Kenyan businesses are already using ChatGPT or similar tools.
+                                        </p>
+                                        <p className="text-xs text-white/50">
+                                            Source: KEPSA 2024 AI Readiness Report (Simulated)
+                                        </p>
+                                    </div>
+                                    <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
+                                    <div className="flex-1 space-y-3">
+                                        <p className="text-white">
+                                            How does your organization compare? Take the assessment to find out your TOE
+                                            readiness score.
+                                        </p>
+                                        <Link
+                                            href="/assess"
+                                            className="inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
+                                        >
+                                            Check My Readiness
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
-                            <Link
-                                href="/assess"
-                                className="inline-flex items-center justify-center rounded-lg bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/20"
-                            >
-                                View Details
-                            </Link>
-                        </div>
-                        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                            <div className="h-full w-[15%] rounded-full bg-green-500 transition-all duration-1000"></div>
-                        </div>
-                        <p className="mt-2 text-xs text-white/50">15% Complete</p>
+                        )}
                     </div>
 
                     {/* Action Card: Assessment */}
