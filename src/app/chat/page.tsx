@@ -174,8 +174,11 @@ export default function ChatPage() {
       const decoder = new TextDecoder()
       let buffer = ''
 
+      let fullResponse = ''
+
       const appendToAssistant = (delta: string) => {
         if (!delta) return
+        fullResponse += delta
         setMessages((prev) =>
           prev.map((m) =>
             m.id === placeholderId ? { ...m, content: m.content + delta } : m,
@@ -247,6 +250,33 @@ export default function ChatPage() {
       toast.error('Chat service is unavailable right now. Please try again.')
     } finally {
       setIsThinking(false)
+
+      if (fullResponse) {
+        const lowerContent = fullResponse.toLowerCase()
+        const riskyKeywords = [
+          'write my essay',
+          'do my homework',
+          'academic dishonesty',
+          'cheat',
+          'stereotypes',
+          'bias',
+        ]
+        const found = riskyKeywords.find((kw) => lowerContent.includes(kw))
+        if (found) {
+          toast(
+            'This content may involve sensitive or academic integrity topics. Please verify and use ethically.',
+            {
+              icon: '⚠️',
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+              },
+              duration: 5000,
+            }
+          )
+        }
+      }
     }
   }
 
@@ -406,6 +436,9 @@ export default function ChatPage() {
             </div>
           </form>
         </div>
+        <p className="mt-2 text-center text-[10px] text-white/40 md:text-xs">
+          AI can make mistakes. Always verify outputs. Use responsibly.
+        </p>
       </main>
     </div>
   )
