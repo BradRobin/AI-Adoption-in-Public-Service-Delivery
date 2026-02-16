@@ -148,6 +148,7 @@ export default function ChatPage() {
     setInput('')
     setIsThinking(true)
     const currentProvider = isLocalAI ? 'ollama' : 'openai'
+    let fullResponse = ''
 
     try {
       // Send message to backend API and handle streaming response
@@ -173,8 +174,6 @@ export default function ChatPage() {
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
-
-      let fullResponse = ''
 
       const appendToAssistant = (delta: string) => {
         if (!delta) return

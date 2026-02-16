@@ -21,6 +21,13 @@ export default function Dashboard() {
     const [sessionExpired, setSessionExpired] = useState(false)
     const [redirectTakingLong, setRedirectTakingLong] = useState(false)
     const [isGreetingVisible, setIsGreetingVisible] = useState(true)
+    const [marketStats, setMarketStats] = useState<{
+        ai_adoption_rate: { value: string; source: string }
+        policy_update: { value: string; source: string }
+    }>({
+        ai_adoption_rate: { value: '41.5%', source: 'Loading...' },
+        policy_update: { value: 'Loading...', source: '' },
+    })
 
     // Effect: Check for active session on mount and subscribe to auth changes
     useEffect(() => {
@@ -108,6 +115,51 @@ export default function Dashboard() {
             supabase.removeChannel(channel)
         }
     }, [session?.user?.id])
+
+    // Effect: Realtime subscription for market stats
+    useEffect(() => {
+        // Initial fetch + triggering update
+        fetch('/api/stats/update')
+            .then((res) => res.json())
+            .catch(() => {
+                // Ignore errors for background update
+            })
+
+        const fetchInitial = async () => {
+            const { data } = await supabase.from('market_stats').select('*')
+            if (data) {
+                const statsMap: Record<string, { value: string; source: string }> = {}
+                data.forEach((item) => {
+                    statsMap[item.id] = { value: item.value, source: item.source }
+                })
+                setMarketStats((prev) => ({ ...prev, ...statsMap }))
+            }
+        }
+        fetchInitial()
+
+        const channel = supabase
+            .channel('public:market_stats')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'market_stats',
+                },
+                (payload) => {
+                    const newItem = payload.new as { id: string; value: string; source: string }
+                    setMarketStats((prev) => ({
+                        ...prev,
+                        [newItem.id]: { value: newItem.value, source: newItem.source },
+                    }))
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [])
 
     useEffect(() => {
         if (session) {
@@ -237,45 +289,53 @@ export default function Dashboard() {
                 {/* Dashboard Grid */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-                    {/* Quick Stats / Charts Area */}
+                    {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                        {latestAssessment ? (
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
+                            <h2 className="mb-4 text-xl font-semibold text-white">
+                                Kenya AI Adoption Insight
+                            </h2>
+                            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
+                                    <p className="text-white/80">
+                                        of Kenyan businesses are already using ChatGPT or similar tools.
+                                    </p>
+                                    <p className="text-xs text-white/50">
+                                        Source: {marketStats.ai_adoption_rate.source}
+                                    </p>
+                                </div>
+                                <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
+                                <div className="flex-1 space-y-3">
+                                    <p className="text-sm font-semibold text-white/90">Latest Policy Update:</p>
+                                    <p className="text-white">
+                                        {marketStats.policy_update.value}
+                                    </p>
+                                    <p className="text-xs text-white/50">
+                                        Source: {marketStats.policy_update.source}
+                                    </p>
+                                    {!latestAssessment && (
+                                        <Link
+                                            href="/assess"
+                                            className="mt-2 inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
+                                        >
+                                            Check My Readiness
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Charts (Conditional) */}
+                    {latestAssessment && (
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
                             <DashboardCharts
                                 overall={latestAssessment.score}
                                 dimensionScores={latestAssessment.dimension_scores}
                             />
-                        ) : (
-                            <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
-                                <h2 className="mb-4 text-xl font-semibold text-white">
-                                    Kenya AI Adoption Insight
-                                </h2>
-                                <div className="flex flex-col gap-6 md:flex-row md:items-center">
-                                    <div className="flex-1 space-y-2">
-                                        <p className="text-3xl font-bold text-green-400">42.1%</p>
-                                        <p className="text-white/80">
-                                            of Kenyan businesses are already using ChatGPT or similar tools.
-                                        </p>
-                                        <p className="text-xs text-white/50">
-                                            Source: KEPSA 2024 AI Readiness Report (Simulated)
-                                        </p>
-                                    </div>
-                                    <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
-                                    <div className="flex-1 space-y-3">
-                                        <p className="text-white">
-                                            How does your organization compare? Take the assessment to find out your TOE
-                                            readiness score.
-                                        </p>
-                                        <Link
-                                            href="/assess"
-                                            className="inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
-                                        >
-                                            Check My Readiness
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Action Card: Assessment */}
                     <Link
