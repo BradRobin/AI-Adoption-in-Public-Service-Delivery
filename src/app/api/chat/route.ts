@@ -7,6 +7,7 @@ type ChatMessage = {
 
 type ChatRequestBody = {
   messages: ChatMessage[]
+  provider?: string
 }
 
 // System prompt defining the AI's persona and language preferences
@@ -215,7 +216,7 @@ export async function POST(req: Request) {
   ]
 
   // Retrieve configuration from environment variables
-  const provider = (process.env.LLM_PROVIDER ?? 'auto').toLowerCase()
+  const provider = (body.provider || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.1:8b'
   const openAiKey = process.env.OPENAI_API_KEY ?? ''

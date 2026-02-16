@@ -70,6 +70,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const [isLocalAI, setIsLocalAI] = useState(true) // Default to Local (Ollama)
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -146,6 +147,7 @@ export default function ChatPage() {
     setMessages(nextMessages)
     setInput('')
     setIsThinking(true)
+    const currentProvider = isLocalAI ? 'ollama' : 'openai'
 
     try {
       // Send message to backend API and handle streaming response
@@ -159,6 +161,7 @@ export default function ChatPage() {
           messages: nextMessages
             .filter((m) => m.role === 'user' || m.role === 'assistant')
             .map((m) => ({ role: m.role, content: m.content })),
+          provider: currentProvider,
         }),
       })
 
@@ -354,8 +357,8 @@ export default function ChatPage() {
               >
                 <div
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm md:text-base ${message.role === 'user'
-                      ? 'rounded-br-sm bg-green-500 text-black'
-                      : 'rounded-bl-sm bg-black/70 text-white'
+                    ? 'rounded-br-sm bg-green-500 text-black'
+                    : 'rounded-bl-sm bg-black/70 text-white'
                     }`}
                 >
                   {message.content}
@@ -376,6 +379,20 @@ export default function ChatPage() {
                 placeholder="Ask about your AI readiness or TOE factors..."
                 className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base"
               />
+              <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-white/70 hover:text-white select-none">
+                  <div className="relative inline-flex items-center h-5 rounded-full w-9 transition-colors focus:outline-none bg-white/20">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={isLocalAI}
+                      onChange={() => setIsLocalAI(!isLocalAI)}
+                    />
+                    <div className={`w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600`}></div>
+                  </div>
+                  <span>Local AI (Ollama)</span>
+                </label>
+              </div>
               <button
                 type="submit"
                 disabled={isThinking || input.trim().length === 0}
