@@ -11,6 +11,7 @@ import { DashboardCharts } from '@/components/DashboardCharts'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { ServiceHub } from '@/components/ServiceHub'
 import { OrgPulseCheck } from '@/components/OrgPulseCheck'
+import { NewsFeed } from '@/components/NewsFeed'
 
 export default function Dashboard() {
     const router = useRouter()
@@ -334,9 +335,10 @@ export default function Dashboard() {
                         <ServiceHub />
                     </div>
 
-                    {/* Org Pulse Check (New) */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                    {/* Org Pulse Check & News Feed (2 Columns) */}
+                    <div className="col-span-1 md:col-span-2 lg:col-span-3 grid gap-6 lg:grid-cols-2">
                         <OrgPulseCheck />
+                        <NewsFeed />
                     </div>
 
                     {/* Charts (Conditional) */}
