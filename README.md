@@ -1,41 +1,91 @@
+# PARP: Public Sector AI Readiness Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 🌍 Overview
+PARP is a digital prototype designed to assess and improve AI readiness within Kenya's public sector. Built as part of a Master's Thesis, this platform leverages the Technology-Organization-Environment (TOE) framework to provide personalized assessments, real-time market insights, and an AI-powered advisory chatbot.
 
-## Getting Started
+This platform addresses the critical gap in structured AI adoption strategies for government entities, offering a data-driven approach to readiness evaluation.
 
-First, run the development server:
+## ✨ Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. TOE Readiness Assessment
+- **Structured Questionnaire**: 30-question assessment based on Technology, Organization, and Environment dimensions.
+- **Instant Scoring**: Real-time calculation of readiness scores (Low, Moderate, High).
+- **Draft Saving**: Auto-save functionality ensures progress is never lost.
+- **Visual Analytics**: Radar and Bar charts visualizing strengths and weaknesses.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. AI Advisory Chatbot
+- **Context-Aware**: Trained on Kenya's Data Protection Act (2019) and National AI Strategy.
+- **Dual Mode**: Supports both Cloud (OpenAI) and Local (Ollama - Llama 3.1 / Qwen 2.5) inference for offline privacy.
+- **Multilingual**: Capable of switching between English and Kiswahili/Sheng to increase accessibility.
+- **Animated Avatar**: A toggleable 3D-style talking avatar (Web Speech API) for a more engaging, culturally relevant interaction.
+- **Ethical Guardrails**: Real-time keyword scanning to flag academic dishonesty or bias.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Real-Time Dashboard
+- **Market Insights**: Live feed of AI adoption rates in Kenyan businesses (via Supabase Realtime).
+- **Policy Updates**: Instant notifications on relevant government policy changes.
+- **Dynamic Widgets**: "Kenya AI Adoption Insight" card highlighting key trends.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Enterprise-Grade Security
+- **Authentication**: Secure email/password login via Supabase Auth.
+- **Role-Based Access**: Public landing page vs. Protected dashboard routes.
+- **Data Privacy**: Local LLM support explicitly designed for processing sensitive government data on-premise.
 
-## Learn More
+## 🚀 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend**: Next.js 14 (App Router), TailwindCSS, Framer Motion
+- **Backend/Database**: Supabase (PostgreSQL, Auth, Realtime)
+- **AI/ML**: OpenAI API (Cloud), Ollama (Local), Web Speech API (TTS)
+- **Visualization**: Recharts
+- **Deployment**: Vercel (Web), Electron (Desktop - Experimental)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Installation & Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
+- Node.js 18+
+- Supabase Account
+- (Optional) Ollama running locally for offline chat
 
-## Deploy on Vercel
+### Steps
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/your-username/parp-platform.git
+    cd parp-platform
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    # for electron support
+    npm install electron electron-builder -D
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# AI-Adoption-in-Public-Service-Delivery
-Public AI Readiness Platform – A full-stack prototype for assessing organizational readiness for AI adoption in Kenyan public services using the TOE framework. Features interactive assessments, public value dashboards, AI chatbot, and secure desktop/web access to support ethical AI integration in government.
->>>>>>> b6f3b253d2e9b87d7ee4e4464f2bdfbe4f44e037
+3.  **Environment Variables**
+    Create a `.env.local` file:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    OPENAI_API_KEY=your_openai_key_optional
+    ```
+
+4.  **Database Migration**
+    Run the SQL migrations in Supabase SQL Editor (found in `supabase/migrations`) to create `assessments` and `market_stats` tables.
+
+5.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000).
+
+6.  **Run Desktop App (Experimental)**
+    ```bash
+    npm run electron-dev
+    ```
+
+## 🎥 Demo
+[Link to Demo Video Placeholder]
+
+## 📜 Thesis Context
+This artifact supports the thesis "Assessing AI Readiness in Kenya's Public Sector: A Framework for Strategic Adoption." It operationalizes the theoretical TOE framework into a usable software tool.
+
+**Author**: Bradley Robin
+**Date**: February 2026
