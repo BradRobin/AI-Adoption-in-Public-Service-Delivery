@@ -8,6 +8,7 @@ type ChatMessage = {
 type ChatRequestBody = {
   messages: ChatMessage[]
   provider?: string
+  systemPrompt?: string
 }
 
 // System prompt defining the AI's persona and language preferences
@@ -220,9 +221,11 @@ export async function POST(req: Request) {
     })
   }
 
+  const activeSystemPrompt = body.systemPrompt ? body.systemPrompt : SYSTEM_PROMPT
+
   const history = normalizeMessages(body.messages)
   const stitched = [
-    { role: 'system' as const, content: SYSTEM_PROMPT },
+    { role: 'system' as const, content: activeSystemPrompt },
     ...history.map((m) => ({ role: m.role, content: m.content })),
   ]
 

@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import {
     Stethoscope, // Healthcare
@@ -5,8 +7,11 @@ import {
     Droplets,    // Water
     GraduationCap, // Education
     Briefcase,    // Gig/Employment
-    ExternalLink
+    ExternalLink,
+    Bot
 } from 'lucide-react'
+import { useState } from 'react'
+import { ServiceAssistantModal } from './ServiceAssistantModal'
 
 const services = [
     {
@@ -57,22 +62,27 @@ const services = [
 ]
 
 export function ServiceHub() {
+    const [selectedService, setSelectedService] = useState<{ id: string; title: string } | null>(null)
+
     return (
         <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">Public Services Hub</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {services.map((service, index) => (
-                    <motion.a
+                    <motion.div
                         key={service.id}
-                        href={service.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 transition-all hover:border-white/20 hover:bg-white/10"
                     >
-                        <div className="space-y-3">
+                        {/* Interactive Link Area for Title/Desc */}
+                        <a
+                            href={service.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block space-y-3 flex-1"
+                        >
                             <div className={`inline-flex items-center justify-center rounded-lg p-2 ${service.bg} ${service.color}`}>
                                 <service.icon size={24} />
                             </div>
@@ -82,15 +92,38 @@ export function ServiceHub() {
                             <p className="text-sm text-white/60 line-clamp-3">
                                 {service.description}
                             </p>
-                        </div>
+                        </a>
 
-                        <div className="mt-4 flex items-center gap-2 text-xs font-medium text-white/40 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span>Visit Portal</span>
-                            <ExternalLink size={12} />
+                        {/* Footer Actions */}
+                        <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+                            <a
+                                href={service.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-xs font-medium text-white/40 transition-colors hover:text-white"
+                            >
+                                <span>Visit Portal</span>
+                                <ExternalLink size={12} />
+                            </a>
+
+                            <button
+                                onClick={() => setSelectedService({ id: service.id, title: service.title })}
+                                className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-400 transition-colors hover:bg-green-500 hover:text-black"
+                            >
+                                <Bot size={14} />
+                                <span>AI Assist</span>
+                            </button>
                         </div>
-                    </motion.a>
+                    </motion.div>
                 ))}
             </div>
+
+            <ServiceAssistantModal
+                isOpen={!!selectedService}
+                onClose={() => setSelectedService(null)}
+                serviceId={selectedService?.id || ''}
+                serviceTitle={selectedService?.title || ''}
+            />
         </div>
     )
 }
