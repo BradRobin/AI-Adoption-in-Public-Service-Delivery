@@ -10,6 +10,7 @@ import type { Session } from '@supabase/supabase-js'
 import { DashboardCharts } from '@/components/DashboardCharts'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { ServiceHub } from '@/components/ServiceHub'
+import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 
 export default function Dashboard() {
     const router = useRouter()
@@ -331,6 +332,11 @@ export default function Dashboard() {
                     {/* Service Hub Section */}
                     <div className="col-span-1 md:col-span-2 lg:col-span-3">
                         <ServiceHub />
+                    </div>
+
+                    {/* Org Pulse Check (New) */}
+                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                        <OrgPulseCheck />
                     </div>
 
                     {/* Charts (Conditional) */}
