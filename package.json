@@ -2,11 +2,29 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "author": "PARP Team",
+  "description": "Public Sector AI Readiness Platform Desktop App",
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on -l tcp:3000 && electron .\"",
+    "electron-build": "npm run build && electron-builder"
+  },
+  "main": "electron/main.js",
+  "build": {
+    "appId": "com.parp.app",
+    "productName": "PARP - Public Sector AI Readiness",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -28,6 +46,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "electron-builder": "^26.7.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
