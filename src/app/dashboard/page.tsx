@@ -12,6 +12,7 @@ import { InstallPrompt } from '@/components/InstallPrompt'
 import { ServiceHub } from '@/components/ServiceHub'
 import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
+import { BenchmarkCard } from '@/components/BenchmarkCard'
 
 export default function Dashboard() {
     const router = useRouter()
@@ -73,6 +74,15 @@ export default function Dashboard() {
 
             if (!error && data) {
                 setLatestAssessment(data)
+
+                // Simulate "Weekly Check" notification once on load if assessment exists
+                // In production, this would be triggered by a real background cron job
+                setTimeout(() => {
+                    toast.success('Weekly Assessment Complete: Your score is consistent.', {
+                        icon: '📅',
+                        duration: 4000
+                    })
+                }, 1500)
             }
         }
 
@@ -341,17 +351,23 @@ export default function Dashboard() {
                         <NewsFeed />
                     </div>
 
-                    {/* Charts (Conditional) */}
+                    {/* Charts & Benchmarks (Conditional) */}
                     {latestAssessment && (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                            <DashboardCharts
-                                overall={latestAssessment.score}
-                                dimensionScores={latestAssessment.dimension_scores}
-                            />
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3 grid gap-6 lg:grid-cols-3">
+                            {/* Benchmark Card takes 1/3, Charts take 2/3 */}
+                            <div className="lg:col-span-1">
+                                <BenchmarkCard userScore={latestAssessment.score} />
+                            </div>
+                            <div className="lg:col-span-2">
+                                <DashboardCharts
+                                    overall={latestAssessment.score}
+                                    dimensionScores={latestAssessment.dimension_scores}
+                                />
+                            </div>
                         </div>
                     )}
 
-                    {/* Action Card: Assessment */}
+                    {/* Action Cards (Chat & Assessment) */}
                     <Link
                         href="/assess"
                         className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
@@ -370,7 +386,6 @@ export default function Dashboard() {
                         <div className="absolute inset-0 z-0 bg-green-500/5 opacity-0 transition group-hover:opacity-100"></div>
                     </Link>
 
-                    {/* Action Card: Chat */}
                     <Link
                         href="/chat"
                         className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
