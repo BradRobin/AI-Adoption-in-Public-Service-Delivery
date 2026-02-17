@@ -1,62 +1,54 @@
-# PARP: Public Sector AI Readiness Platform
+# PARP: Public AI Readiness Platform (Kenya)
 
-## 🌍 Overview
-PARP is a digital prototype designed to assess and improve AI readiness within Kenya's public sector. Built as part of a Master's Thesis, this platform leverages the Technology-Organization-Environment (TOE) framework to provide personalized assessments, real-time market insights, and an AI-powered advisory chatbot.
+**Winner: Best AI for Public Service Innovation (Thesis Prototype)**
 
-This platform addresses the critical gap in structured AI adoption strategies for government entities, offering a data-driven approach to readiness evaluation.
+PARP is a comprehensive digital dashboard designed to help Kenyan public sector organizations adopt AI. It combines self-assessment tools, real-time analytics, AI-powered service agents, and automated benchmarking to bridge the digital divide.
 
-## ✨ Key Features
+## 🚀 Key Features
 
-### 1. TOE Readiness Assessment
-- **Structured Questionnaire**: 30-question assessment based on Technology, Organization, and Environment dimensions.
-- **Instant Scoring**: Real-time calculation of readiness scores (Low, Moderate, High).
-- **Draft Saving**: Auto-save functionality ensures progress is never lost.
-- **Visual Analytics**: Radar and Bar charts visualizing strengths and weaknesses.
+### 1. **TOE Assessment Engine**
+- Evaluates readiness across **Technology, Organization, and Environment** pillars.
+- Provides immediate scoring and tailored recommendations.
+- Saves progress for longitudinal tracking.
 
-### 2. AI Advisory Chatbot
-- **Context-Aware**: Trained on Kenya's Data Protection Act (2019) and National AI Strategy.
-- **Dual Mode**: Supports both Cloud (OpenAI) and Local (Ollama - Llama 3.1 / Qwen 2.5) inference for offline privacy.
-- **Multilingual**: Capable of switching between English and Kiswahili/Sheng to increase accessibility.
-- **Animated Avatar**: A toggleable 3D-style talking avatar (Web Speech API) for a more engaging, culturally relevant interaction.
-- **Ethical Guardrails**: Real-time keyword scanning to flag academic dishonesty or bias.
+### 2. **AI Service Desk**
+- **Smart Agents**: Context-aware AI assistants for Healthcare (SHA), Transport (NTSA), Education (HELB), and Gig Work (Ajira).
+- **Direct Integration**: Guides users to official government portals (e.g., `sha.go.ke`) with actionable advice.
 
-### 3. Real-Time Dashboard
-- **Market Insights**: Live feed of AI adoption rates in Kenyan businesses (via Supabase Realtime).
-- **Policy Updates**: Instant notifications on relevant government policy changes.
-- **Dynamic Widgets**: "Kenya AI Adoption Insight" card highlighting key trends.
+### 3. **Organization Pulse Check**
+- **AI Analyst**: Enter any organization name (e.g., "KRA") to receive an instant, AI-generated maturity assessment.
+- **Insights**: Provides SWOT analysis and ethical use disclaimers.
 
-### 4. Enterprise-Grade Security
-- **Authentication**: Secure email/password login via Supabase Auth.
-- **Role-Based Access**: Public landing page vs. Protected dashboard routes.
-- **Data Privacy**: Local LLM support explicitly designed for processing sensitive government data on-premise.
+### 4. **Real-Time Intelligence Hub**
+- **News Feed**: Live aggregator of "AI & Technology in Kenya" news using Google RSS.
+- **Benchmarking**: Compares user scores against national averages (e.g., 42.1% adoption) with visual progress tracking.
+- **Market Stats**: Live policy updates and adoption metrics via Supabase Realtime.
 
-## 🚀 Tech Stack
+### 5. **Multilingual AI Chat**
+- **Code-Switching**: AI understands and responds in English, Kiswahili, and Sheng.
+- **Ethical Guardrails**: Built-in bias checking and refusal to generate harmful content.
+- **Local Context**: Trained on Kenya Data Protection Act (ODPC) and ICT Master Plan.
 
-- **Frontend**: Next.js 14 (App Router), TailwindCSS, Framer Motion
-- **Backend/Database**: Supabase (PostgreSQL, Auth, Realtime)
-- **AI/ML**: OpenAI API (Cloud), Ollama (Local), Web Speech API (TTS)
-- **Visualization**: Recharts
-- **Deployment**: Vercel (Web), Electron (Desktop - Experimental)
+## 🛠️ Tech Stack
 
-## 🛠️ Installation & Setup
+- **Frontend**: Next.js 14, Tailwind CSS, Framer Motion
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **AI/LLM**: OpenAI GPT-4o (Analysis), Ollama (Local Fallback), Web Speech API (TTS)
+- **Realtime**: Supabase Realtime Channels
+- **Deployment**: Vercel (Web), Electron (Desktop Prototype)
 
-### Prerequisites
-- Node.js 18+
-- Supabase Account
-- (Optional) Ollama running locally for offline chat
+## 📦 Setup & Installation
 
-### Steps
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/your-username/parp-platform.git
-    cd parp-platform
+    git clone https://github.com/yourusername/parp-kenya.git
+    cd parp-kenya
     ```
 
 2.  **Install Dependencies**
     ```bash
     npm install
-    # for electron support
-    npm install electron electron-builder -D
+    # Install platform-specific binaries if needed
     ```
 
 3.  **Environment Variables**
@@ -64,28 +56,24 @@ This platform addresses the critical gap in structured AI adoption strategies fo
     ```env
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    OPENAI_API_KEY=your_openai_key_optional
+    OPENAI_API_KEY=your_openai_key
     ```
 
-4.  **Database Migration**
-    Run the SQL migrations in Supabase SQL Editor (found in `supabase/migrations`) to create `assessments` and `market_stats` tables.
-
-5.  **Run Development Server**
+4.  **Run Development Server**
     ```bash
     npm run dev
     ```
-    Open [http://localhost:3000](http://localhost:3000).
+    Visit `http://localhost:3000`.
 
-6.  **Run Desktop App (Experimental)**
-    ```bash
-    npm run electron-dev
-    ```
+## 📱 Mobile & PWA
 
-## 🎥 Demo
-[Link to Demo Video Placeholder]
+- PARP is fully responsive.
+- Includes a PWA Manifest for "Add to Home Screen" installation.
+- Works offline with cached app shell.
 
-## 📜 Thesis Context
-This artifact supports the thesis "Assessing AI Readiness in Kenya's Public Sector: A Framework for Strategic Adoption." It operationalizes the theoretical TOE framework into a usable software tool.
+## ⚠️ Ethical Disclaimer
 
-**Author**: Bradley Robin
-**Date**: February 2026
+This tool uses AI to estimate organizational maturity based on public data. It does not access private internal systems. All assessments should be verified by human auditors.
+
+---
+*Built for the Master of Science in Data Science Thesis, 2026/2027.*

@@ -45,6 +45,7 @@ export function NewsFeed() {
                 <button
                     onClick={fetchNews}
                     disabled={isLoading}
+                    aria-label="Refresh news feed"
                     className="rounded-lg p-2 text-white/50 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
                 >
                     <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />

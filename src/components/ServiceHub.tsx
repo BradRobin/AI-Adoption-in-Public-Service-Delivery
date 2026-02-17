@@ -67,7 +67,8 @@ export function ServiceHub() {
     return (
         <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">Public Services Hub</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Grid Layout: 1 col mobile, 2 col tablet, 3 col desktop */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 {services.map((service, index) => (
                     <motion.div
                         key={service.id}

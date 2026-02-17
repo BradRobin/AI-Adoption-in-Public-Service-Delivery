@@ -35,6 +35,10 @@ export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
                         animate={{ width: `${userScore}%` }}
                         transition={{ duration: 1, ease: 'easeOut' }}
                         className={`absolute h-full rounded-full ${isAboveAvg ? 'bg-green-500' : 'bg-yellow-500'}`}
+                        role="progressbar"
+                        aria-valuenow={userScore}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
                     />
                     {/* Marker for Industry Avg */}
                     <div
