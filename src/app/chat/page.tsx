@@ -422,7 +422,7 @@ export default function ChatPage() {
                     }
                   }
                 }}
-                placeholder="Ask about your AI readiness or TOE factors..."
+                placeholder="Ask PARP AI"
                 className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base"
               />
               <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
