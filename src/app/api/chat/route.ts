@@ -232,7 +232,7 @@ export async function POST(req: Request) {
   // Retrieve configuration from environment variables
   const provider = (body.provider || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
-  const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.1:8b'
+  const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
   const openAiKey = process.env.OPENAI_API_KEY ?? ''
   const openAiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
 
