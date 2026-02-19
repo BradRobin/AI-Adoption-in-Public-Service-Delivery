@@ -39,7 +39,13 @@ function parseSseEvents(raw: string): SseEvent[] {
       if (line.startsWith('event:')) {
         event = line.slice('event:'.length).trim()
       } else if (line.startsWith('data:')) {
-        dataParts.push(line.slice('data:'.length).trimStart())
+        const dataVal = line.slice('data:'.length);
+        // Only strip the single mandatory space required by SSE spec
+        if (dataVal.startsWith(' ')) {
+          dataParts.push(dataVal.slice(1));
+        } else {
+          dataParts.push(dataVal);
+        }
       }
     }
 
