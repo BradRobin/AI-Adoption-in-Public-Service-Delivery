@@ -100,69 +100,44 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
             })
 
             if (!res.ok) throw new Error('Failed to fetch response')
+            if (!res.body) return
 
-            const reader = res.body?.getReader()
+            const reader = res.body.getReader()
             const decoder = new TextDecoder()
             let assistantMsg = ''
 
+            // Create placeholder message
             setMessages(prev => [...prev, { role: 'assistant', content: '' }])
-
-            while (true) {
-                const { done, value } = await reader?.read() || {}
-                if (done) break
-
-                const chunk = decoder.decode(value, { stream: true })
-                // Simple parser for our SSE format (data: ...) or raw stream depending on implementation
-                // leveraging the existing parser logic or simple text extraction
-
-                // Quick hack for this modal: we'll rebuild full response or append incrementally
-                // The API sends SSE events. Let's parse simply:
-                const lines = chunk.split('\n')
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6)
-                        // Try to see if it's "token" event logic from api/chat
-                        // Actually api/chat sends: event: token\ndata: value\n\n
-                    }
-                }
-                // For simplicity in this modal, let's assume raw text flow or handle the SSE correctly
-                // NOTE: Since our API sends SSE, we need a proper parser or use the one from ChatPage. 
-                // To keep this component self-contained and small, I will implement a basic version.
-
-                // Re-using the logic from `ChatPage` is best, but let's try a simpler fetch for now 
-                // to avoid duplicating the complex parser. 
-                // Wait, `api/chat` returns a stream. 
-                // Let's just accumulate raw text if the API was simple, but it's SSE.
-                // We MUST parse SSE event: token
-            }
-
-            // Re-implementing a minimal SSE reader for this modal
-            // (Simulated for brevity in this step, practically we'd extract a helper, 
-            // but for this file I'll write the loop)
-
-            // Let's refetch with a non-streaming approach? No, API is streaming-only.
-            // Okay, let's use a robust reader.
-
-            if (!res.body) return
-            const reader2 = res.body.pipeThrough(new TextDecoderStream()).getReader()
 
             let buffer = ''
 
             while (true) {
-                const { value, done } = await reader2.read()
+                const { done, value } = await reader.read()
                 if (done) break
-                buffer += value
 
-                const parts = buffer.split('\n\n')
-                buffer = parts.pop() || ''
+                buffer += decoder.decode(value, { stream: true })
 
-                for (const part of parts) {
-                    const lines = part.split('\n')
+                // Process SSE frames
+                while (true) {
+                    const frameIdx = buffer.indexOf('\n\n')
+                    if (frameIdx === -1) break
+
+                    const frame = buffer.slice(0, frameIdx + 2)
+                    buffer = buffer.slice(frameIdx + 2)
+
+                    const lines = frame.split('\n')
                     let event = ''
                     let data = ''
+
                     for (const line of lines) {
-                        if (line.startsWith('event: ')) event = line.slice(7)
-                        if (line.startsWith('data: ')) data = line.slice(6)
+                        if (line.startsWith('event:')) event = line.slice('event:'.length).trim()
+                        if (line.startsWith('data:')) {
+                            data = line.slice('data:'.length)
+                            // Remove only the first space if it exists (protocol convention)
+                            if (data.startsWith(' ')) {
+                                data = data.slice(1)
+                            }
+                        }
                     }
 
                     if (event === 'token') {

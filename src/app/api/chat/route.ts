@@ -233,7 +233,7 @@ export async function POST(req: Request) {
   const provider = (body.provider || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
-  const openAiKey = process.env.OPENAI_API_KEY ?? ''
+  const openAiKey = process.env.OPENAI_API_KEY ?? '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'
   const openAiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
 
   // Stream response back to the client using ReadableStream
