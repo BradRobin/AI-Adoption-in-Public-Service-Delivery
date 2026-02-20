@@ -19,7 +19,7 @@ export function NewsFeed() {
     const fetchNews = async () => {
         setIsLoading(true)
         try {
-            const res = await fetch('/api/news')
+            const res = await fetch('/api/news', { cache: 'no-store' })
             if (!res.ok) throw new Error('Failed to fetch news')
             const data = await res.json()
             setNews(data.news)
