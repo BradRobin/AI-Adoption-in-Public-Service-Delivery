@@ -14,6 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * Global metadata configuration for the Next.js application.
+ * Defines the main title, description, and PWA manifest properties.
+ */
 export const metadata: Metadata = {
   title: "PARP-AI Readiness Platform",
   description:

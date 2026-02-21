@@ -11,6 +11,10 @@ let nextServer
 const isDev = !app.isPackaged
 const PORT = 3000
 
+/**
+ * Creates the main Electron browser window that serves the Next.js frontend.
+ * Configured with strict security policies like Context Isolation and Sandboxing.
+ */
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,

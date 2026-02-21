@@ -15,17 +15,30 @@ import {
 } from 'recharts'
 import type { DimensionScores } from '@/lib/toe-scoring'
 
+/**
+ * Props for the DashboardCharts component.
+ */
 type DashboardChartsProps = {
     overall: number
     dimensionScores: DimensionScores
 }
 
+/**
+ * Maps the internal dimension keys to short labels used in the radar/bar charts.
+ */
 const DIMENSION_LABELS: Record<keyof DimensionScores, string> = {
     technological: 'Tech',
     organizational: 'Org',
     environmental: 'Env',
 }
 
+/**
+ * DashboardCharts Component
+ * Renders Recharts visualizations (Radar and Bar charts) to display the user's
+ * TOE assessment scores across the three dimensions.
+ *
+ * @param {DashboardChartsProps} props containing the overall and dimensional scores.
+ */
 export function DashboardCharts({
     overall,
     dimensionScores,

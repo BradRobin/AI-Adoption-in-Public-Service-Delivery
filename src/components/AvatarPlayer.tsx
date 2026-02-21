@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Volume2, VolumeX, Mic, MicOff } from 'lucide-react'
 
+/**
+ * AvatarCharacter Component
+ * A purely CSS/SVG based rendering of a digital avatar intended to visually simulate "talking".
+ * Serves as a cost-effective placeholder for fully rendered video avatars (e.g. D-ID, HeyGen).
+ *
+ * @param {boolean} isTalking Determines if the mouth and eyes should animate.
+ */
 // Placeholder "Avatar" states. In a real app, these would be:
 // 1. URLs to HeyGen/D-ID API streaming videos
 // 2. Or simplified looping MP4s (e.g. /videos/avatar-idle.mp4, /videos/avatar-talking.mp4)
@@ -49,12 +56,22 @@ const AvatarCharacter = ({ isTalking }: { isTalking: boolean }) => {
     )
 }
 
+/**
+ * Props for the AvatarPlayer component.
+ */
 interface AvatarPlayerProps {
     textToSpeak: string | null
     isVisible: boolean
     onClose: () => void
 }
 
+/**
+ * AvatarPlayer Component
+ * Displays a floating digital avatar that visually "speaks" using the browser's Web Speech API.
+ * The component synchronizes the text-to-speech audio with simple CSS animations on the avatar.
+ *
+ * @param {AvatarPlayerProps} props The component props.
+ */
 export function AvatarPlayer({ textToSpeak, isVisible, onClose }: AvatarPlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(false)

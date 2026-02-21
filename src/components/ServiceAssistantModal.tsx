@@ -6,8 +6,14 @@ import { X, Send, Bot, AlertTriangle, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
+/**
+ * Identifier for the specific type of service action the assistant should handle.
+ */
 export type ServiceAction = 'health_triage' | 'gig_proposal' | 'transport_guide' | 'water_support' | 'education_advisor'
 
+/**
+ * Props for the ServiceAssistantModal component.
+ */
 interface ServiceAssistantModalProps {
     isOpen: boolean
     onClose: () => void
@@ -15,6 +21,9 @@ interface ServiceAssistantModalProps {
     serviceTitle: string
 }
 
+/**
+ * Represents a single standard chat message in the modal context.
+ */
 type Message = {
     role: 'user' | 'assistant'
     content: string
@@ -44,9 +53,17 @@ Rules:
     education: `You are a HELB Loan Advisor. Help students apply for loans, understand repayment terms, and check bursary eligibility.`
 }
 
+/**
+ * Default fallback prompt used when a specific service ID prompt map is not found.
+ */
 // Default prompt if ID not found
 const DEFAULT_PROMPT = `You are a helpful assistant for Kenyan public services. Answer questions concisely about this service.`
 
+/**
+ * ServiceAssistantModal Component
+ * Displays a specialized, focused chat interface (typically powered by a local AI) tailored
+ * to a specific public service (e.g., Health Triage, Ajira Digital Proposal Writing).
+ */
 export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle }: ServiceAssistantModalProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')

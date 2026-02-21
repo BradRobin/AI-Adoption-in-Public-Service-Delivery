@@ -24,6 +24,9 @@ import {
   type ToeSection,
 } from '@/data/toe-questions'
 
+/**
+ * Maps TOE section keys to human-readable labels for UI display.
+ */
 // Maps TOE section keys to human-readable labels
 const SECTION_LABELS: Record<ToeSection, string> = {
   technological: 'Technological Factors',
@@ -31,6 +34,9 @@ const SECTION_LABELS: Record<ToeSection, string> = {
   environmental: 'Environmental Factors',
 }
 
+/**
+ * Defines the strict presentation order of the TOE dimensions in the assessment.
+ */
 // Order in which sections are presented
 const SECTION_ORDER: ToeSection[] = [
   'technological',

@@ -5,6 +5,9 @@ import { Newspaper, ExternalLink, RefreshCw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 
+/**
+ * Represents a single news item sourced from the RSS feed.
+ */
 type NewsItem = {
     title: string
     link: string
@@ -12,6 +15,11 @@ type NewsItem = {
     source: string
 }
 
+/**
+ * NewsFeed Component
+ * Fetches and displays the latest AI and Tech news relevant to Kenya.
+ * Uses the internal /api/news route which acts as a proxy/parser for Google News RSS.
+ */
 export function NewsFeed() {
     const [news, setNews] = useState<NewsItem[]>([])
     const [isLoading, setIsLoading] = useState(true)

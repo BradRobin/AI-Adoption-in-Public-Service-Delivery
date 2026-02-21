@@ -18,6 +18,9 @@ type ChatMessage = {
   content: string
 }
 
+/**
+ * Defines the structure of Server-Sent Events (SSE) chunks returned by the chat API.
+ */
 // SSE event types for handling stream chunks
 type SseEvent =
   | { event: 'open'; data: string }
@@ -26,6 +29,13 @@ type SseEvent =
   | { event: 'error'; data: string }
   | { event: 'done'; data: string }
 
+/**
+ * Parses raw text from an SSE stream into structured event objects.
+ * Handles the standard SSE format, accounting for newlines and data chunking.
+ *
+ * @param {string} raw The raw streaming string chunk.
+ * @returns {SseEvent[]} An array of parsed Server-Sent Events.
+ */
 function parseSseEvents(raw: string): SseEvent[] {
   // Minimal SSE parser for our server format: "event: X\ndata: Y\n\n"
   const events: SseEvent[] = []

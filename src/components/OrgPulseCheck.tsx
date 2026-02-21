@@ -6,6 +6,9 @@ import { Search, Loader2, Building, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
+/**
+ * The structured shape of the digital maturity assessment returned by the AI.
+ */
 type AssessmentResult = {
     level: 'Low' | 'Medium' | 'High' | 'Unknown'
     insights: string[]
@@ -13,6 +16,11 @@ type AssessmentResult = {
     disclaimer: string
 }
 
+/**
+ * OrgPulseCheck Component
+ * Allows users to enter an organization name to receive an AI-generated,
+ * real-time estimation of their digital maturity based on the TOE framework.
+ */
 export function OrgPulseCheck() {
     const [orgName, setOrgName] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -194,8 +202,8 @@ export function OrgPulseCheck() {
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-white/50">Estimated Maturity</span>
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${result.level === 'High' ? 'bg-green-500/20 text-green-400' :
-                                        result.level === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                                            'bg-red-500/20 text-red-400'
+                                    result.level === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-red-500/20 text-red-400'
                                     }`}>
                                     {result.level}
                                 </span>

@@ -1,10 +1,20 @@
+/**
+ * Defines the main dimensions of the TOE framework (Technological, Organizational, Environmental).
+ */
 export type ToeSection = 'technological' | 'organizational' | 'environmental'
 
+/**
+ * Represents a single question within the TOE assessment.
+ */
 export type ToeQuestion = {
   id: string
   text: string
 }
 
+/**
+ * The structured dataset of questions utilized in the TOE AI Readiness Assessment.
+ * Categorized explicitly by the three dimensions of the framework.
+ */
 // Define the TOE data structure
 export const TOE_QUESTIONS: Record<ToeSection, ToeQuestion[]> = {
   technological: [

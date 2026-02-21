@@ -3,11 +3,19 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
+/**
+ * Custom event interface for the PWA beforeinstallprompt event.
+ */
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+/**
+ * InstallPrompt Component
+ * Listens for the browser's PWA install prompt event and displays a custom button
+ * allowing the user to install the application to their home screen or desktop.
+ */
 export function InstallPrompt() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
     const [isVisible, setIsVisible] = useState(false)

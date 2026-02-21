@@ -14,6 +14,12 @@ import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
 
+/**
+ * Main dashboard view for authenticated users.
+ * Aggregates various insights including market stats, organizational pulse check,
+ * news feed, and personal assessment scores. Provides entry points to take
+ * assessments or chat with the AI assistant.
+ */
 export default function Dashboard() {
     const router = useRouter()
     const [session, setSession] = useState<Session | null>(null)

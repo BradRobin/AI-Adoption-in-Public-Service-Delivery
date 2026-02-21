@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+/**
+ * Mock data array used to simulate external API records or varying market stats.
+ * In a production environment, this data would likely be sourced from an explicit data service.
+ */
 // Mock Data Source - In a real app, this would fetch from an external API or RSS feed
 const MOCK_DATA = [
     {
@@ -17,8 +21,18 @@ const MOCK_DATA = [
     },
 ]
 
+/**
+ * Run this API route on the Edge runtime for lower latency.
+ */
 export const runtime = 'edge'
 
+/**
+ * Handles GET requests to probabilistically update the AI adoption market stats simulating live data changes.
+ * This is meant to periodically simulate a changing data source for demonstration purposes.
+ *
+ * @param {Request} req The incoming HTTP request object.
+ * @returns {Promise<NextResponse>} JSON response indicating the chosen stat update.
+ */
 export async function GET(req: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

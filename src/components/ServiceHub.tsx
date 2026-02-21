@@ -13,6 +13,10 @@ import {
 import { useState } from 'react'
 import { ServiceAssistantModal } from './ServiceAssistantModal'
 
+/**
+ * Defines the static list of public services available in the hub.
+ * Each entry configures the display title, description, external link, and UI styling.
+ */
 const services = [
     {
         id: 'health',
@@ -61,6 +65,11 @@ const services = [
     }
 ]
 
+/**
+ * ServiceHub Component
+ * Displays a grid of available Kenyan public services.
+ * Allows users to either visit the external portal directly or open a specialized AI assistant.
+ */
 export function ServiceHub() {
     const [selectedService, setSelectedService] = useState<{ id: string; title: string } | null>(null)
 

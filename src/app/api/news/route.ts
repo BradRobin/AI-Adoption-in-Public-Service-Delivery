@@ -1,6 +1,17 @@
 
+/**
+ * Route configuration to ensure this API endpoint is always dynamically rendered.
+ * This prevents Next.js from caching the RSS feed responses.
+ */
 export const dynamic = 'force-dynamic'
 
+/**
+ * Handles GET requests to fetch recent AI-related news for Kenya.
+ * It primarily attempts to fetch data from the Google News RSS feed.
+ * If that fails, it falls back to providing static mock news data.
+ *
+ * @returns {Promise<Response>} A JSON response containing an array of news items.
+ */
 export async function GET() {
     try {
         // Fetch RSS feed for "AI Kenya" from Google News
@@ -45,6 +56,7 @@ export async function GET() {
         return Response.json({ news: items })
 
     } catch (error) {
+        // Log the error for server-side debugging
         console.error('News fetch error:', error)
 
         // Fallback mock data if fetch fails (e.g. rate limit or network issue)

@@ -9,6 +9,9 @@ import {
 } from 'recharts'
 import type { DimensionScores } from '@/lib/toe-scoring'
 
+/**
+ * Props for the ToeResults component.
+ */
 type ToeResultsProps = {
   overall: number
   dimensionScores: DimensionScores

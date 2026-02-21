@@ -7,9 +7,16 @@ import { supabase } from '@/lib/supabase/client'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 
+/**
+ * The main Landing Page component for the PARP application.
+ * Handles initial user entry, displays the hero section, and checks for existing user sessions
+ * to automatically redirect authenticated users to the dashboard.
+ */
 export default function LandingPage() {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
+
+  // State to manage the loading spinner while checking auth status
   const [isLoading, setIsLoading] = useState(true)
 
   // Effect: Check for active session. If logged in, redirect to dashboard.

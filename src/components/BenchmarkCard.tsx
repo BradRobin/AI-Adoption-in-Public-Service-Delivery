@@ -3,10 +3,19 @@
 import { motion } from 'framer-motion'
 import { TrendingUp, Award } from 'lucide-react'
 
+/**
+ * Props for the BenchmarkCard component.
+ */
 interface BenchmarkCardProps {
     userScore: number
 }
 
+/**
+ * BenchmarkCard Component
+ * Displays the user's overall AI adoption readiness score compared visually against an established national average.
+ *
+ * @param {BenchmarkCardProps} props - The component props containing the user's score to evaluate.
+ */
 export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
     const INDUSTRY_AVG = 42.1 // Based on DataReportal 2024 Kenya Digital Adoption
     const isAboveAvg = userScore >= INDUSTRY_AVG

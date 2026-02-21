@@ -8,13 +8,22 @@ const SECTION_ORDER: ToeSection[] = [
   'environmental',
 ]
 
+/**
+ * Dictionary mapping each TOE dimension to its computed average score (0-5 scale).
+ */
 export type DimensionScores = Record<ToeSection, number>
 
+/**
+ * Result structure returned by the scoring system after evaluating a user's answers.
+ */
 export type ToeScores = {
   overall: number
   dimensionScores: DimensionScores
 }
 
+/**
+ * Maps the unique string ID of an assessment question to the user's numeric response rating (1-5).
+ */
 export type ToeFormValues = Record<string, number>
 
 /**

@@ -1,16 +1,26 @@
 import { createClient } from '@supabase/supabase-js'
 
+/**
+ * Represents a single message in the chat conversation.
+ */
 type ChatMessage = {
   role: 'user' | 'assistant'
   content: string
 }
 
+/**
+ * Defines the expected JSON payload for the chat endpoint.
+ */
 type ChatRequestBody = {
   messages: ChatMessage[]
   provider?: string
   systemPrompt?: string
 }
 
+/**
+ * System prompt defining the AI's persona, language preferences, and base context.
+ * Used when no custom system prompt is provided.
+ */
 // System prompt defining the AI's persona and language preferences
 const SYSTEM_PROMPT =
   `You are PARP AI - a savvy, knowledgeable Kenyan digital advisor. You specialize in AI adoption for public services, freelancing (online writing, coding), and the digital economy in Kenya.
@@ -38,6 +48,12 @@ function sseEncode(event: string, data: string) {
   return `event: ${event}\ndata: ${safeData}\n\n`
 }
 
+/**
+ * Extracts the user's bearer token from the 'Authorization' header.
+ *
+ * @param {Request} req The incoming request.
+ * @returns {string | null} The extracted token or null if not found.
+ */
 function getBearerToken(req: Request) {
   const header = req.headers.get('authorization') ?? req.headers.get('Authorization')
   if (!header) return null
@@ -45,6 +61,12 @@ function getBearerToken(req: Request) {
   return match?.[1]?.trim() ?? null
 }
 
+/**
+ * Validates the presence of an active user session by checking the provided auth token against Supabase.
+ *
+ * @param {Request} req The incoming API request.
+ * @returns {Promise<{ ok: boolean, status?: number, message?: string, token?: string, userId?: string }>} Validation result.
+ */
 async function requireUser(req: Request) {
   const token = getBearerToken(req)
   if (!token) return { ok: false as const, status: 401, message: 'Missing auth token.' }
@@ -86,6 +108,16 @@ function normalizeMessages(messages: ChatMessage[]) {
   return cleaned.slice(Math.max(0, cleaned.length - MAX_TURNS))
 }
 
+/**
+ * Initiates an interaction with an Ollama-compatible LLM endpoint and streams the response.
+ *
+ * @param {Object} opts Configuration options for streaming from Ollama.
+ * @param {string} opts.baseUrl The URL base path for the Ollama inference server.
+ * @param {string} opts.model The model identifier to use (e.g. `gemma2:2b`).
+ * @param {Array} opts.messages The conversation history including system prompt.
+ * @param {Function} opts.onToken Callback function triggered per received text chunk.
+ * @returns {Promise<void>} Resolves when streaming is complete.
+ */
 async function streamFromOllama(opts: {
   baseUrl: string
   model: string
@@ -140,6 +172,16 @@ async function streamFromOllama(opts: {
   }
 }
 
+/**
+ * Initiates an interaction with an OpenAI-compatible API endpoint and streams the response via SSE.
+ *
+ * @param {Object} opts Configuration options for streaming from OpenAI.
+ * @param {string} opts.apiKey The authorization API key for OpenAI.
+ * @param {string} opts.model The model identifier to use (e.g. `gpt-4o-mini`).
+ * @param {Array} opts.messages The conversation history.
+ * @param {Function} opts.onToken Callback function triggered for each received text chunk.
+ * @returns {Promise<void>} Resolves when the stream reaches completion.
+ */
 async function streamFromOpenAI(opts: {
   apiKey: string
   model: string
@@ -200,8 +242,20 @@ async function streamFromOpenAI(opts: {
   }
 }
 
+/**
+ * Hint to Next.js that this API route benefits from Node.js runtime bindings.
+ */
 export const runtime = 'nodejs'
 
+/**
+ * Main POST handler for the chat inference API endpoint.
+ * It authenticates the user, reads the requested chat history, provisions either
+ * Ollama or OpenAI as an LLM backend based on user request/fallback configuration,
+ * and streams the tokens back to the client using Server-Sent Events (SSE).
+ *
+ * @param {Request} req The incoming HTTP POST request.
+ * @returns {Promise<Response>} The streaming response data or an error construct.
+ */
 export async function POST(req: Request) {
   const auth = await requireUser(req)
   if (!auth.ok) {
