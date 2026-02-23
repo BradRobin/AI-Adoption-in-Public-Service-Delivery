@@ -56,9 +56,12 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // Protect the /admin route
-    if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Protect the /admin and /api/admin routes
+    if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/api/admin')) {
         if (!user) {
+            if (request.nextUrl.pathname.startsWith('/api/admin')) {
+                return new NextResponse('Unauthorized: Must be logged in', { status: 401 })
+            }
             // User is not logged in, redirect to login
             const url = request.nextUrl.clone()
             url.pathname = '/login'
@@ -75,10 +78,36 @@ export async function middleware(request: NextRequest) {
         }
 
         if (role !== 'admin') {
+            if (request.nextUrl.pathname.startsWith('/api/admin')) {
+                return new NextResponse('Forbidden: Admins Only', { status: 403 })
+            }
             // Logged in but not an admin, redirect to dashboard
             const url = request.nextUrl.clone()
             url.pathname = '/dashboard'
             return NextResponse.redirect(url)
+        }
+
+        // --- Audit Logging ---
+        // Log page views if the request is for an HTML page (prevents logging RSC network calls/prefetching twice)
+        if (
+            request.method === 'GET' &&
+            request.nextUrl.pathname.startsWith('/admin') &&
+            request.headers.get('accept')?.includes('text/html')
+        ) {
+            // Log this action asynchronously so it doesn't block the response
+            try {
+                await supabase.from('admin_logs').insert({
+                    admin_id: user.id,
+                    action: 'view_page',
+                    target_id: request.nextUrl.pathname,
+                    details: {
+                        search: request.nextUrl.search,
+                        userAgent: request.headers.get('user-agent')
+                    }
+                })
+            } catch (e) {
+                console.error('Failed to write middleware audit log:', e)
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { logAdminAction } from '@/lib/adminLogger'
 
 export async function toggleUserBanStatus(userId: string, currentBanStatus: boolean) {
     const cookieStore = await cookies()
@@ -46,6 +47,10 @@ export async function toggleUserBanStatus(userId: string, currentBanStatus: bool
         console.error('Failed to toggle ban status:', error)
         throw new Error('Database error updating ban status')
     }
+
+    // Log the action to the audit trail
+    const actionName = currentBanStatus ? 'activate_user' : 'ban_user'
+    await logAdminAction(user.id, actionName, userId, { previousState: currentBanStatus })
 
     // Invalidate the users cache so the table refreshes
     revalidatePath('/admin/users')
