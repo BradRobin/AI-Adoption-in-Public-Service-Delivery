@@ -61,16 +61,22 @@ export default function AdminReAuth() {
             }
 
             // Verify live DB role after login success
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', authData.user.id)
                 .single()
 
+            if (profileError) {
+                console.error("Profile fetch error:", profileError)
+                throw new Error(`DB Error: ${profileError.message}`)
+            }
+
             if (profile?.role === 'admin') {
                 // Access Granted
                 router.replace('/admin')
             } else {
+                console.warn(`Rejection triggered. Fetched role was: "${profile?.role}"`)
                 // Access Denied! Render rejection screen.
                 triggerRejectionTimer()
             }
