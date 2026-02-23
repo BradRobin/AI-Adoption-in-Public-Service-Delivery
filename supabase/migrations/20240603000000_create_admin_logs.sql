@@ -16,14 +16,16 @@ create index if not exists admin_logs_created_at_idx on public.admin_logs(create
 alter table public.admin_logs enable row level security;
 
 -- Admin read policy
+drop policy if exists "Admins can view admin logs" on public.admin_logs;
 create policy "Admins can view admin logs"
   on public.admin_logs for select
   using (
-    (select role from public.profiles where id = auth.uid()) = 'admin'
+    public.is_admin()
   );
 
 -- Backend Insert Policy
 -- Only auth'd users can insert logs broadly, but we rely on application logic to supply valid IDs
+drop policy if exists "Service or Auth can insert admin logs" on public.admin_logs;
 create policy "Service or Auth can insert admin logs"
   on public.admin_logs for insert
   with check (auth.uid() = admin_id);
