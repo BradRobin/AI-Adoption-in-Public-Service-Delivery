@@ -13,6 +13,7 @@ import { ServiceHub } from '@/components/ServiceHub'
 import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
+import { NavigationMenu } from '@/components/NavigationMenu'
 
 /**
  * Main dashboard view for authenticated users.
@@ -282,12 +283,7 @@ export default function Dashboard() {
                     <span className="hidden text-sm text-white/60 sm:inline-block">
                         {session.user?.email}
                     </span>
-                    <button
-                        onClick={handleSignOut}
-                        className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10"
-                    >
-                        Sign Out
-                    </button>
+                    <NavigationMenu />
                 </div>
             </nav>
 

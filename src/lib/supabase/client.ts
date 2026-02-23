@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 /**
  * The public URL for the Supabase project, provided via environment variables.
@@ -14,6 +14,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 /**
  * Export a globally accessible singleton instance of the Supabase client.
- * This client is configured to interact with the project's database and auth services.
+ * This client uses `@supabase/ssr` to automatically sync the user session into browser cookies
+ * so that Middleware and Server Components can verify authentication safely.
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)

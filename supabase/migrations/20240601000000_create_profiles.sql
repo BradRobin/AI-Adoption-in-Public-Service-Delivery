@@ -49,7 +49,7 @@ create trigger on_auth_user_created
 
 -- Backfill existing users (Optional: run if users already exist)
 insert into public.profiles (id, email, role)
-select id, email, raw_user_meta_data->>'role' as role
+select id, email, coalesce(raw_user_meta_data->>'role', 'user') as role
 from auth.users
 where id not in (select id from public.profiles)
 on conflict do nothing;

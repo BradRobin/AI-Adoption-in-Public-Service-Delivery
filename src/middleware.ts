@@ -68,16 +68,15 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(url)
         }
 
-        // Role check logic: We'll assume the role is in user_metadata first
-        // Fallback to checking the profile if user_metadata is empty
-        let role = user.user_metadata?.role
+        // Role check logic: We MUST check `profiles` because user_metadata is stale 
+        // if the role was granted manually via the SQL dashboard after signup.
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
 
-        if (!role) {
-            const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-            role = data?.role
-        }
+        let role = profile?.role
 
-        if (role !== 'admin') {
+        // If not an admin, we redirect them to the dashboard, EXCEPT if they are trying to access the 
+        // /admin/auth re-login gate, in which case we let them through so the explicit client-side rejection UI can render.
+        if (role !== 'admin' && request.nextUrl.pathname !== '/admin/auth') {
             if (request.nextUrl.pathname.startsWith('/api/admin')) {
                 return new NextResponse('Forbidden: Admins Only', { status: 403 })
             }
