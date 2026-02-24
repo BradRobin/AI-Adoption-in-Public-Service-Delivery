@@ -14,6 +14,7 @@ import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
 import { NavigationMenu } from '@/components/NavigationMenu'
+import { X } from 'lucide-react'
 
 /**
  * Main dashboard view for authenticated users.
@@ -85,10 +86,23 @@ export default function Dashboard() {
                 // Simulate "Weekly Check" notification once on load if assessment exists
                 // In production, this would be triggered by a real background cron job
                 setTimeout(() => {
-                    toast.success('Weekly Assessment Complete: Your score is consistent.', {
-                        icon: '📅',
-                        duration: 4000
-                    })
+                    toast.success(
+                        (t) => (
+                            <div className="flex items-center gap-2">
+                                <span>Weekly Assessment Complete: Your score is consistent.</span>
+                                <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="ml-2 rounded-full p-1 text-black/40 hover:bg-black/10 dark:text-white/40 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ),
+                        {
+                            icon: '📅',
+                            duration: 4000,
+                        }
+                    )
                 }, 1500)
             }
         }
