@@ -9,7 +9,7 @@ import type { Session } from '@supabase/supabase-js'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
-import { AvatarPlayer } from '@/components/AvatarPlayer'
+import AvatarAdvisor from '@/components/AvatarAdvisor'
 import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -525,10 +525,11 @@ export default function ChatPage() {
         </p>
 
         {/* Avatar Player Overlay */}
-        <AvatarPlayer
-          textToSpeak={avatarText}
+        <AvatarAdvisor
+          responseText={avatarText}
           isVisible={showAvatar}
           onClose={() => setShowAvatar(false)}
+          isListening={isThinking}
         />
       </main>
     </div>
