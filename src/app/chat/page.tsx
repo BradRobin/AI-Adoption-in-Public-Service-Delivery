@@ -11,6 +11,7 @@ import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import { AvatarPlayer } from '@/components/AvatarPlayer'
 import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 type ChatMessage = {
   id: string
@@ -433,7 +434,15 @@ export default function ChatPage() {
                       : 'rounded-bl-sm bg-white/10 text-white shadow-sm border border-white/5'
                       }`}
                   >
-                    {message.content}
+                    {isCurrentlyStreaming && message.content === '' ? (
+                      <div className="flex items-center gap-1 h-5 px-1">
+                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
+                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
+                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+                      </div>
+                    ) : (
+                      message.content
+                    )}
                   </div>
                   {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
                     <div className="mt-2 flex items-center gap-3 px-2 text-white/40">
