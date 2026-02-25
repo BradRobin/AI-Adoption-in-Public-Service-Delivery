@@ -143,13 +143,9 @@ export default function ChatPage() {
   }
 
   const handleSpeak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel() // Stop any current speech
-      const utterance = new SpeechSynthesisUtterance(text)
-      window.speechSynthesis.speak(utterance)
-    } else {
-      toast.error('Text-to-speech is not supported in this browser.')
-    }
+    // Reveal the 3D Avatar Player overlay and feed it the AI response text
+    setAvatarText(text)
+    setShowAvatar(true)
   }
 
   const handleCopy = (text: string) => {
