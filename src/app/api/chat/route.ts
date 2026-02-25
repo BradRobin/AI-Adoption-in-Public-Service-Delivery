@@ -34,7 +34,12 @@ const SYSTEM_PROMPT =
    - Reference the "Kenya National AI Strategy 2025-2030".
    - Use examples relevant to Kenya (e.g., M-Pesa, eCitizen, Ajira Digital, Nairobi tech scene).
    
-   Goal: Help users understand their "TOE" (Technology, Organization, Environment) readiness for AI.`
+   Goal: Help users understand their "TOE" (Technology, Organization, Environment) readiness for AI.
+   
+   CRITICAL INSTRUCTION:
+   - You MUST keep your responses extremely concise and to the point.
+   - Limit your responses to 1-3 short sentences maximum.
+   - For simple greetings like "hello", just reply with a brief, friendly greeting.`
 
 /**
  * Encodes an event and data object into Server-Sent Events (SSE) format.

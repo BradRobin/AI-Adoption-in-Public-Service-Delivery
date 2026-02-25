@@ -10,7 +10,7 @@ import type { Session } from '@supabase/supabase-js'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import { AvatarPlayer } from '@/components/AvatarPlayer'
-import { Video, VideoOff } from 'lucide-react'
+import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2 } from 'lucide-react'
 
 type ChatMessage = {
   id: string
@@ -139,6 +139,21 @@ export default function ChatPage() {
     await supabase.auth.signOut()
     toast.success('You have been signed out.')
     router.replace('/login')
+  }
+
+  const handleSpeak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel() // Stop any current speech
+      const utterance = new SpeechSynthesisUtterance(text)
+      window.speechSynthesis.speak(utterance)
+    } else {
+      toast.error('Text-to-speech is not supported in this browser.')
+    }
+  }
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success('Response copied to clipboard')
   }
 
   const handleSend = async (event: FormEvent) => {
@@ -388,7 +403,7 @@ export default function ChatPage() {
 
           <section
             ref={scrollContainerRef}
-            className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+            className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
           >
             {messages.length === 0 && !isThinking && (
               <div className="mt-6 rounded-xl border border-dashed border-white/15 bg-black/40 px-4 py-3 text-xs text-white/70 md:text-sm">
@@ -403,22 +418,42 @@ export default function ChatPage() {
               </div>
             )}
 
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-              >
+            {messages.map((message, index) => {
+              const isLastMessage = index === messages.length - 1
+              const isCurrentlyStreaming = isThinking && isLastMessage && message.role === 'assistant'
+
+              return (
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm md:text-base ${message.role === 'user'
-                    ? 'rounded-br-sm bg-green-500 text-black'
-                    : 'rounded-bl-sm bg-black/70 text-white'
-                    }`}
+                  key={message.id}
+                  className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} mb-2`}
                 >
-                  {message.content}
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${message.role === 'user'
+                      ? 'rounded-br-sm bg-green-500 text-black'
+                      : 'rounded-bl-sm bg-white/10 text-white shadow-sm border border-white/5'
+                      }`}
+                  >
+                    {message.content}
+                  </div>
+                  {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
+                    <div className="mt-2 flex items-center gap-3 px-2 text-white/40">
+                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Helpful">
+                        <ThumbsUp size={16} />
+                      </button>
+                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Not Helpful">
+                        <ThumbsDown size={16} />
+                      </button>
+                      <button onClick={() => handleCopy(message.content)} className="hover:text-white transition-colors" title="Copy">
+                        <Copy size={16} />
+                      </button>
+                      <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud">
+                        <Volume2 size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </section>
 
           <form
