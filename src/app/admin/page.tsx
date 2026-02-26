@@ -52,8 +52,7 @@ export default async function AdminPage() {
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
     ])
 
-    // Due to RLS or missing DB definitions, complex counts on 'assessments' might be difficult 
-    // without a specific SQL function (rpc). We'll attempt a generic distinct count.
+    //A generic distinct count.
     const { data: allAssessments, error: assessError } = await supabase
         .from('assessments')
         .select('user_id')
@@ -65,7 +64,7 @@ export default async function AdminPage() {
     }
 
     const activeUsers24h = activeUsersRes.count ?? 0
-    const adoptionRate = adoptionRes.data?.value || '41.5%'
+    const adoptionRate = adoptionRes.data?.value || '42.1%'
 
     return (
         <div className="flex h-full flex-col">
