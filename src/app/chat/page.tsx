@@ -147,7 +147,7 @@ export default function ChatPage() {
     setAvatarText(text)
     setShowAvatar(true)
   }
-
+  // handles the copy functionality
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Response copied to clipboard')
@@ -258,7 +258,7 @@ export default function ChatPage() {
         }
       }
 
-      // If the model streamed nothing (rare), show a minimal message.
+      // If the model streamed nothing, show a minimal message.
       setMessages((prev) =>
         prev.map((m) =>
           m.id === placeholderId && m.content.trim().length === 0
