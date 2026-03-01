@@ -22,7 +22,7 @@ const services = [
         id: 'health',
         title: 'Healthcare (SHA)',
         description: 'Access the Social Health Authority for registration, claims, and universal health coverage services.',
-        link: 'https://sha.go.ke/',
+        link: 'https://sha.ecitizen.go.ke/',
         icon: Stethoscope,
         color: 'text-red-400',
         bg: 'bg-red-400/10'
@@ -31,7 +31,7 @@ const services = [
         id: 'transport',
         title: 'NTSA Transport',
         description: 'Manage driving licenses, vehicle inspections, and road safety compliance via NTSA TIMS.',
-        link: 'https://timsvirl.ntsa.go.ke/',
+        link: 'https://ntsa.ecitizen.go.ke/',
         icon: CarFront,
         color: 'text-blue-400',
         bg: 'bg-blue-400/10'
@@ -40,7 +40,7 @@ const services = [
         id: 'water',
         title: 'Water Services',
         description: 'Pay water bills, apply for new connections, and report issues to Nairobi City Water.',
-        link: 'https://www.nairobiwater.co.ke/',
+        link: 'https://nairobiwater.ecitizen.go.ke/',
         icon: Droplets,
         color: 'text-cyan-400',
         bg: 'bg-cyan-400/10'
@@ -49,7 +49,7 @@ const services = [
         id: 'education',
         title: 'Education (HELB)',
         description: 'Apply for student loans, bursaries, and manage repayment through the Higher Education Loans Board.',
-        link: 'https://portal.helb.co.ke/',
+        link: 'https://helb.ecitizen.go.ke/',
         icon: GraduationCap,
         color: 'text-yellow-400',
         bg: 'bg-yellow-400/10'
