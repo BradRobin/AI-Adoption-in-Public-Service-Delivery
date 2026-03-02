@@ -291,6 +291,12 @@ export default function AssessPage() {
           Chat
         </Link>
         <Link
+          href="/profile"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Profile
+        </Link>
+        <Link
           href="/privacy"
           className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
         >

@@ -366,6 +366,12 @@ export default function ChatPage() {
           Chat
         </Link>
         <Link
+          href="/profile"
+          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+        >
+          Profile
+        </Link>
+        <Link
           href="/privacy"
           className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
         >
@@ -408,9 +414,7 @@ export default function ChatPage() {
                   Welcome to the AI Readiness Chat.
                 </p>
                 <p className="mt-1">
-                  Start by asking about your current capabilities, risks, or TOE
-                  factors. This prototype will respond with a simple placeholder
-                  message for now.
+                  Ask about your AI readiness, try predicting service times (e.g. &quot;Estimate queue time at Huduma Center&quot;), or report issues directly starting with &quot;Report issue:&quot;. Responses are personalized based on your role and location.
                 </p>
               </div>
             )}

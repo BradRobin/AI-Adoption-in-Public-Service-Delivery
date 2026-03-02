@@ -12,6 +12,7 @@ import {
     Shield,
     ShieldAlert,
     LogOut,
+    User,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
@@ -113,6 +114,7 @@ export function NavigationMenu() {
                         <div className="flex-1 overflow-y-auto p-4 space-y-1">
                             <div onClick={handleClose}><MenuItem href="/chat" icon={MessageSquare} label="Chat Assistant" /></div>
                             <div onClick={handleClose}><MenuItem href="/assess" icon={ClipboardCheck} label="Self Assessment" /></div>
+                            <div onClick={handleClose}><MenuItem href="/profile" icon={User} label="Profile Settings" /></div>
 
                             <div className="my-4 h-px w-full bg-white/5" />
 

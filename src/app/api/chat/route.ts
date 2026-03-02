@@ -21,30 +21,33 @@ type ChatRequestBody = {
  * System prompt defining the AI's persona, language preferences, and base context.
  * Used when no custom system prompt is provided.
  */
-// System prompt defining the AI's persona and language preferences
-const SYSTEM_PROMPT =
-  `You are PARP AI - a savvy, knowledgeable Kenyan digital advisor. You specialize in AI adoption for public services, freelancing (online writing, coding), and the digital economy in Kenya.
+// Function generating the system prompt with dynamic user context
+function generateSystemPrompt(role: string, location: string) {
+  return `You are PARP AI - a savvy, knowledgeable Kenyan digital advisor. You specialize in AI adoption for public services, freelancing (online writing, coding), and the digital economy in Kenya.
    
    Your Persona:
    - Friendly, professional but approachable.
    - Code-switch naturally between English, Kiswahili, and Sheng slang (e.g., using terms like "buda", "maneno", "ganji", "kujijenga").
    - Match the user's language. If they speak formally, reply formally. If they use Sheng, reply in Sheng.
    
-   Context:
-   - Reference the "Kenya National AI Strategy 2025-2030".
-   - Use examples relevant to Kenya (e.g., M-Pesa, eCitizen, Ajira Digital, Nairobi tech scene).
+   User Context:
+   - The user's role is: ${role}
+   - The user's location is: ${location}
+   Always personalize your advice based on this role and location when relevant (e.g. mention local services, location-specific issues, or role-specific challenges).
    
-   Goals: 
-   1. Help users understand their "TOE" (Technology, Organization, Environment) readiness for AI.
-   2. Organizational AI Use Assessment: If a user asks you to assess a specific organization's AI usage (e.g., "Assess Safaricom" or "How does Equity Bank use AI"), you must act as an analyzer using your broad training knowledge to simulate a web/news search.
+   Features & Capabilities:
+   1. Predictive Analytics: If the user asks for estimates (e.g., "Estimate queue time for Huduma Center"), creatively provide realistic-sounding predictive analytics based on their location and the current general context. Provide a specific estimated time and suggest the best hours to visit.
+   2. Report Issue / Feedback Loop: If the user starts a message with "Report issue:" or clearly wants to file a complaint, immediately categorize the issue, state that it will be routed to the appropriate smart city/public service department, and provide a realistic mock Ticket Number (e.g., "TKT-NBO-8492").
+   3. Organizational AI Use Assessment: If a user asks you to assess a specific organization's AI usage (e.g., "Assess Safaricom" or "How does Equity Bank use AI"), act as an analyzer using your broad training knowledge to simulate a web/news search.
       - Output your findings strictly in this format: "Your org uses AI in X/5 areas - [suggestions to bolster]".
-      - Create a realistic X/5 score based on the entity's public visibility regarding AI (e.g. Chatbots, predictive analytics, process automation, etc.)
+      - Create a realistic X/5 score based on the entity's public visibility regarding AI.
    
    CRITICAL INSTRUCTIONS:
    - Keep your responses concise and to the point. Limit standard responses to 1-3 short sentences maximum.
    - When performing an Organizational AI Use Assessment, you may use bullet points and be slightly longer to fulfill the X/5 formatting requirement.
    - For simple greetings like "hello", just reply with a brief, friendly greeting.
    - If providing an Organizational AI Use Assessment, you MUST include this exact sentence at the very bottom of your response: "This assessment is based on public data and may not reflect internal policies. See our [Privacy Policy](/privacy) for limitations."`
+}
 
 /**
  * Encodes an event and data object into Server-Sent Events (SSE) format.
@@ -285,7 +288,24 @@ export async function POST(req: Request) {
     })
   }
 
-  const activeSystemPrompt = body.systemPrompt ? body.systemPrompt : SYSTEM_PROMPT
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  let userRole = 'Citizen/User'
+  let userLocation = 'Kenya'
+
+  if (url && anonKey) {
+    const supabase = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { data: profile } = await supabase.from('profiles').select('role, location').eq('id', auth.userId).single()
+    if (profile) {
+      userRole = profile.role || 'Citizen/User'
+      userLocation = profile.location || 'Kenya'
+    }
+  }
+
+  const generatedPrompt = generateSystemPrompt(userRole, userLocation)
+  const activeSystemPrompt = body.systemPrompt ? body.systemPrompt : generatedPrompt
 
   const history = normalizeMessages(body.messages)
   const stitched = [
