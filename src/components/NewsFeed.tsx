@@ -48,7 +48,7 @@ export function NewsFeed() {
             <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                     <Newspaper className="text-orange-400" />
-                    AI & Tech News (Kenya)
+                    AI & Public Service News
                 </h2>
                 <button
                     onClick={fetchNews}
@@ -99,7 +99,7 @@ export function NewsFeed() {
             </div>
 
             <a
-                href="https://news.google.com/search?q=AI+Kenya+Technology"
+                href="https://news.google.com/search?q=AI+Kenya+public+services"
                 target="_blank"
                 rel="noreferrer"
                 className="mt-4 block text-center text-xs text-white/30 hover:text-white hover:underline"

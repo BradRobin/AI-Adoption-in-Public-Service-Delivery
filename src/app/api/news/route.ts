@@ -14,9 +14,9 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET() {
     try {
-        // Fetch RSS feed for "AI Kenya" from Google News
+        // Fetch RSS feed for "AI Kenya public services" from Google News
         // hl=en-KE&gl=KE&ceid=KE:en ensures Kenya-specific news
-        const feedUrl = 'https://news.google.com/rss/search?q=AI+Technology+Kenya&hl=en-KE&gl=KE&ceid=KE:en'
+        const feedUrl = 'https://news.google.com/rss/search?q=AI+Kenya+public+services&hl=en-KE&gl=KE&ceid=KE:en'
         const res = await fetch(feedUrl)
 
         if (!res.ok) {
@@ -69,13 +69,13 @@ export async function GET() {
                     source: 'Daily Nation'
                 },
                 {
-                    title: 'How AI is transforming Nairobi traffic management',
+                    title: 'How AI is transforming Nairobi water and traffic management',
                     link: 'https://techcrunch.com',
                     pubDate: 'Yesterday',
                     source: 'TechCrunch'
                 },
                 {
-                    title: 'Safaricom announces new AI-powered M-Pesa features',
+                    title: 'Government announces new AI-powered eCitizen features',
                     link: 'https://www.standardmedia.co.ke',
                     pubDate: '2 days ago',
                     source: 'The Standard'
