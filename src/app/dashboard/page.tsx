@@ -89,7 +89,7 @@ export default function Dashboard() {
                     toast.success(
                         (t) => (
                             <div className="flex items-center gap-2">
-                                <span>Weekly Assessment Complete: Your score is consistent.</span>
+                                <span>Weekly Background Re-assessment Complete! Tracking against dynamic Kenya average.</span>
                                 <button
                                     onClick={() => toast.dismiss(t.id)}
                                     className="ml-2 rounded-full p-1 text-black/40 hover:bg-black/10 dark:text-white/40 dark:hover:bg-white/10 transition-colors"
@@ -372,7 +372,11 @@ export default function Dashboard() {
                         <div className="col-span-1 md:col-span-2 lg:col-span-3 grid gap-6 lg:grid-cols-3">
                             {/* Benchmark Card takes 1/3, Charts take 2/3 */}
                             <div className="lg:col-span-1">
-                                <BenchmarkCard userScore={latestAssessment.score} />
+                                <BenchmarkCard
+                                    userScore={latestAssessment.score}
+                                    industryAvg={parseFloat(marketStats.ai_adoption_rate.value) || 42.1}
+                                    source={marketStats.ai_adoption_rate.source}
+                                />
                             </div>
                             <div className="lg:col-span-2">
                                 <DashboardCharts

@@ -8,6 +8,8 @@ import { TrendingUp, Award } from 'lucide-react'
  */
 interface BenchmarkCardProps {
     userScore: number
+    industryAvg: number
+    source?: string
 }
 
 /**
@@ -16,10 +18,9 @@ interface BenchmarkCardProps {
  *
  * @param {BenchmarkCardProps} props - The component props containing the user's score to evaluate.
  */
-export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
-    const INDUSTRY_AVG = 42.1 // Based on DataReportal 2024 Kenya Digital Adoption
-    const isAboveAvg = userScore >= INDUSTRY_AVG
-    const diff = (userScore - INDUSTRY_AVG).toFixed(1)
+export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardProps) {
+    const isAboveAvg = userScore >= industryAvg
+    const diff = (userScore - industryAvg).toFixed(1)
 
     return (
         <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
@@ -34,9 +35,10 @@ export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
             </div>
 
             <div className="mb-6">
-                <div className="flex justify-between text-sm mb-2">
-                    <span className="text-white/70">Your Readiness</span>
-                    <span className="font-bold text-white">{userScore.toFixed(1)}%</span>
+                <div className="flex justify-between text-sm mb-2 text-white/80">
+                    <span>
+                        Your score: <strong className="text-white">{userScore.toFixed(1)}%</strong> vs. Kenya average <strong className="text-white">{industryAvg.toFixed(1)}%</strong>
+                    </span>
                 </div>
                 <div className="relative h-2 w-full rounded-full bg-white/10">
                     <motion.div
@@ -52,13 +54,13 @@ export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
                     {/* Marker for Industry Avg */}
                     <div
                         className="absolute top-[-4px] h-4 w-1 bg-white/30"
-                        style={{ left: `${INDUSTRY_AVG}%` }}
-                        title={`National Avg: ${INDUSTRY_AVG}%`}
+                        style={{ left: `${industryAvg}%` }}
+                        title={`National Avg: ${industryAvg}%`}
                     />
                 </div>
                 <div className="flex justify-between text-xs mt-1 text-white/30">
                     <span>0%</span>
-                    <span style={{ marginLeft: `${INDUSTRY_AVG - 10}%` }}>Avg: {INDUSTRY_AVG}%</span>
+                    <span style={{ marginLeft: `${Math.max(0, industryAvg - 15)}%` }}>Avg: {industryAvg.toFixed(1)}%</span>
                     <span>100%</span>
                 </div>
             </div>
@@ -77,7 +79,7 @@ export function BenchmarkCard({ userScore }: BenchmarkCardProps) {
 
             {/* Simulated 'Last Checked' Badge */}
             <div className="absolute top-4 right-4 text-[10px] text-green-400/60 font-mono border border-green-500/10 px-2 py-0.5 rounded-full">
-                AUTO-CHECK: TODAY
+                BACKGROUND RE-ASSESSMENT: ACTIVE
             </div>
         </div>
     )
