@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Bot, AlertTriangle, FileText } from 'lucide-react'
+import { X, Send, Bot, AlertTriangle, FileText, CarFront, Droplets, GraduationCap } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -32,25 +32,42 @@ type Message = {
 // System Prompts for Specific AI Agents
 const PROMPTS: Record<string, string> = {
     health: `You are a Maternal Health Triage Assistant for the Social Health Authority (SHA) Kenya.
-Your Goal: Help mothers assess symptoms like bleeding, fever, or pain.
+Your Goal: Help mothers assess symptoms like bleeding, fever, or pain, and provide information on SHA maternal care access.
 Rules:
 1. ALWAYS start with a disclaimer: "I am an AI assistant, not a doctor. If this is an emergency, go to the nearest hospital immediately."
 2. Ask clarification questions about the symptom severity.
 3. Classify urgency: "Emergency" (Hospital NOW), "Urgent" (See doctor today), or "Routine".
-4. Be empathetic and clear. Use simple English or Kiswahili if requested.`,
+4. Provide factual information on how to access maternal care via SHA if asked.
+5. Be empathetic and clear. Use simple English or Kiswahili if requested.`,
 
     ajira: `You are a Professional Proposal Writer for the Ajira Digital Program.
-Your Goal: Help Kenyan youth write winning proposals for Upwork/Fiverr jobs.
+Your Goal: Help Kenyan youth write winning proposals for Upwork/Fiverr jobs AND provide info about Ajira programs.
 Rules:
-1. Ask for: The Job Title, Client Requirements, and User's Skills.
+1. First, ask for: The Job Title, Client Requirements, and User's Skills.
 2. Generate a structured proposal: Greeting -> Understanding of Problem -> Proposed Solution -> Relevant Experience -> Call to Action.
-3. Tone: Professional, confident, and concise.`,
+3. If they ask about Ajira, briefly explain the free training and mentorship available at ajiradigital.go.ke.
+4. Tone: Professional, confident, and concise.`,
 
-    transport: `You are an NTSA Transport Guide. Help users understand driving license renewal, vehicle inspection, and road safety rules in Kenya.`,
+    transport: `You are an NTSA Transport Guide. 
+Your Goal: Inform users about NTSA services (driving licenses, vehicle inspections) AND help them structure appeals or inquiries.
+Rules:
+1. Provide accurate information regarding TIMS and eCitizen integration.
+2. If they have an issue (e.g., lost license, inspection failure), ask for details and write a professional short email/inquiry for them to send to NTSA.
+3. Keep answers directly related to Kenyan road safety and NTSA processes.`,
 
-    water: `You are a Nairobi Water Support Assistant. Help users report leaks, understand bills, and apply for new connections.`,
+    water: `You are a Nairobi Water Support Assistant. 
+Your Goal: Help users understand procedures AND assist in formatting structured issue reports.
+Rules:
+1. Explain how to apply for connections or read bills.
+2. If they need to report a leak or outage, ask for: Location, Duration, and Severity.
+3. Then format a structured, professional report they can copy-paste to customer support.`,
 
-    education: `You are a HELB Loan Advisor. Help students apply for loans, understand repayment terms, and check bursary eligibility.`
+    education: `You are a HELB Loan Advisor. 
+Your Goal: Inform students about HELB loans/bursaries AND help them draft appeal/application letters.
+Rules:
+1. Provide generic timelines and portal info for HELB applications.
+2. If they need a bursary application letter or loan appeal, ask for their academic year and reason (e.g., financial hardship).
+3. Draft a respectful, formal letter addressed to the Higher Education Loans Board based on their details.`
 }
 
 /**
@@ -180,8 +197,14 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
 
     // Helper to render icon based on service
     const renderIcon = () => {
-        // Using a generic Bot icon, but could map specific ones.
-        return <Bot className="text-green-400" size={20} />
+        switch (serviceId) {
+            case 'health': return <AlertTriangle className="text-red-400" size={20} />
+            case 'ajira': return <FileText className="text-purple-400" size={20} />
+            case 'transport': return <CarFront className="text-blue-400" size={20} />
+            case 'water': return <Droplets className="text-cyan-400" size={20} />
+            case 'education': return <GraduationCap className="text-yellow-400" size={20} />
+            default: return <Bot className="text-green-400" size={20} />
+        }
     }
 
     if (!isOpen) return null
@@ -224,12 +247,18 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                                 <div className="rounded-full bg-white/5 p-4 mb-3">
                                     {serviceId === 'health' && <AlertTriangle size={32} className="text-red-400" />}
                                     {serviceId === 'ajira' && <FileText size={32} className="text-purple-400" />}
-                                    {serviceId !== 'health' && serviceId !== 'ajira' && <Bot size={32} />}
+                                    {serviceId === 'transport' && <CarFront size={32} className="text-blue-400" />}
+                                    {serviceId === 'water' && <Droplets size={32} className="text-cyan-400" />}
+                                    {serviceId === 'education' && <GraduationCap size={32} className="text-yellow-400" />}
+                                    {!['health', 'ajira', 'transport', 'water', 'education'].includes(serviceId) && <Bot size={32} />}
                                 </div>
                                 <p className="text-sm max-w-[80%]">
-                                    {serviceId === 'health' && "I can help triage symptoms. NOTE: For emergencies, visit a hospital immediately."}
-                                    {serviceId === 'ajira' && "I can help you write winning gig proposals. Tell me about the job!"}
-                                    {!['health', 'ajira'].includes(serviceId) && "How can I help you with this service today?"}
+                                    {serviceId === 'health' && "I can help triage symptoms or provide info on SHA maternal care. NOTE: For emergencies, visit a hospital immediately."}
+                                    {serviceId === 'ajira' && "I can help you write winning gig proposals or explain Ajira benefits. Tell me about the job!"}
+                                    {serviceId === 'transport' && "I can explain NTSA processes or help you draft an inquiry about your license/vehicle. What do you need?"}
+                                    {serviceId === 'water' && "I can help with Nairobi Water queries and format structured leak/outage reports for your area."}
+                                    {serviceId === 'education' && "I can explain HELB processes or draft a formal loan/bursary appeal letter for you. How can I help?"}
+                                    {!['health', 'ajira', 'transport', 'water', 'education'].includes(serviceId) && "How can I help you with this service today?"}
                                 </p>
                             </div>
                         )}
