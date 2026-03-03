@@ -424,18 +424,6 @@ export default function Dashboard() {
                         <div className="absolute inset-0 z-0 bg-blue-500/5 opacity-0 transition group-hover:opacity-100"></div>
                     </Link>
 
-                    {/* Feedback Link (Secondary) */}
-                    <div className="col-span-1 flex items-center justify-center p-4 md:col-span-2 lg:col-span-3">
-                        <a
-                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL || '#'}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sm text-white/40 hover:text-white hover:underline"
-                        >
-                            Provide Feedback on Beta
-                        </a>
-                    </div>
-
                 </div>
             </main>
         </div>

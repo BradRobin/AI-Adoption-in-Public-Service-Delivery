@@ -10,6 +10,7 @@ import type { Session } from '@supabase/supabase-js'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import AvatarAdvisor from '@/components/AvatarAdvisor'
+import { NavigationMenu } from '@/components/NavigationMenu'
 import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -346,50 +347,14 @@ export default function ChatPage() {
     <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
 
-      <nav className="absolute right-4 top-4 z-20 flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
-        <Link
-          href="/"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Home
-        </Link>
-        <Link
-          href="/assess"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Assess
-        </Link>
-        <Link
-          href="/chat"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Chat
-        </Link>
-        <Link
-          href="/profile"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Profile
-        </Link>
-        <Link
-          href="/privacy"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Privacy
-        </Link>
-        <Link
-          href="/report"
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          Report
-        </Link>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="rounded-lg px-3 py-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-        >
-          SignOut
-        </button>
+      <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="text-xl font-bold tracking-tight text-white">PARP</div>
+        <div className="flex items-center gap-4">
+          <span className="hidden text-sm text-white/60 sm:inline-block">
+            {session.user?.email}
+          </span>
+          <NavigationMenu />
+        </div>
       </nav>
 
       <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col px-4 pt-20 pb-24">
