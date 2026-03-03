@@ -11,6 +11,9 @@ PARP is a comprehensive digital dashboard designed to help Kenyan public sector 
 - Provides immediate scoring and tailored recommendations.
 - Saves progress for longitudinal tracking.
 
+### 🎥 End-to-End Platform Demo
+![Demonstration of PARP Platform](public/demo.webp)
+
 ### 2. **AI Service Desk**
 - **Smart Agents**: Context-aware AI assistants for Healthcare (SHA), Transport (NTSA), Education (HELB), and Gig Work (Ajira).
 - **Direct Integration**: Guides users to official government portals (e.g., `sha.go.ke`) with actionable advice.
@@ -28,6 +31,9 @@ PARP is a comprehensive digital dashboard designed to help Kenyan public sector 
 - **Code-Switching**: AI understands and responds in English, Kiswahili, and Sheng.
 - **Ethical Guardrails**: Built-in bias checking and refusal to generate harmful content.
 - **Local Context**: Trained on Kenya Data Protection Act (ODPC) and ICT Master Plan.
+- **Predictive Analytics [NEW]**: Provides dynamic wait-time estimations and data projections.
+- **Personalized Context [NEW]**: Responses automatically adapt to user roles and County/Locations.
+- **Feedback Loop**: Integrated capability to accurately parse mock complaint/report scenarios.
 
 ## 🛠️ Tech Stack
 
