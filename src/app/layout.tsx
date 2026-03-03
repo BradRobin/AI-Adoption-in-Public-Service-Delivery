@@ -42,6 +42,9 @@ export default function RootLayout({
       >
         {children}
         <ToasterClient />
+        <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
+          Built by Engineer Brad Robinson
+        </footer>
       </body>
     </html>
   );
