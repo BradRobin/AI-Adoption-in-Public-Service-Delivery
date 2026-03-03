@@ -18,6 +18,9 @@ export default function ProfilePage() {
 
     const [location, setLocation] = useState('')
     const [role, setRole] = useState('')
+    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
     const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
@@ -30,6 +33,8 @@ export default function ProfilePage() {
             }
 
             setSession(currentSession)
+            setEmail(currentSession.user.email || '')
+            setUsername((currentSession.user.user_metadata?.username as string) || '')
 
             const { data: profile, error } = await supabase
                 .from('profiles')
@@ -61,17 +66,56 @@ export default function ProfilePage() {
         if (!session) return
 
         setIsSaving(true)
-        const { error } = await supabase
+
+        let hasAuthChanges = false
+        const authUpdates: any = {}
+
+        if (email !== session.user.email) {
+            authUpdates.email = email
+            hasAuthChanges = true
+        }
+
+        if (password) {
+            authUpdates.password = password
+            hasAuthChanges = true
+        }
+
+        if (username !== (session.user.user_metadata?.username || '')) {
+            authUpdates.data = { username }
+            hasAuthChanges = true
+        }
+
+        let authError = null
+        if (hasAuthChanges) {
+            const { error } = await supabase.auth.updateUser(authUpdates)
+            authError = error
+        }
+
+        const { error: profileError } = await supabase
             .from('profiles')
             .update({ location: location.trim() })
             .eq('id', session.user.id)
 
-        if (error) {
-            toast.error('Failed to update profile.')
-            console.error(error)
+        if (profileError) {
+            toast.error('Failed to update profile location.')
+            console.error(profileError)
+        } else if (authError) {
+            toast.error(authError.message || 'Failed to update account details.')
+            console.error(authError)
         } else {
-            toast.success('Profile updated successfully!')
+            if (authUpdates.email) {
+                toast.success('Profile updated! Please check your new email to confirm the change.')
+            } else {
+                toast.success('Profile updated successfully!')
+            }
+            setPassword('') // Clear password field after save
         }
+
+        // Refresh session to get updated metadata locally
+        if (hasAuthChanges && !authError) {
+            await supabase.auth.getSession()
+        }
+
         setIsSaving(false)
     }
 
@@ -93,10 +137,10 @@ export default function ProfilePage() {
     if (!session) return null
 
     return (
-        <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
+        <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-black font-sans">
             <ParticleBackground />
 
-            <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <nav className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
                 <div className="text-xl font-bold tracking-tight text-white">PARP</div>
                 <div className="flex items-center gap-4">
                     <span className="hidden text-sm text-white/60 sm:inline-block">
@@ -106,23 +150,48 @@ export default function ProfilePage() {
                 </div>
             </nav>
 
-            <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-4 pt-32 pb-24 items-center justify-center">
+            <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-4 pt-16 pb-24 items-center justify-center">
                 <div className="flex w-full flex-col rounded-2xl border border-white/10 bg-black/60 shadow-xl backdrop-blur p-6">
-                    <header className="mb-6">
+                    <header className="mb-6 text-center">
                         <h1 className="text-2xl font-semibold text-white">Your Profile</h1>
                         <p className="mt-1 text-sm text-white/70">Update your details for personalized AI responses.</p>
                     </header>
 
-                    <form onSubmit={handleSave} className="flex flex-col gap-4">
+                    <form onSubmit={handleSave} className="flex flex-col gap-5">
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-white/80">Email</label>
-                            <input type="text" disabled value={session.user.email} className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/50 cursor-not-allowed" />
+                            <label htmlFor="username" className="mb-1 block text-sm font-medium text-white/80">Username</label>
+                            <input
+                                id="username"
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="Your preferred display name"
+                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-white/20"
+                            />
                         </div>
 
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-white/80">Role</label>
-                            <input type="text" disabled value={role} className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/50 cursor-not-allowed uppercase" />
-                            <p className="mt-1 text-xs text-white/40">Roles are managed by administrators.</p>
+                            <label htmlFor="email" className="mb-1 block text-sm font-medium text-white/80">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40"
+                            />
+                            <p className="mt-1 text-xs text-white/40">Changing your email will require verification.</p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="mb-1 block text-sm font-medium text-white/80">New Password</label>
+                            <input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Leave blank to keep current password"
+                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-white/20"
+                            />
                         </div>
 
                         <div>
@@ -137,12 +206,18 @@ export default function ProfilePage() {
                             />
                         </div>
 
+                        <div className="pt-2 border-t border-white/10">
+                            <label className="mb-1 block text-sm font-medium text-white/80">Role</label>
+                            <input type="text" disabled value={role} className="w-full rounded-lg border border-white/5 bg-white/5 px-3 py-2 text-sm text-white/40 cursor-not-allowed uppercase" />
+                            <p className="mt-1 text-xs text-white/40">Roles are managed by administrators.</p>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={isSaving}
                             className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-lg bg-green-500 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
                         >
-                            {isSaving ? 'Saving...' : 'Save Changes'}
+                            {isSaving ? 'Saving Changes...' : 'Save Profile'}
                         </button>
                     </form>
                 </div>
@@ -150,3 +225,4 @@ export default function ProfilePage() {
         </div>
     )
 }
+

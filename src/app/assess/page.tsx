@@ -270,9 +270,9 @@ export default function AssessPage() {
   const showResults = submittedData && scores
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden bg-black font-sans">
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-black font-sans">
       <ParticleBackground />
-      <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <nav className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
         <div className="text-xl font-bold tracking-tight text-white">PARP</div>
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-white/60 sm:inline-block">
