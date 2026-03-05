@@ -204,14 +204,14 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
     }
 
     // Helper to render icon based on service
-    const renderIcon = () => {
+    const renderIcon = (size: number = 20) => {
         switch (serviceId) {
-            case 'health': return <AlertTriangle className="text-red-400" size={20} />
-            case 'ajira': return <FileText className="text-purple-400" size={20} />
-            case 'transport': return <CarFront className="text-blue-400" size={20} />
-            case 'water': return <Droplets className="text-cyan-400" size={20} />
-            case 'education': return <GraduationCap className="text-yellow-400" size={20} />
-            default: return <Bot className="text-green-400" size={20} />
+            case 'health': return <AlertTriangle className="text-red-400" size={size} />
+            case 'ajira': return <FileText className="text-purple-400" size={size} />
+            case 'transport': return <CarFront className="text-blue-400" size={size} />
+            case 'water': return <Droplets className="text-cyan-400" size={size} />
+            case 'education': return <GraduationCap className="text-yellow-400" size={size} />
+            default: return <Bot className="text-green-400" size={size} />
         }
     }
 
@@ -236,7 +236,7 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                     <div className="flex items-center justify-between border-b border-white/10 bg-black/40 px-6 py-4">
                         <div className="flex items-center gap-3">
                             <div className="inline-flex items-center justify-center rounded-lg bg-green-500/10 p-2">
-                                {renderIcon()}
+                                {renderIcon(20)}
                             </div>
                             <div>
                                 <h3 className="font-semibold text-white">{serviceTitle} Assistant</h3>
@@ -251,23 +251,21 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                     {/* Chat Area */}
                     <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                         {messages.length === 0 && (
-                            <div className="mt-8 flex flex-col items-center text-center text-white/50">
-                                <div className="rounded-full bg-white/5 p-4 mb-3">
-                                    {serviceId === 'health' && <AlertTriangle size={32} className="text-red-400" />}
-                                    {serviceId === 'ajira' && <FileText size={32} className="text-purple-400" />}
-                                    {serviceId === 'transport' && <CarFront size={32} className="text-blue-400" />}
-                                    {serviceId === 'water' && <Droplets size={32} className="text-cyan-400" />}
-                                    {serviceId === 'education' && <GraduationCap size={32} className="text-yellow-400" />}
-                                    {!['health', 'ajira', 'transport', 'water', 'education'].includes(serviceId) && <Bot size={32} />}
+                            <div className="mt-8 flex flex-col items-center text-center text-white/50 space-y-4">
+                                <div className="rounded-full bg-white/5 p-5">
+                                    {renderIcon(32)}
                                 </div>
-                                <p className="text-sm max-w-[80%]">
-                                    {serviceId === 'health' && "I can help triage symptoms or provide info on SHA maternal care. NOTE: For emergencies, visit a hospital immediately."}
-                                    {serviceId === 'ajira' && "I can help you write winning gig proposals or explain Ajira benefits. Tell me about the job!"}
-                                    {serviceId === 'transport' && "I can explain NTSA processes or help you draft an inquiry about your license/vehicle. What do you need?"}
-                                    {serviceId === 'water' && "I can help with Nairobi Water queries and format structured leak/outage reports for your area."}
-                                    {serviceId === 'education' && "I can explain HELB processes or draft a formal loan/bursary appeal letter for you. How can I help?"}
-                                    {!['health', 'ajira', 'transport', 'water', 'education'].includes(serviceId) && "How can I help you with this service today?"}
-                                </p>
+                                <div className="max-w-[80%] space-y-2">
+                                    <h4 className="font-medium text-white/80">Welcome to the {serviceTitle} AI Assistant</h4>
+                                    <p className="text-sm leading-relaxed">
+                                        {serviceId === 'health' && "I can help triage symptoms or provide information on SHA maternal care. NOTE: For emergencies, visit a hospital immediately."}
+                                        {serviceId === 'ajira' && "I can help you write winning gig proposals or explain Ajira benefits. Tell me about the job you are applying for!"}
+                                        {serviceId === 'transport' && "I can explain NTSA processes or help you draft a formal inquiry about your license or vehicle. What do you need?"}
+                                        {serviceId === 'water' && "I can help with Nairobi Water queries and format structured leak or outage reports for you to submit."}
+                                        {serviceId === 'education' && "I can explain HELB loan processes or help you draft a formal loan/bursary appeal letter. How can I help today?"}
+                                        {!['health', 'ajira', 'transport', 'water', 'education'].includes(serviceId) && "How can I help you with this service today?"}
+                                    </p>
+                                </div>
                             </div>
                         )}
 
