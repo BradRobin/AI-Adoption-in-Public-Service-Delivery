@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToasterClient } from "@/components/ToasterClient";
+import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
       >
         {children}
         <ToasterClient />
+        <AdminToeQuizPopup />
         <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
           Built by Engineer Brad Robinson
         </footer>

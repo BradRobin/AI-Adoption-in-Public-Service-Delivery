@@ -29,6 +29,8 @@ export default function Dashboard() {
     const [latestAssessment, setLatestAssessment] = useState<{
         score: number
         dimension_scores: any
+        created_at?: string
+        previousScore?: number | null
     } | null>(null)
     const [sessionExpired, setSessionExpired] = useState(false)
     const [redirectTakingLong, setRedirectTakingLong] = useState(false)
@@ -74,14 +76,21 @@ export default function Dashboard() {
         const fetchAssessment = async (userId: string) => {
             const { data, error } = await supabase
                 .from('assessments')
-                .select('score, dimension_scores')
+                .select('score, dimension_scores, created_at')
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false })
-                .limit(1)
-                .single()
+                .limit(2)
 
-            if (!error && data) {
-                setLatestAssessment(data)
+            if (!error && data && data.length > 0) {
+                const current = data[0]
+                const previous = data.length > 1 ? data[1] : null
+
+                setLatestAssessment({
+                    score: current.score,
+                    dimension_scores: current.dimension_scores,
+                    created_at: current.created_at,
+                    previousScore: previous ? previous.score : null
+                })
 
                 // Simulate "Weekly Check" notification once on load if assessment exists
                 // In production, this would be triggered by a real background cron job
@@ -137,11 +146,13 @@ export default function Dashboard() {
                 },
                 (payload) => {
                     // Update latest assessment immediately
-                    const newAssessment = payload.new as { score: number; dimension_scores: any }
-                    setLatestAssessment({
+                    const newAssessment = payload.new as { score: number; dimension_scores: any, created_at: string }
+                    setLatestAssessment(prev => ({
                         score: newAssessment.score,
                         dimension_scores: newAssessment.dimension_scores,
-                    })
+                        created_at: newAssessment.created_at,
+                        previousScore: prev ? prev.score : null
+                    }))
                     toast.success('New assessment results received!')
                 }
             )
@@ -286,6 +297,18 @@ export default function Dashboard() {
     const displayName =
         formatName(rawUsername) ?? session.user?.email ?? 'User'
 
+    const getRelativeTime = (isoString: string) => {
+        const d = new Date(isoString);
+        const now = new Date();
+        const diffMs = now.getTime() - d.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 60) return `updated ${diffMins} minutes ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `updated ${diffHours} hours ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `updated ${diffDays} days ago`;
+    }
+
     return (
         <div className="relative min-h-screen w-full bg-black font-sans text-white selection:bg-green-500/30">
             <ParticleBackground />
@@ -313,6 +336,21 @@ export default function Dashboard() {
                     <p className="mt-4 text-lg text-white/70">
                         Ready to continue your AI adoption journey?
                     </p>
+                    {latestAssessment && (
+                        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                            <span>Current readiness: {latestAssessment.score}%</span>
+                            {latestAssessment.previousScore && (
+                                <span className={latestAssessment.score >= latestAssessment.previousScore ? "text-green-400" : "text-red-400"}>
+                                    ({latestAssessment.score > latestAssessment.previousScore ? 'up' : 'down'} {Math.abs(latestAssessment.score - latestAssessment.previousScore)}% since last assessment)
+                                </span>
+                            )}
+                            {latestAssessment.created_at && (
+                                <span className="ml-2 border-l border-white/20 pl-2 text-white/50">
+                                    {getRelativeTime(latestAssessment.created_at)}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Dashboard Grid */}
