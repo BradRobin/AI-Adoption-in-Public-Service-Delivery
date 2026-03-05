@@ -11,13 +11,22 @@ import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import AvatarAdvisor from '@/components/AvatarAdvisor'
 import { NavigationMenu } from '@/components/NavigationMenu'
-import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, X, Menu } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type ChatMessage = {
   id: string
   role: 'user' | 'assistant'
   content: string
+}
+
+type Conversation = {
+  id: string
+  user_id: string
+  title: string
+  messages: ChatMessage[]
+  created_at: string
+  updated_at: string
 }
 
 /**
@@ -94,6 +103,13 @@ export default function ChatPage() {
   const [showAvatar, setShowAvatar] = useState(false)
   const [avatarText, setAvatarText] = useState<string | null>(null)
 
+  // Chat History State
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null)
+  const [editTitleValue, setEditTitleValue] = useState('')
+
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -130,6 +146,46 @@ export default function ChatPage() {
     }
   }, [router])
 
+  // Fetch conversations when session exists
+  useEffect(() => {
+    if (!session?.user?.id) return
+
+    const fetchConversations = async () => {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('updated_at', { ascending: false })
+
+      if (!error && data) {
+        setConversations(data)
+      }
+    }
+
+    fetchConversations()
+
+    // Realtime subscription for cross-tab sync
+    const channel = supabase
+      .channel(`conversations_${session.user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `user_id=eq.${session.user.id}`,
+        },
+        (payload) => {
+          fetchConversations()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [session?.user?.id])
+
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -158,10 +214,23 @@ export default function ChatPage() {
     event.preventDefault()
 
     if (isThinking) return
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
 
     const trimmed = input.trim()
     if (!trimmed) return
+
+    // Ensure we capture current active convo state synchronously inside this function scope 
+    let currentConversationId = activeConversationId
+    let isBrandNewConversation = false
+    let autoTitle = 'New Chat'
+
+    // If no active conversation, prep to create one
+    if (!currentConversationId) {
+      isBrandNewConversation = true
+      // Generate title from first 4 words of the prompt
+      const words = trimmed.split(' ')
+      autoTitle = words.length > 4 ? words.slice(0, 4).join(' ') + '...' : trimmed
+    }
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -180,6 +249,36 @@ export default function ChatPage() {
     setMessages(nextMessages)
     setInput('')
     setIsThinking(true)
+
+    // Instantly create the conversation in the database if brand new
+    if (isBrandNewConversation) {
+      const { data, error } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: session.user.id,
+          title: autoTitle,
+          messages: [userMessage], // Will be updated when assistant finishes
+        })
+        .select()
+        .single()
+
+      if (!error && data) {
+        currentConversationId = data.id
+        setActiveConversationId(data.id)
+      } else {
+        console.error('Failed to create conversation', error)
+      }
+    } else if (currentConversationId) {
+      // Persist the user message immediately for existing chats
+      await supabase
+        .from('conversations')
+        .update({
+          messages: [...messages, userMessage],
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentConversationId)
+    }
+
     const currentProvider = isLocalAI ? 'ollama' : 'openai'
     let fullResponse = ''
 
@@ -288,6 +387,18 @@ export default function ChatPage() {
         setAvatarText(fullResponse)
       }
 
+      // Persist final messages state to database
+      if (currentConversationId && fullResponse.length > 0) {
+        const finalMessages = [...messages, userMessage, { id: placeholderId, role: 'assistant', content: fullResponse }]
+        await supabase
+          .from('conversations')
+          .update({
+            messages: finalMessages,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentConversationId)
+      }
+
       if (fullResponse) {
         const lowerContent = fullResponse.toLowerCase()
         const riskyKeywords = [
@@ -315,6 +426,66 @@ export default function ChatPage() {
         }
       }
     }
+  }
+
+  // --- Sidebar Actions ---
+
+  const handleNewChat = () => {
+    setActiveConversationId(null)
+    setMessages([])
+    if (window.innerWidth < 768) setIsSidebarOpen(false)
+  }
+
+  const handleLoadChat = (conv: Conversation) => {
+    setActiveConversationId(conv.id)
+    setMessages(conv.messages || [])
+    if (window.innerWidth < 768) setIsSidebarOpen(false)
+  }
+
+  const handleDeleteChat = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent loading the chat when deleting
+    if (!confirm('Are you sure you want to delete this conversation?')) return
+
+    const { error } = await supabase.from('conversations').delete().eq('id', id)
+    if (!error) {
+      if (activeConversationId === id) {
+        setActiveConversationId(null)
+        setMessages([])
+      }
+      setConversations(prev => prev.filter(c => c.id !== id))
+      toast.success('Conversation deleted')
+    } else {
+      toast.error('Failed to delete conversation')
+    }
+  }
+
+  const handleRenameSubmit = async (id: string, e: React.FormEvent | null = null) => {
+    if (e) e.preventDefault()
+
+    const trimmed = editTitleValue.trim()
+    if (!trimmed) {
+      setEditingTitleId(null)
+      return
+    }
+
+    setConversations(prev => prev.map(c => c.id === id ? { ...c, title: trimmed } : c))
+    setEditingTitleId(null)
+
+    const { error } = await supabase
+      .from('conversations')
+      .update({ title: trimmed })
+      .eq('id', id)
+
+    if (error) {
+      toast.error('Failed to rename')
+      // Let realtime subscription revert the UI on next fetch if error
+    }
+  }
+
+  const startEditing = (conv: Conversation, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingTitleId(conv.id)
+    setEditTitleValue(conv.title)
   }
 
   if (isLoading) {
@@ -357,140 +528,241 @@ export default function ChatPage() {
         </div>
       </nav>
 
-      <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-2xl flex-col px-4 pt-20 pb-24">
-        <div className="flex min-h-[400px] flex-1 flex-col rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur max-h-[calc(100vh-6rem)]">
-          <header className="border-b border-white/10 px-5 py-4">
-            <h1 className="text-lg font-semibold text-white md:text-xl">
-              AI Readiness Chat
-            </h1>
-            <p className="mt-1 text-xs text-white/70 md:text-sm">
-              Ask questions about your Technology–Organization–Environment (TOE)
-              readiness.
-            </p>
-          </header>
+      <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-4 pb-8 md:pt-20 md:pb-24">
 
-          <section
-            ref={scrollContainerRef}
-            className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+        {/* Mobile Sidebar Toggle Button (Visible only on small screens) */}
+        <div className="mb-4 flex items-center gap-2 md:hidden">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
           >
-            {messages.length === 0 && !isThinking && (
-              <div className="mt-6 rounded-xl border border-dashed border-white/15 bg-black/40 px-4 py-3 text-xs text-white/70 md:text-sm">
-                <p className="font-medium text-white/80">
-                  Welcome to the AI Readiness Chat.
-                </p>
-                <p className="mt-1">
-                  Ask about your AI readiness, try predicting service times (e.g. &quot;Estimate queue time at Huduma Center&quot;), or report issues directly starting with &quot;Report issue:&quot;. Responses are personalized based on your role and location.
-                </p>
-              </div>
-            )}
-
-            {messages.map((message, index) => {
-              const isLastMessage = index === messages.length - 1
-              const isCurrentlyStreaming = isThinking && isLastMessage && message.role === 'assistant'
-
-              return (
-                <div
-                  key={message.id}
-                  className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} mb-2`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${message.role === 'user'
-                      ? 'rounded-br-sm bg-green-500 text-black'
-                      : 'rounded-bl-sm bg-white/10 text-white shadow-sm border border-white/5'
-                      }`}
-                  >
-                    {isCurrentlyStreaming && message.content === '' ? (
-                      <div className="flex items-center gap-1 h-5 px-1">
-                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
-                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
-                        <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
-                      </div>
-                    ) : (
-                      message.content
-                    )}
-                  </div>
-                  {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
-                    <div className="mt-2 flex items-center gap-3 px-2 text-white/40">
-                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Helpful" aria-label="Mark response as helpful">
-                        <ThumbsUp size={16} aria-hidden="true" />
-                      </button>
-                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Not Helpful" aria-label="Mark response as not helpful">
-                        <ThumbsDown size={16} aria-hidden="true" />
-                      </button>
-                      <button onClick={() => handleCopy(message.content)} className="hover:text-white transition-colors" title="Copy" aria-label="Copy response to clipboard">
-                        <Copy size={16} aria-hidden="true" />
-                      </button>
-                      <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud" aria-label="Read response aloud">
-                        <Volume2 size={16} aria-hidden="true" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </section>
-
-          <form
-            onSubmit={handleSend}
-            className="border-t border-white/10 bg-black/60 px-4 py-3"
+            <Menu size={16} />
+            <span>{isSidebarOpen ? 'Hide History' : 'View History'}</span>
+          </button>
+          <button
+            onClick={handleNewChat}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-500/10 border border-green-500/20 px-4 py-2 text-sm text-green-400 transition hover:bg-green-500/20"
           >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-              <textarea
-                rows={1}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    if (!isThinking && input.trim().length > 0) {
-                      handleSend(e as unknown as FormEvent)
-                    }
-                  }
-                }}
-                placeholder="Ask PARP AI"
-                className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
-              />
-              <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
-                {/* Local AI Toggle */}
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-white/70 hover:text-white select-none">
-                  <div className="relative inline-flex items-center h-5 rounded-full w-9 transition-colors focus:outline-none bg-white/20">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={isLocalAI}
-                      onChange={() => setIsLocalAI(!isLocalAI)}
-                    />
-                    <div className={`w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600`}></div>
-                  </div>
-                  <span className="hidden sm:inline">Local AI</span>
-                </label>
+            <Plus size={16} />
+            <span>New Chat</span>
+          </button>
+        </div>
 
-                {/* Avatar Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setShowAvatar(!showAvatar)}
-                  className={`ml-2 flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
-                  title="Toggle 3D Avatar"
-                  aria-label={showAvatar ? "Disable 3D Avatar" : "Enable 3D Avatar"}
-                  aria-pressed={showAvatar}
-                >
-                  {showAvatar ? <Video size={14} aria-hidden="true" /> : <VideoOff size={14} aria-hidden="true" />}
-                  <span className="hidden sm:inline">Avatar</span>
-                </button>
-              </div>
+        <div className="flex min-h-[500px] flex-1 flex-col md:flex-row rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur max-h-[calc(100vh-6rem)] relative overflow-hidden">
+
+          {/* History Sidebar */}
+          <div className={`
+            absolute md:static inset-y-0 left-0 z-30 w-[260px] md:w-[300px] 
+            border-r border-white/10 bg-black/90 md:bg-black/40 backdrop-blur-md 
+            transform transition-transform duration-300 ease-in-out flex flex-col
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          `}>
+            <div className="p-4 border-b border-white/10 hidden md:block">
               <button
-                type="submit"
-                disabled={isThinking || input.trim().length === 0}
-                aria-label={isThinking ? 'Sending message...' : 'Send message'}
-                className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
+                onClick={handleNewChat}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 hover:bg-green-400 text-black px-4 py-3 text-sm font-medium transition"
               >
-                {isThinking && (
-                  <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />
-                )}
-                {isThinking ? 'Thinking...' : 'Send'}
+                <Plus size={18} />
+                <span>New Chat</span>
               </button>
             </div>
-          </form>
+
+            <div className="flex-1 overflow-y-auto p-3 space-y-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
+              {conversations.length === 0 ? (
+                <p className="text-center text-xs text-white/40 mt-6">No saved conversations</p>
+              ) : (
+                conversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    onClick={() => handleLoadChat(conv)}
+                    className={`group cursor-pointer rounded-lg p-3 transition-colors flex items-start gap-3 ${activeConversationId === conv.id ? 'bg-white/15' : 'hover:bg-white/5'}`}
+                  >
+                    <MessageSquare size={16} className={`mt-0.5 shrink-0 ${activeConversationId === conv.id ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`} />
+
+                    {editingTitleId === conv.id ? (
+                      <form
+                        onSubmit={(e) => handleRenameSubmit(conv.id, e)}
+                        className="flex-1 flex items-center gap-1"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <input
+                          autoFocus
+                          value={editTitleValue}
+                          onChange={e => setEditTitleValue(e.target.value)}
+                          onBlur={() => handleRenameSubmit(conv.id)}
+                          className="w-full bg-black/50 border border-green-500/50 rounded px-1.5 py-0.5 text-sm text-white outline-none"
+                        />
+                        <button type="submit" className="text-green-400 p-0.5"><Check size={14} /></button>
+                      </form>
+                    ) : (
+                      <div className="flex-1 min-w-0">
+                        <p className={`truncate text-sm ${activeConversationId === conv.id ? 'font-medium text-white' : 'text-white/80'}`}>
+                          {conv.title}
+                        </p>
+                      </div>
+                    )}
+
+                    {!editingTitleId && (
+                      <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => startEditing(conv, e)}
+                          className="text-white/40 hover:text-white p-1"
+                          title="Rename conversation"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteChat(conv.id, e)}
+                          className="text-white/40 hover:text-red-400 p-1"
+                          title="Delete conversation"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Main Chat Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="border-b border-white/10 px-5 py-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold text-white md:text-xl truncate">
+                  {activeConversationId ? conversations.find(c => c.id === activeConversationId)?.title || 'Chat' : 'New AI Readiness Chat'}
+                </h1>
+                <p className="mt-1 text-xs text-white/70 md:text-sm">
+                  Ask questions about your Technology–Organization–Environment (TOE)
+                  readiness.
+                </p>
+              </div>
+            </header>
+
+            <section
+              ref={scrollContainerRef}
+              className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+            >
+              {messages.length === 0 && !isThinking && (
+                <div className="mt-6 rounded-xl border border-dashed border-white/15 bg-black/40 px-4 py-3 text-xs text-white/70 md:text-sm">
+                  <p className="font-medium text-white/80">
+                    Welcome to the AI Readiness Chat.
+                  </p>
+                  <p className="mt-1">
+                    Ask about your AI readiness, try predicting service times (e.g. &quot;Estimate queue time at Huduma Center&quot;), or report issues directly starting with &quot;Report issue:&quot;. Responses are personalized based on your role and location.
+                  </p>
+                </div>
+              )}
+
+              {messages.map((message, index) => {
+                const isLastMessage = index === messages.length - 1
+                const isCurrentlyStreaming = isThinking && isLastMessage && message.role === 'assistant'
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} mb-2`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${message.role === 'user'
+                        ? 'rounded-br-sm bg-green-500 text-black'
+                        : 'rounded-bl-sm bg-white/10 text-white shadow-sm border border-white/5'
+                        }`}
+                    >
+                      {isCurrentlyStreaming && message.content === '' ? (
+                        <div className="flex items-center gap-1 h-5 px-1">
+                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
+                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
+                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+                        </div>
+                      ) : (
+                        message.content
+                      )}
+                    </div>
+                    {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
+                      <div className="mt-2 flex items-center gap-3 px-2 text-white/40">
+                        <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Helpful" aria-label="Mark response as helpful">
+                          <ThumbsUp size={16} aria-hidden="true" />
+                        </button>
+                        <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Not Helpful" aria-label="Mark response as not helpful">
+                          <ThumbsDown size={16} aria-hidden="true" />
+                        </button>
+                        <button onClick={() => handleCopy(message.content)} className="hover:text-white transition-colors" title="Copy" aria-label="Copy response to clipboard">
+                          <Copy size={16} aria-hidden="true" />
+                        </button>
+                        <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud" aria-label="Read response aloud">
+                          <Volume2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </section>
+
+            <form
+              onSubmit={handleSend}
+              className="border-t border-white/10 bg-black/60 px-4 py-3"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <textarea
+                  rows={1}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      if (!isThinking && input.trim().length > 0) {
+                        handleSend(e as unknown as FormEvent)
+                      }
+                    }
+                  }}
+                  placeholder="Ask PARP AI"
+                  className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+                />
+                <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
+                  {/* Local AI Toggle */}
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-white/70 hover:text-white select-none">
+                    <div className="relative inline-flex items-center h-5 rounded-full w-9 transition-colors focus:outline-none bg-white/20">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={isLocalAI}
+                        onChange={() => setIsLocalAI(!isLocalAI)}
+                      />
+                      <div className={`w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600`}></div>
+                    </div>
+                    <span className="hidden sm:inline">Local AI</span>
+                  </label>
+
+                  {/* Avatar Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAvatar(!showAvatar)}
+                    className={`ml-2 flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                    title="Toggle 3D Avatar"
+                    aria-label={showAvatar ? "Disable 3D Avatar" : "Enable 3D Avatar"}
+                    aria-pressed={showAvatar}
+                  >
+                    {showAvatar ? <Video size={14} aria-hidden="true" /> : <VideoOff size={14} aria-hidden="true" />}
+                    <span className="hidden sm:inline">Avatar</span>
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isThinking || input.trim().length === 0}
+                  aria-label={isThinking ? 'Sending message...' : 'Send message'}
+                  className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
+                >
+                  {isThinking && (
+                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />
+                  )}
+                  {isThinking ? 'Thinking...' : 'Send'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
         <p className="mt-2 text-center text-[10px] text-white/40 md:text-xs">
           AI can make mistakes. Always verify outputs. Use responsibly.
