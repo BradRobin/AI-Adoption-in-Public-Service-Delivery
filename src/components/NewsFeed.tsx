@@ -13,6 +13,7 @@ type NewsItem = {
     link: string
     pubDate: string
     source: string
+    snippet?: string
 }
 
 /**
@@ -60,41 +61,48 @@ export function NewsFeed() {
                 </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {isLoading && news.length === 0 ? (
                     // skeletons
-                    Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="h-20 animate-pulse rounded-lg bg-white/5" />
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="h-28 animate-pulse rounded-lg bg-white/5" />
                     ))
                 ) : (
                     news.map((item, index) => (
-                        <motion.a
+                        <motion.div
                             key={index}
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="group block rounded-lg border border-white/5 bg-black/20 p-4 transition hover:border-white/20 hover:bg-white/5"
+                            className="group flex flex-col rounded-lg border border-white/5 bg-black/30 p-4 transition-all hover:border-white/20 hover:bg-white/5 shadow-sm"
                         >
                             <div className="flex justify-between items-start gap-3">
-                                <h3 className="text-sm font-medium text-white group-hover:text-orange-400 line-clamp-2">
+                                <h3 className="text-base font-semibold leading-snug text-white group-hover:text-orange-400">
                                     {item.title}
                                 </h3>
-                                <ExternalLink size={14} className="text-white/30 flex-shrink-0 mt-1" />
+                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-1 shrink-0 rounded hover:bg-white/10" aria-label={`Read full article: ${item.title}`}>
+                                    <ExternalLink size={16} className="text-white/40 group-hover:text-orange-400" />
+                                </a>
                             </div>
-                            <div className="mt-2 flex items-center gap-3 text-xs text-white/50">
-                                <span className="font-semibold text-white/70">{item.source}</span>
-                                <span>•</span>
-                                <span>{item.pubDate}</span>
+
+                            {item.snippet && (
+                                <p className="mt-2 text-sm text-white/70 line-clamp-3 leading-relaxed">
+                                    {item.snippet}{' '}
+                                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-orange-400/80 hover:text-orange-400 font-medium whitespace-nowrap text-xs ml-1 hover:underline">
+                                        [{item.source}]
+                                    </a>
+                                </p>
+                            )}
+
+                            <div className="mt-3 flex items-center gap-3 text-xs text-white/40 border-t border-white/5 pt-3">
+                                <span className="font-medium text-white/60">{item.pubDate}</span>
                             </div>
-                        </motion.a>
+                        </motion.div>
                     ))
                 )}
 
                 {news.length === 0 && !isLoading && (
-                    <p className="text-center text-sm text-white/50 py-4">No news available at the moment.</p>
+                    <p className="text-center text-sm text-white/50 py-6 bg-black/20 rounded-lg">No news available at the moment.</p>
                 )}
             </div>
 
