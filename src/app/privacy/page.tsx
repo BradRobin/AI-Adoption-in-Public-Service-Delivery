@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
             </div>
 
-            <main className="relative z-10 max-w-4xl mx-auto px-6 py-20 md:py-32">
+            <main id="main-content" className="relative z-10 max-w-4xl mx-auto px-6 py-20 md:py-32">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}

@@ -28,12 +28,55 @@ body {
 
 /* Custom keyframe for particle animation */
 @keyframes particle-float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.3;
   }
+
   50% {
     transform: translate(10px, -15px) scale(1.1);
     opacity: 0.6;
   }
+}
+
+/* High Contrast Mode Overrides */
+html.high-contrast {
+  --background: #000000 !important;
+  --foreground: #ffffff !important;
+}
+
+html.high-contrast * {
+  /* Enforce stronger contrast ratios and remove translucency where critical */
+  border-color: #ffffff !important;
+}
+
+html.high-contrast .bg-white\/5,
+html.high-contrast .bg-white\/10 {
+  background-color: transparent !important;
+  border: 2px solid #ffffff !important;
+}
+
+html.high-contrast .text-white\/30,
+html.high-contrast .text-white\/40,
+html.high-contrast .text-white\/50,
+html.high-contrast .text-white\/60,
+html.high-contrast .text-white\/70,
+html.high-contrast .text-white\/80 {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+html.high-contrast .text-zinc-500,
+html.high-contrast .text-zinc-300 {
+  color: #ffffff !important;
+}
+
+html.high-contrast .bg-green-500,
+html.high-contrast .text-green-400 {
+  /* Use a more accessible high-contrast green or just outline */
+  background-color: #00ff00 !important;
+  color: #000000 !important;
+  font-weight: bold !important;
 }

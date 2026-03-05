@@ -14,9 +14,9 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
       <ParticleBackground />
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+      <main id="main-content" className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
         <AuthForm initialMode="login" onLoginSuccess={() => router.replace('/dashboard')} />
-      </div>
+      </main>
     </div>
   )
 }

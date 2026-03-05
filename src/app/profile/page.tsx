@@ -150,7 +150,7 @@ export default function ProfilePage() {
                 </div>
             </nav>
 
-            <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-4 pt-16 pb-24 items-center justify-center">
+            <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-md flex-col px-4 pt-16 pb-24 items-center justify-center">
                 <div className="flex w-full flex-col rounded-2xl border border-white/10 bg-black/60 shadow-xl backdrop-blur p-6">
                     <header className="mb-6 text-center">
                         <h1 className="text-2xl font-semibold text-white">Your Profile</h1>

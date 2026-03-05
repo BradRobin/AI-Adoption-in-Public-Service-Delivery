@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import { useAccessibility } from './AccessibilityProvider'
 
 interface MenuItemProps {
     href: string
@@ -56,6 +57,7 @@ function MenuItem({ href, icon: Icon, label, onClick, variant = 'default' }: Men
 export function NavigationMenu() {
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
+    const { highContrast, toggleHighContrast } = useAccessibility()
 
     const handleSignOut = async () => {
         setIsOpen(false)
@@ -102,17 +104,33 @@ export function NavigationMenu() {
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-white/10 p-5">
-                            <span className="text-lg font-bold text-white tracking-widest">MENU</span>
+                            <h2 className="text-lg font-bold text-white tracking-widest" id="menu-title">MENU</h2>
                             <button
                                 onClick={handleClose}
-                                className="rounded-full p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                                aria-label="Close menu"
+                                className="rounded-full p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                             >
-                                <X size={20} />
+                                <X size={20} aria-hidden="true" />
                             </button>
                         </div>
 
                         {/* Navigation Links */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-1">
+                        <nav aria-label="Main Navigation" className="flex-1 overflow-y-auto p-4 space-y-1">
+                            {/* Accessibility Toggles */}
+                            <button
+                                onClick={toggleHighContrast}
+                                aria-pressed={highContrast}
+                                className={`w-full text-left flex items-center justify-between rounded-lg px-4 py-3 transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${highContrast
+                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                        : 'text-white/80 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                <span className="font-medium text-sm">High Contrast Mode</span>
+                                <div className={`w-10 h-6 rounded-full p-1 transition-colors ${highContrast ? 'bg-green-500' : 'bg-white/20'}`}>
+                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${highContrast ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </div>
+                            </button>
+
                             <div onClick={handleClose}><MenuItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" /></div>
                             <div onClick={handleClose}><MenuItem href="/chat" icon={MessageSquare} label="Chat Assistant" /></div>
                             <div onClick={handleClose}><MenuItem href="/assess" icon={ClipboardCheck} label="Self Assessment" /></div>
@@ -133,7 +151,7 @@ export function NavigationMenu() {
                                     variant="admin"
                                 />
                             </div>
-                        </div>
+                        </nav>
 
                         {/* Footer (Sign Out) */}
                         <div className="border-t border-white/10 p-4">

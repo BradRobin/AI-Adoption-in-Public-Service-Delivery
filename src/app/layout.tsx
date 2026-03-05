@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToasterClient } from "@/components/ToasterClient";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
+import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,12 +42,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <ToasterClient />
-        <AdminToeQuizPopup />
-        <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
-          Built by Engineer Brad Robinson
-        </footer>
+        <AccessibilityProvider>
+          {/* Skip to Content Link for Keyboard Users */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-green-500 focus:p-4 focus:text-black focus:outline-none focus:ring-4 focus:ring-white"
+          >
+            Skip to main content
+          </a>
+
+          {children}
+
+          <ToasterClient />
+          <AdminToeQuizPopup />
+          <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
+            Built by Engineer Brad Robinson
+          </footer>
+        </AccessibilityProvider>
       </body>
     </html>
   );

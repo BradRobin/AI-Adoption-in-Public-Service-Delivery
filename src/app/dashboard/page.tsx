@@ -327,7 +327,7 @@ export default function Dashboard() {
             <InstallPrompt />
 
             {/* Main Content */}
-            <main className="relative z-10 mx-auto max-w-5xl px-6 py-12">
+            <main id="main-content" className="relative z-10 mx-auto max-w-5xl px-6 py-12">
                 {/* Welcome Section */}
                 <div className={`mb-12 text-center transition-all duration-700 ease-out ${isGreetingVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
                     <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl">

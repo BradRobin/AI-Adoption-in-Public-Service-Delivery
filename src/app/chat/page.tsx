@@ -357,7 +357,7 @@ export default function ChatPage() {
         </div>
       </nav>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col px-4 pt-20 pb-24">
+      <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-2xl flex-col px-4 pt-20 pb-24">
         <div className="flex min-h-[400px] flex-1 flex-col rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur max-h-[calc(100vh-6rem)]">
           <header className="border-b border-white/10 px-5 py-4">
             <h1 className="text-lg font-semibold text-white md:text-xl">
@@ -411,17 +411,17 @@ export default function ChatPage() {
                   </div>
                   {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
                     <div className="mt-2 flex items-center gap-3 px-2 text-white/40">
-                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Helpful">
-                        <ThumbsUp size={16} />
+                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Helpful" aria-label="Mark response as helpful">
+                        <ThumbsUp size={16} aria-hidden="true" />
                       </button>
-                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Not Helpful">
-                        <ThumbsDown size={16} />
+                      <button onClick={() => toast.success('Thanks for the feedback!')} className="hover:text-white transition-colors" title="Not Helpful" aria-label="Mark response as not helpful">
+                        <ThumbsDown size={16} aria-hidden="true" />
                       </button>
-                      <button onClick={() => handleCopy(message.content)} className="hover:text-white transition-colors" title="Copy">
-                        <Copy size={16} />
+                      <button onClick={() => handleCopy(message.content)} className="hover:text-white transition-colors" title="Copy" aria-label="Copy response to clipboard">
+                        <Copy size={16} aria-hidden="true" />
                       </button>
-                      <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud">
-                        <Volume2 size={16} />
+                      <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud" aria-label="Read response aloud">
+                        <Volume2 size={16} aria-hidden="true" />
                       </button>
                     </div>
                   )}
@@ -469,20 +469,23 @@ export default function ChatPage() {
                 <button
                   type="button"
                   onClick={() => setShowAvatar(!showAvatar)}
-                  className={`ml-2 flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                  className={`ml-2 flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
                   title="Toggle 3D Avatar"
+                  aria-label={showAvatar ? "Disable 3D Avatar" : "Enable 3D Avatar"}
+                  aria-pressed={showAvatar}
                 >
-                  {showAvatar ? <Video size={14} /> : <VideoOff size={14} />}
+                  {showAvatar ? <Video size={14} aria-hidden="true" /> : <VideoOff size={14} aria-hidden="true" />}
                   <span className="hidden sm:inline">Avatar</span>
                 </button>
               </div>
               <button
                 type="submit"
                 disabled={isThinking || input.trim().length === 0}
-                className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
+                aria-label={isThinking ? 'Sending message...' : 'Send message'}
+                className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
               >
                 {isThinking && (
-                  <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" />
+                  <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />
                 )}
                 {isThinking ? 'Thinking...' : 'Send'}
               </button>

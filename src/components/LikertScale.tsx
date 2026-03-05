@@ -44,9 +44,9 @@ export function LikertScale<T extends FieldValues>({
               return (
                 <label
                   key={opt.value}
-                  className={`flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm ${isSelected
-                      ? 'border-white/50 bg-white/10'
-                      : 'border-white/10 bg-black/40 hover:border-white/20'
+                  className={`flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-green-400 has-[:focus-visible]:outline-none ${isSelected
+                    ? 'border-white/50 bg-white/10'
+                    : 'border-white/10 bg-black/40 hover:border-white/20'
                     }`}
                 >
                   <input
@@ -56,11 +56,12 @@ export function LikertScale<T extends FieldValues>({
                     onChange={() => field.onChange(opt.value)}
                     onBlur={field.onBlur}
                     className="sr-only"
+                    aria-label={`${opt.label} - Score ${opt.value}`}
                   />
-                  <span className="text-center font-medium text-white">
+                  <span className="text-center font-medium text-white" aria-hidden="true">
                     {opt.value}
                   </span>
-                  <span className="ml-1 hidden text-white/80 sm:inline">
+                  <span className="ml-1 hidden text-white/80 sm:inline" aria-hidden="true">
                     — {opt.label}
                   </span>
                 </label>

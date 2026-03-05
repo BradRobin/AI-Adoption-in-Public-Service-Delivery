@@ -281,7 +281,7 @@ export default function AssessPage() {
           <NavigationMenu />
         </div>
       </nav>
-      <main className="relative z-10 mx-auto w-full max-w-2xl px-4 pt-20 pb-24">
+      <main id="main-content" className="relative z-10 mx-auto w-full max-w-2xl px-4 pt-20 pb-24">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur md:p-8">
           <h1 className="text-xl font-semibold text-white md:text-2xl">
             AI Readiness Assessment (TOE Framework)
