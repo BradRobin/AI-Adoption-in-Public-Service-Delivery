@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { NavigationMenu } from '@/components/NavigationMenu'
+import { CountySelect } from '@/components/CountySelect'
 import { supabase } from '@/lib/supabase/client'
 
 export default function ProfilePage() {
@@ -196,14 +197,13 @@ export default function ProfilePage() {
 
                         <div>
                             <label htmlFor="location" className="mb-1 block text-sm font-medium text-white/80">Location / County</label>
-                            <input
+                            <CountySelect
                                 id="location"
-                                type="text"
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
-                                placeholder="e.g. Nairobi, Mombasa, Kisumu"
-                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-white/20"
+                                onChange={setLocation}
+                                placeholder="Select your county"
                             />
+                            <p className="mt-1 text-xs text-white/40">Helps personalize AI responses to your region.</p>
                         </div>
 
                         <div className="pt-2 border-t border-white/10">

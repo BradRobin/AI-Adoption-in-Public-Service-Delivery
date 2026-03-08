@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import { CountySelect } from '@/components/CountySelect'
 
 type AuthMode = 'login' | 'signup'
 
@@ -41,6 +42,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [location, setLocation] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -101,17 +103,19 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
       const signupEmail = trimmedEmail
       const signupUsername = trimmedUsername
       const signupPassword = password
+      const signupLocation = location
       setEmail('')
       setUsername('')
       setPassword('')
+      setLocation('')
 
       try {
         setIsSubmitting(true)
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: signupEmail,
           password: signupPassword,
           options: {
-            data: { username: signupUsername },
+            data: { username: signupUsername, location: signupLocation },
             emailRedirectTo:
               typeof window !== 'undefined'
                 ? `${window.location.origin}/login`
@@ -123,6 +127,14 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
           setError(signUpError.message || 'Unable to sign up. Please try again.')
           toast.error(signUpError.message || 'Unable to sign up. Please try again.')
           return
+        }
+
+        // Update the profile with location if user was created
+        if (signUpData.user && signupLocation) {
+          await supabase
+            .from('profiles')
+            .update({ location: signupLocation })
+            .eq('id', signUpData.user.id)
         }
 
         // Ensure there is no active session so the user is prompted to log in.
@@ -364,6 +376,24 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="location"
+                className="mb-1 block text-sm font-medium text-white/80"
+              >
+                County (Optional)
+              </label>
+              <CountySelect
+                id="location"
+                value={location}
+                onChange={setLocation}
+                placeholder="Select your county"
+              />
+              <p className="mt-1 text-xs text-white/40">
+                Helps personalize AI responses to your region.
+              </p>
             </div>
           </>
         )}
