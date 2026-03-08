@@ -99,6 +99,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const [thinkingTime, setThinkingTime] = useState(0)
+  const [thinkingDurations, setThinkingDurations] = useState<Record<string, number>>({})
   const [isLocalAI, setIsLocalAI] = useState(true) // Default to Local (Ollama)
   const [showAvatar, setShowAvatar] = useState(false)
   const [avatarText, setAvatarText] = useState<string | null>(null)
@@ -111,6 +113,43 @@ export default function ChatPage() {
   const [editTitleValue, setEditTitleValue] = useState('')
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const thinkingTimeRef = useRef(0)
+
+  // Format thinking time as "Xs" or "Xm Ys"
+  const formatThinkingTime = (seconds: number): string => {
+    if (seconds < 60) {
+      return `${seconds}s`
+    }
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}m ${secs}s`
+  }
+
+  // Timer effect for tracking thinking duration
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (isThinking) {
+      setThinkingTime(0)
+      thinkingTimeRef.current = 0
+      interval = setInterval(() => {
+        setThinkingTime((prev) => {
+          const newVal = prev + 1
+          thinkingTimeRef.current = newVal
+          return newVal
+        })
+      }, 1000)
+    } else {
+      setThinkingTime(0)
+      thinkingTimeRef.current = 0
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [isThinking])
 
   useEffect(() => {
     const checkSession = async () => {
@@ -380,6 +419,8 @@ export default function ChatPage() {
       )
       toast.error('Chat service is unavailable right now. Please try again.')
     } finally {
+      // Capture the thinking duration for this message before resetting
+      setThinkingDurations((prev) => ({ ...prev, [placeholderId]: thinkingTimeRef.current }))
       setIsThinking(false)
 
       // Trigger Avatar Speech if enabled
@@ -671,10 +712,20 @@ export default function ChatPage() {
                         }`}
                     >
                       {isCurrentlyStreaming && message.content === '' ? (
-                        <div className="flex items-center gap-1 h-5 px-1">
-                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
-                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
-                          <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+                        <div className="flex items-center gap-2 h-5 px-1">
+                          <div className="flex items-center gap-1">
+                            <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
+                            <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
+                            <motion.div className="w-1.5 h-1.5 bg-white/70 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+                          </div>
+                          <motion.span
+                            className="text-xs text-white/60 font-mono"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                            {formatThinkingTime(thinkingTime)}
+                          </motion.span>
                         </div>
                       ) : (
                         message.content
@@ -694,6 +745,11 @@ export default function ChatPage() {
                         <button onClick={() => handleSpeak(message.content)} className="hover:text-white transition-colors" title="Read Aloud" aria-label="Read response aloud">
                           <Volume2 size={16} aria-hidden="true" />
                         </button>
+                        {thinkingDurations[message.id] !== undefined && thinkingDurations[message.id] > 0 && (
+                          <span className="text-xs text-white/40 ml-1">
+                            thought for {formatThinkingTime(thinkingDurations[message.id])}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -752,13 +808,13 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled={isThinking || input.trim().length === 0}
-                  aria-label={isThinking ? 'Sending message...' : 'Send message'}
+                  aria-label={isThinking ? `Thinking for ${formatThinkingTime(thinkingTime)}` : 'Send message'}
                   className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
                 >
                   {isThinking && (
                     <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />
                   )}
-                  {isThinking ? 'Thinking...' : 'Send'}
+                  {isThinking ? `${formatThinkingTime(thinkingTime)}` : 'Send'}
                 </button>
               </div>
             </form>
