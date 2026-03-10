@@ -21,10 +21,9 @@ const parser = new Parser<
 })
 
 /**
- * Strips HTML tags and decodes common HTML entities from a string.
- * Also removes trailing source attribution patterns.
+ * Strips HTML tags, decodes HTML entities, and removes source attribution patterns.
  * @param html - Raw HTML string to clean
- * @param source - Optional source name to strip from end
+ * @param source - Optional source name to strip
  * @returns Plain text string safe for display
  */
 function cleanHtml(html: string, source?: string): string {
@@ -48,20 +47,49 @@ function cleanHtml(html: string, source?: string): string {
     // Collapse multiple spaces and trim
     text = text.replace(/\s+/g, ' ').trim()
 
-    // Remove trailing source attribution if provided
+    // Remove source attribution patterns if provided
     if (source) {
-        const escapedSource = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        const trailingPatterns = [
-            new RegExp(`\\s*[-–—|]\\s*${escapedSource}\\s*$`, 'i'),
-            new RegExp(`\\s*\\[${escapedSource}\\]\\s*$`, 'i'),
-            new RegExp(`\\s*\\(${escapedSource}\\)\\s*$`, 'i'),
-        ]
-        for (const pattern of trailingPatterns) {
-            text = text.replace(pattern, '')
-        }
+        text = stripSourceFromText(text, source)
     }
 
     return text.trim()
+}
+
+/**
+ * Removes source name from text in various patterns.
+ * Handles trailing, leading, and inline source mentions.
+ * @param text - Text to clean
+ * @param source - Source name to remove
+ * @returns Text without source attribution
+ */
+function stripSourceFromText(text: string, source: string): string {
+    if (!text || !source) return text
+
+    const escapedSource = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    
+    // Patterns to remove (order matters - most specific first)
+    const patterns = [
+        // Trailing patterns: "... - Source", "... | Source", "... — Source"
+        new RegExp(`\\s*[-–—|:]\\s*${escapedSource}\\s*$`, 'gi'),
+        // Bracketed: "... [Source]", "... (Source)"
+        new RegExp(`\\s*[\\[\\(]${escapedSource}[\\]\\)]\\s*$`, 'gi'),
+        // Leading patterns: "Source - ...", "Source: ...", "Source | ..."
+        new RegExp(`^${escapedSource}\\s*[-–—|:]\\s*`, 'gi'),
+        // Inline with clear delimiters: " - Source - " or " | Source | "
+        new RegExp(`\\s*[-–—|]\\s*${escapedSource}\\s*[-–—|]\\s*`, 'gi'),
+        // Standalone at boundaries with punctuation
+        new RegExp(`\\s+[-–—]\\s*${escapedSource}\\s*\\.?\\s*$`, 'gi'),
+    ]
+
+    let result = text
+    for (const pattern of patterns) {
+        result = result.replace(pattern, ' ').trim()
+    }
+
+    // Clean up any resulting double spaces or trailing punctuation issues
+    result = result.replace(/\s+/g, ' ').replace(/\s*[\-–—|:]\s*$/, '').trim()
+
+    return result
 }
 
 /**
@@ -120,26 +148,31 @@ export async function GET() {
                 }
             }
 
+            // Clean title - strip source attribution from title too
+            const title = cleanHtml(item.title || 'Untitled', sourceName)
+
             // Use contentSnippet (auto-stripped by rss-parser) or clean the description
-            // Pass sourceName to strip trailing attribution
-            let snippet = item.contentSnippet || cleanHtml(item.content || item.summary || '', sourceName)
+            // Pass sourceName to strip attribution
+            let snippet = item.contentSnippet 
+                ? stripSourceFromText(item.contentSnippet, sourceName)
+                : cleanHtml(item.content || item.summary || '', sourceName)
 
-            // If using contentSnippet, also clean trailing source
-            if (item.contentSnippet) {
-                snippet = cleanHtml(snippet, sourceName)
-            }
-
-            // Truncate long snippets
-            if (snippet.length > 250) {
-                snippet = snippet.substring(0, 247) + '...'
+            // Truncate snippet to ~180 chars with word boundary
+            if (snippet.length > 180) {
+                snippet = snippet.substring(0, 177)
+                const lastSpace = snippet.lastIndexOf(' ')
+                if (lastSpace > 140) {
+                    snippet = snippet.substring(0, lastSpace)
+                }
+                snippet = snippet.replace(/[,;:\-–—]\s*$/, '') + '...'
             }
 
             return {
-                title: cleanHtml(item.title || 'Untitled'),
+                title,
                 link: item.link || '#',
                 pubDate: formatDate(item.pubDate || item.isoDate),
                 source: sourceName,
-                snippet,
+                snippet: snippet.trim(),
             }
         })
 
