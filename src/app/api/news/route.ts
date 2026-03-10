@@ -22,10 +22,12 @@ const parser = new Parser<
 
 /**
  * Strips HTML tags and decodes common HTML entities from a string.
+ * Also removes trailing source attribution patterns.
  * @param html - Raw HTML string to clean
+ * @param source - Optional source name to strip from end
  * @returns Plain text string safe for display
  */
-function cleanHtml(html: string): string {
+function cleanHtml(html: string, source?: string): string {
     if (!html) return ''
 
     // Remove HTML tags
@@ -44,7 +46,22 @@ function cleanHtml(html: string): string {
         .replace(/&#x2F;/g, '/')
 
     // Collapse multiple spaces and trim
-    return text.replace(/\s+/g, ' ').trim()
+    text = text.replace(/\s+/g, ' ').trim()
+
+    // Remove trailing source attribution if provided
+    if (source) {
+        const escapedSource = source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const trailingPatterns = [
+            new RegExp(`\\s*[-–—|]\\s*${escapedSource}\\s*$`, 'i'),
+            new RegExp(`\\s*\\[${escapedSource}\\]\\s*$`, 'i'),
+            new RegExp(`\\s*\\(${escapedSource}\\)\\s*$`, 'i'),
+        ]
+        for (const pattern of trailingPatterns) {
+            text = text.replace(pattern, '')
+        }
+    }
+
+    return text.trim()
 }
 
 /**
@@ -93,15 +110,7 @@ export async function GET() {
 
         // Map feed items to clean news objects, limited to 7 items
         const news = feed.items.slice(0, 7).map((item) => {
-            // Use contentSnippet (auto-stripped by rss-parser) or clean the description
-            let snippet = item.contentSnippet || cleanHtml(item.content || item.summary || '')
-
-            // Truncate long snippets
-            if (snippet.length > 250) {
-                snippet = snippet.substring(0, 247) + '...'
-            }
-
-            // Extract source name - rss-parser parses <source> as object or string
+            // Extract source name first - rss-parser parses <source> as object or string
             let sourceName = 'Google News'
             if (item.source) {
                 if (typeof item.source === 'string') {
@@ -109,6 +118,20 @@ export async function GET() {
                 } else if (typeof item.source === 'object' && '_' in item.source) {
                     sourceName = (item.source as { _: string })._ || 'Google News'
                 }
+            }
+
+            // Use contentSnippet (auto-stripped by rss-parser) or clean the description
+            // Pass sourceName to strip trailing attribution
+            let snippet = item.contentSnippet || cleanHtml(item.content || item.summary || '', sourceName)
+
+            // If using contentSnippet, also clean trailing source
+            if (item.contentSnippet) {
+                snippet = cleanHtml(snippet, sourceName)
+            }
+
+            // Truncate long snippets
+            if (snippet.length > 250) {
+                snippet = snippet.substring(0, 247) + '...'
             }
 
             return {
