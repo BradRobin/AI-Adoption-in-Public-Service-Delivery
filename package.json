@@ -40,6 +40,7 @@
     "react-hook-form": "^7.71.1",
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.7.0",
+    "rss-parser": "^3.13.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
