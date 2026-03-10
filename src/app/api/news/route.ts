@@ -93,6 +93,71 @@ function stripSourceFromText(text: string, source: string): string {
 }
 
 /**
+ * Removes duplicate title text from the beginning of a snippet.
+ * Google News RSS often repeats the title in the description field.
+ * @param snippet - The snippet text to clean
+ * @param title - The title to check for and remove
+ * @returns Snippet with leading title text removed
+ */
+function removeTitleFromSnippet(snippet: string, title: string): string {
+    if (!snippet || !title) return snippet
+
+    // Normalize both strings for comparison (lowercase, collapse spaces, remove punctuation)
+    const normalize = (str: string) =>
+        str.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+
+    const normalizedSnippet = normalize(snippet)
+    const normalizedTitle = normalize(title)
+
+    // If snippet is essentially the same as title, return empty
+    if (normalizedSnippet === normalizedTitle) {
+        return ''
+    }
+
+    // If snippet starts with the title, remove it
+    if (normalizedSnippet.startsWith(normalizedTitle)) {
+        // Find where title ends in original snippet (accounting for case/punctuation differences)
+        // Use a progressive match approach
+        const titleWords = normalizedTitle.split(' ')
+        const snippetWords = snippet.split(/\s+/)
+        
+        let matchCount = 0
+        for (let i = 0; i < titleWords.length && i < snippetWords.length; i++) {
+            const snippetWordNorm = normalize(snippetWords[i])
+            if (snippetWordNorm === titleWords[i] || snippetWordNorm.startsWith(titleWords[i])) {
+                matchCount++
+            } else {
+                break
+            }
+        }
+
+        if (matchCount >= titleWords.length * 0.8) {
+            // Remove matched words and clean up
+            const remaining = snippetWords.slice(matchCount).join(' ')
+            // Clean leading punctuation/connectors
+            return remaining.replace(/^[\s,;:\-–—|.]+/, '').trim()
+        }
+    }
+
+    // Check if title appears embedded with minor variations
+    // Try fuzzy prefix match (first 60% of title words)
+    const titleWordCount = normalizedTitle.split(' ').length
+    const prefixWordCount = Math.ceil(titleWordCount * 0.6)
+    const titlePrefix = normalizedTitle.split(' ').slice(0, prefixWordCount).join(' ')
+    
+    if (normalizedSnippet.startsWith(titlePrefix)) {
+        const snippetWords = snippet.split(/\s+/)
+        const remaining = snippetWords.slice(prefixWordCount).join(' ')
+        return remaining.replace(/^[\s,;:\-–—|.]+/, '').trim()
+    }
+
+    return snippet
+}
+
+/**
  * Formats a date string into a human-readable relative or absolute format.
  * @param dateStr - ISO date string or RSS pubDate
  * @returns Formatted date string (e.g., "Today", "Yesterday", "Mar 5, 2026")
@@ -157,11 +222,15 @@ export async function GET() {
                 ? stripSourceFromText(item.contentSnippet, sourceName)
                 : cleanHtml(item.content || item.summary || '', sourceName)
 
-            // Truncate snippet to ~180 chars with word boundary
-            if (snippet.length > 180) {
-                snippet = snippet.substring(0, 177)
+            // Remove duplicate title from snippet
+            // Google News often puts the title text at the start of description
+            snippet = removeTitleFromSnippet(snippet, title)
+
+            // Truncate snippet to ~150 chars with word boundary
+            if (snippet.length > 150) {
+                snippet = snippet.substring(0, 147)
                 const lastSpace = snippet.lastIndexOf(' ')
-                if (lastSpace > 140) {
+                if (lastSpace > 100) {
                     snippet = snippet.substring(0, lastSpace)
                 }
                 snippet = snippet.replace(/[,;:\-–—]\s*$/, '') + '...'
@@ -172,7 +241,7 @@ export async function GET() {
                 link: item.link || '#',
                 pubDate: formatDate(item.pubDate || item.isoDate),
                 source: sourceName,
-                snippet: snippet.trim(),
+                snippet: snippet.trim() || '', // Empty if no unique content
             }
         })
 
