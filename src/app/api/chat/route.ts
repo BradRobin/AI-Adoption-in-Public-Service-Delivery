@@ -56,9 +56,11 @@ function generateSystemPrompt(role: string, location: string) {
  */
 function sseEncode(event: string, data: string) {
   // SSE format: event + data lines + blank line
-  // Ensure no bare CRLF issues; keep it simple and consistent.
+  // For multi-line data, each line must be prefixed with "data: "
   const safeData = data.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
-  return `event: ${event}\ndata: ${safeData}\n\n`
+  const lines = safeData.split('\n')
+  const dataLines = lines.map(line => `data: ${line}`).join('\n')
+  return `event: ${event}\n${dataLines}\n\n`
 }
 
 /**

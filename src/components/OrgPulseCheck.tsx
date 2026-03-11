@@ -66,7 +66,7 @@ export function OrgPulseCheck() {
                     provider: 'openai',
                     systemPrompt: `You are an AI Digital Maturity Analyst. Estimate digital maturity for the organization using the provided search web/X results.
                     
-Your output MUST be a valid JSON object strictly matching this format:
+Your output MUST be ONLY a valid JSON object with no additional text. Use this exact format:
 {
   "level": "Low" | "Medium" | "High" | "Unknown",
   "insights": ["List 2-4 key findings regarding their AI/digital adoption. Use inline citations like [1] that map to the provided sources."],
@@ -74,47 +74,87 @@ Your output MUST be a valid JSON object strictly matching this format:
   "disclaimer": "This analysis relies on recent public data and surface web mentions. No deep scraping was performed."
 }
 
-If 'No recent public search results' is found, provide generic recommendations based on their assumed sector and emphasize the lack of public AI transparency in the insights. Do NOT halucinate sources.`
+If 'No recent public search results' is found, provide generic recommendations based on their assumed sector and emphasize the lack of public AI transparency in the insights. Do NOT hallucinate sources. Output ONLY the JSON, no markdown, no explanation.`
                 }),
             })
 
             if (!res.ok) throw new Error('Chat API returned error')
 
-            const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader()
+            if (!res.body) throw new Error('No response body')
+            
+            // Use the same approach as the chat page for stream reading
+            const reader = res.body.getReader()
+            const decoder = new TextDecoder()
             let accumulated = ''
 
             // Secure, single-pass reading
             while (true) {
-                const { value, done } = await reader?.read() || {}
+                const { value, done } = await reader.read()
                 if (done) break
-                accumulated += value
+                if (value) accumulated += decoder.decode(value, { stream: true })
             }
 
             // Extract data from SSE format safely
+            // Parse SSE events and collect token data
             let jsonString = ''
-            const parts = accumulated.split('\n\n')
-            for (const part of parts) {
-                const lines = part.split('\n')
+            const eventBlocks = accumulated.split('\n\n')
+            for (const block of eventBlocks) {
+                const lines = block.split('\n')
+                let eventType = ''
+                const dataParts: string[] = []
+                
                 for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const rawData = line.slice(6)
-                        if (rawData !== '[DONE]' && rawData !== 'ok') {
-                            jsonString += rawData
-                        }
+                    if (line.startsWith('event:')) {
+                        eventType = line.slice(6).trim()
+                    } else if (line.startsWith('data:')) {
+                        const dataVal = line.slice(5)
+                        // Strip the single mandatory space per SSE spec
+                        dataParts.push(dataVal.startsWith(' ') ? dataVal.slice(1) : dataVal)
                     }
+                }
+                
+                // Only collect token events, skip open/done/error/info
+                if (eventType === 'token' && dataParts.length > 0) {
+                    // Join multiple data lines with newlines per SSE spec
+                    jsonString += dataParts.join('\n')
                 }
             }
 
-            const cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim()
+            // Debug: log raw accumulated data
+            console.log('Raw SSE accumulated length:', accumulated.length)
+            console.log('Extracted JSON string length:', jsonString.length)
+            console.log('JSON string preview:', jsonString.slice(0, 300))
+
+            // Clean up markdown code blocks and extract JSON object
+            let cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim()
+            
+            // Extract JSON object from response - handle cases where LLM adds prose
+            const jsonMatch = cleanJson.match(/\{[\s\S]*\}/)
+            if (!jsonMatch) {
+                console.error('Failed to parse response. Clean JSON:', cleanJson.slice(0, 500))
+                console.error('Raw accumulated:', accumulated.slice(0, 1000))
+                throw new Error('No valid JSON found in response')
+            }
+            cleanJson = jsonMatch[0]
+            
+            console.log('Final JSON to parse:', cleanJson.slice(0, 300))
             const parsed = JSON.parse(cleanJson)
 
-            // Attach sources for UI rendering
-            parsed.sources = articles
-            setResult(parsed)
+            // Validate and ensure required fields have defaults
+            const validResult: AssessmentResult = {
+                level: ['Low', 'Medium', 'High', 'Unknown'].includes(parsed.level) ? parsed.level : 'Unknown',
+                insights: Array.isArray(parsed.insights) ? parsed.insights : ['No specific insights available.'],
+                recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : ['Consider conducting a formal digital maturity assessment.'],
+                disclaimer: typeof parsed.disclaimer === 'string' ? parsed.disclaimer : 'This analysis relies on public data and may not be comprehensive.',
+                sources: articles
+            }
+
+            setResult(validResult)
 
         } catch (e) {
-            console.error('Org Analysis Error', e)
-            toast.error('Analysis failed. Please try again.')
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error'
+            console.error('Org Analysis Error:', errorMessage, e)
+            toast.error(`Analysis failed: ${errorMessage}`)
         } finally {
             setIsLoading(false)
         }
