@@ -97,8 +97,15 @@ If 'No recent public search results' is found, provide generic recommendations b
             // Extract data from SSE format safely
             // Parse SSE events and collect token data
             let jsonString = ''
-            const eventBlocks = accumulated.split('\n\n')
+            let errorMessage = ''
+            
+            // Split by double newlines, but also handle \r\n line endings
+            const normalizedAccumulated = accumulated.replace(/\r\n/g, '\n')
+            const eventBlocks = normalizedAccumulated.split('\n\n')
+            
             for (const block of eventBlocks) {
+                if (!block.trim()) continue
+                
                 const lines = block.split('\n')
                 let eventType = ''
                 const dataParts: string[] = []
@@ -113,10 +120,15 @@ If 'No recent public search results' is found, provide generic recommendations b
                     }
                 }
                 
-                // Only collect token events, skip open/done/error/info
+                const joinedData = dataParts.join('\n')
+                
+                // Collect token events for JSON reconstruction
                 if (eventType === 'token' && dataParts.length > 0) {
-                    // Join multiple data lines with newlines per SSE spec
-                    jsonString += dataParts.join('\n')
+                    jsonString += joinedData
+                }
+                // Capture error events from the stream
+                else if (eventType === 'error' && dataParts.length > 0) {
+                    errorMessage = joinedData
                 }
             }
 
@@ -125,20 +137,50 @@ If 'No recent public search results' is found, provide generic recommendations b
             console.log('Extracted JSON string length:', jsonString.length)
             console.log('JSON string preview:', jsonString.slice(0, 300))
 
+            // Check if there was an error event from the API
+            if (errorMessage) {
+                throw new Error(`API Error: ${errorMessage}`)
+            }
+
+            // Handle empty response
+            if (!jsonString.trim()) {
+                throw new Error('No response received from AI')
+            }
+
             // Clean up markdown code blocks and extract JSON object
-            let cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim()
+            let cleanJson = jsonString.replace(/```json/gi, '').replace(/```/g, '').trim()
             
             // Extract JSON object from response - handle cases where LLM adds prose
+            // Use a more robust regex that finds the outermost complete JSON object
             const jsonMatch = cleanJson.match(/\{[\s\S]*\}/)
             if (!jsonMatch) {
+                // If no JSON found, create a fallback response
                 console.error('Failed to parse response. Clean JSON:', cleanJson.slice(0, 500))
                 console.error('Raw accumulated:', accumulated.slice(0, 1000))
-                throw new Error('No valid JSON found in response')
+                
+                // Try to provide a meaningful fallback instead of failing completely
+                const fallbackResult: AssessmentResult = {
+                    level: 'Unknown',
+                    insights: ['Unable to generate structured analysis. The AI response was not in the expected format.'],
+                    recommendations: ['Try searching again or try a more specific organization name.'],
+                    disclaimer: 'Analysis could not be completed. This may be due to limited public information about the organization.',
+                    sources: articles
+                }
+                setResult(fallbackResult)
+                setIsLoading(false)
+                return
             }
             cleanJson = jsonMatch[0]
             
             console.log('Final JSON to parse:', cleanJson.slice(0, 300))
-            const parsed = JSON.parse(cleanJson)
+            
+            let parsed: any
+            try {
+                parsed = JSON.parse(cleanJson)
+            } catch (parseErr) {
+                console.error('JSON parse error:', parseErr, 'Clean JSON:', cleanJson.slice(0, 500))
+                throw new Error('Invalid JSON format in AI response')
+            }
 
             // Validate and ensure required fields have defaults
             const validResult: AssessmentResult = {
