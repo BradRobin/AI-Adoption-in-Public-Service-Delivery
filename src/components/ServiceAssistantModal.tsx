@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Bot, AlertTriangle, FileText, CarFront, Droplets, GraduationCap } from 'lucide-react'
+import { X, Send, Bot, AlertTriangle, FileText, CarFront, Droplets, GraduationCap, Stethoscope, Briefcase } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -81,8 +81,29 @@ Rules:
 /**
  * Default fallback prompt used when a specific service ID prompt map is not found.
  */
-// Default prompt if ID not found
 const DEFAULT_PROMPT = `You are a helpful assistant for Kenyan public services. Answer questions concisely about this service.`
+
+/**
+ * Service-specific logos for the modal header.
+ */
+const SERVICE_LOGOS: Record<string, string> = {
+    health: '/images/sha-logo.png',
+    transport: '/images/NTSA-transport.png',
+    water: '/images/water-services.png',
+    education: '/images/education-HELB.png',
+    ajira: '/images/Ajira-digital.png'
+}
+
+/**
+ * Service-specific icons for the modal header.
+ */
+const SERVICE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+    health: Stethoscope,
+    transport: CarFront,
+    water: Droplets,
+    education: GraduationCap,
+    ajira: Briefcase
+}
 
 /**
  * ServiceAssistantModal Component
@@ -235,9 +256,17 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-white/10 bg-black/40 px-6 py-4">
                         <div className="flex items-center gap-3">
-                            <div className="inline-flex items-center justify-center rounded-lg bg-green-500/10 p-2">
-                                {renderIcon(20)}
-                            </div>
+                            {SERVICE_LOGOS[serviceId] ? (
+                                <img 
+                                    src={SERVICE_LOGOS[serviceId]} 
+                                    alt={`${serviceTitle} logo`}
+                                    className="h-10 w-auto object-contain"
+                                />
+                            ) : (
+                                <div className="inline-flex items-center justify-center rounded-lg bg-green-500/10 p-2">
+                                    {renderIcon(20)}
+                                </div>
+                            )}
                             <div>
                                 <h3 className="font-semibold text-white">{serviceTitle} Assistant</h3>
                                 <p className="text-xs text-green-400">AI Agent (Local/Private)</p>
@@ -252,9 +281,19 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                     <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                         {messages.length === 0 && (
                             <div className="mt-8 flex flex-col items-center text-center text-white/50 space-y-4">
-                                <div className="rounded-full bg-white/5 p-5">
-                                    {renderIcon(32)}
-                                </div>
+                                {SERVICE_LOGOS[serviceId] ? (
+                                    <div className="rounded-2xl bg-white/5 p-4">
+                                        <img 
+                                            src={SERVICE_LOGOS[serviceId]} 
+                                            alt={`${serviceTitle} logo`}
+                                            className="h-16 w-auto object-contain"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="rounded-full bg-white/5 p-5">
+                                        {renderIcon(32)}
+                                    </div>
+                                )}
                                 <div className="max-w-[80%] space-y-2">
                                     <h4 className="font-medium text-white/80">Welcome to the {serviceTitle} AI Assistant</h4>
                                     <p className="text-sm leading-relaxed">

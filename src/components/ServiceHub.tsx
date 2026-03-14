@@ -15,7 +15,7 @@ import { ServiceAssistantModal } from './ServiceAssistantModal'
 
 /**
  * Defines the static list of public services available in the hub.
- * Each entry configures the display title, description, external link, and UI styling.
+ * Each entry configures the display title, description, external link, UI styling, and optional logo.
  */
 const services = [
     {
@@ -25,7 +25,8 @@ const services = [
         link: 'https://sha.ecitizen.go.ke/',
         icon: Stethoscope,
         color: 'text-red-400',
-        bg: 'bg-red-400/10'
+        bg: 'bg-red-400/10',
+        logo: '/images/sha-logo.png'
     },
     {
         id: 'transport',
@@ -34,7 +35,8 @@ const services = [
         link: 'https://ntsa.ecitizen.go.ke/',
         icon: CarFront,
         color: 'text-blue-400',
-        bg: 'bg-blue-400/10'
+        bg: 'bg-blue-400/10',
+        logo: '/images/NTSA-transport.png'
     },
     {
         id: 'water',
@@ -43,7 +45,8 @@ const services = [
         link: 'https://nairobiwater.ecitizen.go.ke/',
         icon: Droplets,
         color: 'text-cyan-400',
-        bg: 'bg-cyan-400/10'
+        bg: 'bg-cyan-400/10',
+        logo: '/images/water-services.png'
     },
     {
         id: 'education',
@@ -52,7 +55,8 @@ const services = [
         link: 'https://helb.ecitizen.go.ke/',
         icon: GraduationCap,
         color: 'text-yellow-400',
-        bg: 'bg-yellow-400/10'
+        bg: 'bg-yellow-400/10',
+        logo: '/images/education-HELB.png'
     },
     {
         id: 'ajira',
@@ -61,7 +65,8 @@ const services = [
         link: 'https://ajiradigital.go.ke/',
         icon: Briefcase,
         color: 'text-purple-400',
-        bg: 'bg-purple-400/10'
+        bg: 'bg-purple-400/10',
+        logo: '/images/Ajira-digital.png'
     }
 ]
 
@@ -86,15 +91,34 @@ export function ServiceHub() {
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 transition-all hover:border-white/20 hover:bg-white/10"
                     >
+                        {/* Background logo with fade effect for services with logos */}
+                        {service.logo && (
+                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+                                <img 
+                                    src={service.logo} 
+                                    alt=""
+                                    className="h-full w-full object-cover opacity-25 group-hover:opacity-50 transition-opacity duration-300"
+                                    style={{
+                                        maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)',
+                                        WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)'
+                                    }}
+                                />
+                            </div>
+                        )}
+                        
                         {/* Interactive Link Area for Title/Desc */}
                         <a
                             href={service.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block space-y-3 flex-1"
+                            className="relative z-10 block space-y-3 flex-1"
                         >
-                            <div className={`inline-flex items-center justify-center rounded-lg p-2 ${service.bg} ${service.color}`}>
-                                <service.icon size={24} />
+                            <div className="flex items-center gap-3">
+                                {!service.logo && (
+                                    <div className={`inline-flex items-center justify-center rounded-lg p-2 ${service.bg} ${service.color}`}>
+                                        <service.icon size={24} />
+                                    </div>
+                                )}
                             </div>
                             <h3 className="text-lg font-medium text-white group-hover:text-green-400 transition-colors">
                                 {service.title}
@@ -105,7 +129,7 @@ export function ServiceHub() {
                         </a>
 
                         {/* Footer Actions */}
-                        <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+                        <div className="relative z-10 mt-4 flex items-center justify-between border-t border-white/5 pt-3">
                             <a
                                 href={service.link}
                                 target="_blank"
