@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
 /**
- * The structured shape of the digital maturity assessment returned by the AI.
+ * The structured shape of the digital maturity assessment.
  */
 type AssessmentResult = {
     level: 'Low' | 'Medium' | 'High' | 'Unknown'
@@ -18,9 +18,106 @@ type AssessmentResult = {
 }
 
 /**
+ * Keywords used for heuristic-based digital maturity analysis.
+ */
+const AI_KEYWORDS = ['ai', 'artificial intelligence', 'machine learning', 'chatbot', 'genai', 'automation', 'digital transformation', 'smart', 'data analytics', 'predictive']
+const TECH_KEYWORDS = ['digital', 'online', 'platform', 'app', 'mobile', 'cloud', 'technology', 'innovation', 'ict', 'e-government', 'e-service']
+
+/**
+ * Analyzes search results using keyword matching to estimate digital maturity.
+ * No LLM required - pure heuristic analysis.
+ */
+function analyzeWithHeuristics(orgName: string, articles: { title: string, link: string, source: string }[]): AssessmentResult {
+    if (articles.length === 0) {
+        return {
+            level: 'Unknown',
+            insights: [
+                `No recent public mentions found for "${orgName}" related to AI or digital initiatives.`,
+                'This could indicate limited public communication about technology adoption.',
+                'The organization may be in early stages of digital transformation or maintains a low public profile.'
+            ],
+            recommendations: [
+                'Consider conducting a formal digital maturity assessment.',
+                'Explore AI adoption strategies used by similar organizations in Kenya.',
+                'Increase public communication about digital initiatives to build stakeholder confidence.'
+            ],
+            disclaimer: 'This analysis is based on publicly available news mentions. No direct organizational data was accessed.',
+            sources: []
+        }
+    }
+
+    // Count keyword matches across all article titles
+    let aiScore = 0
+    let techScore = 0
+    const insights: string[] = []
+    
+    const allTitles = articles.map(a => a.title.toLowerCase()).join(' ')
+    
+    AI_KEYWORDS.forEach(keyword => {
+        if (allTitles.includes(keyword)) aiScore++
+    })
+    
+    TECH_KEYWORDS.forEach(keyword => {
+        if (allTitles.includes(keyword)) techScore++
+    })
+
+    // Determine maturity level based on scores
+    let level: AssessmentResult['level']
+    if (aiScore >= 3) {
+        level = 'High'
+        insights.push(`Strong AI presence detected: Found ${aiScore} AI-related keywords in recent news mentions.`)
+    } else if (aiScore >= 1 || techScore >= 3) {
+        level = 'Medium'
+        insights.push(`Moderate digital presence: Found ${aiScore} AI-related and ${techScore} technology keywords in news.`)
+    } else if (techScore >= 1) {
+        level = 'Low'
+        insights.push(`Basic digital presence detected with ${techScore} technology-related mentions.`)
+    } else {
+        level = 'Low'
+        insights.push('Limited technology-related keywords found in recent news coverage.')
+    }
+
+    // Add source-specific insights
+    articles.forEach((article, i) => {
+        const titleLower = article.title.toLowerCase()
+        if (titleLower.includes('ai') || titleLower.includes('artificial intelligence')) {
+            insights.push(`[${i + 1}] Active AI initiative mentioned: "${article.title.slice(0, 80)}..."`)
+        } else if (titleLower.includes('digital') || titleLower.includes('technology')) {
+            insights.push(`[${i + 1}] Digital initiative covered: "${article.title.slice(0, 80)}..."`)
+        }
+    })
+
+    // Cap insights at 4
+    const finalInsights = insights.slice(0, 4)
+
+    // Generate recommendations based on level
+    const recommendations: string[] = []
+    if (level === 'High') {
+        recommendations.push('Continue investing in AI capabilities and consider sharing best practices.')
+        recommendations.push('Explore advanced AI applications like predictive analytics for service delivery.')
+    } else if (level === 'Medium') {
+        recommendations.push('Accelerate AI adoption by piloting chatbots or automated service systems.')
+        recommendations.push('Partner with local tech hubs or universities for AI capacity building.')
+    } else {
+        recommendations.push('Start with foundational digital services before advancing to AI.')
+        recommendations.push('Conduct staff training on digital tools and data literacy.')
+        recommendations.push('Consider implementing basic automation for repetitive processes.')
+    }
+
+    return {
+        level,
+        insights: finalInsights,
+        recommendations: recommendations.slice(0, 3),
+        disclaimer: 'This analysis is based on keyword analysis of recent news mentions. It provides a surface-level estimate and may not reflect internal digital capabilities.',
+        sources: articles
+    }
+}
+
+/**
  * OrgPulseCheck Component
- * Allows users to enter an organization name to receive an AI-generated,
- * real-time estimation of their digital maturity based on the TOE framework.
+ * Allows users to enter an organization name to receive a real-time estimation
+ * of their digital maturity based on web search results and keyword analysis.
+ * Does NOT require an LLM/API key - uses heuristic analysis.
  */
 export function OrgPulseCheck() {
     const [orgName, setOrgName] = useState('')
@@ -42,156 +139,14 @@ export function OrgPulseCheck() {
                 return
             }
 
-            // 1. Fetch search results (simulated web + x search)
+            // Fetch search results from Google News RSS
             const searchRes = await fetch(`/api/org-search?q=${encodeURIComponent(orgName)}`)
             const searchData = await searchRes.json()
             const articles = searchData.articles || []
 
-            let searchContext = ''
-            if (articles.length > 0) {
-                searchContext = "Recent Web & X Mentions Found:\n" + articles.map((a: any, i: number) => `[${i + 1}] Title: ${a.title} | Source: ${a.source}`).join('\n')
-            } else {
-                searchContext = "No recent public search results or mentions found on Web/X for this organization."
-            }
-
-            // 2. Fetch LLM stream with the injected sources
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({
-                    messages: [{ role: 'user', content: `Analyze: ${orgName}\n\n${searchContext}` }],
-                    provider: 'openai',
-                    systemPrompt: `You are an AI Digital Maturity Analyst. Estimate digital maturity for the organization using the provided search web/X results.
-                    
-Your output MUST be ONLY a valid JSON object with no additional text. Use this exact format:
-{
-  "level": "Low" | "Medium" | "High" | "Unknown",
-  "insights": ["List 2-4 key findings regarding their AI/digital adoption. Use inline citations like [1] that map to the provided sources."],
-  "recommendations": ["List 2 actionable recommendations, e.g. 'Bolster with local LLM for privacy'"],
-  "disclaimer": "This analysis relies on recent public data and surface web mentions. No deep scraping was performed."
-}
-
-If 'No recent public search results' is found, provide generic recommendations based on their assumed sector and emphasize the lack of public AI transparency in the insights. Do NOT hallucinate sources. Output ONLY the JSON, no markdown, no explanation.`
-                }),
-            })
-
-            if (!res.ok) throw new Error('Chat API returned error')
-
-            if (!res.body) throw new Error('No response body')
-            
-            // Use the same approach as the chat page for stream reading
-            const reader = res.body.getReader()
-            const decoder = new TextDecoder()
-            let accumulated = ''
-
-            // Secure, single-pass reading
-            while (true) {
-                const { value, done } = await reader.read()
-                if (done) break
-                if (value) accumulated += decoder.decode(value, { stream: true })
-            }
-
-            // Extract data from SSE format safely
-            // Parse SSE events and collect token data
-            let jsonString = ''
-            let errorMessage = ''
-            
-            // Split by double newlines, but also handle \r\n line endings
-            const normalizedAccumulated = accumulated.replace(/\r\n/g, '\n')
-            const eventBlocks = normalizedAccumulated.split('\n\n')
-            
-            for (const block of eventBlocks) {
-                if (!block.trim()) continue
-                
-                const lines = block.split('\n')
-                let eventType = ''
-                const dataParts: string[] = []
-                
-                for (const line of lines) {
-                    if (line.startsWith('event:')) {
-                        eventType = line.slice(6).trim()
-                    } else if (line.startsWith('data:')) {
-                        const dataVal = line.slice(5)
-                        // Strip the single mandatory space per SSE spec
-                        dataParts.push(dataVal.startsWith(' ') ? dataVal.slice(1) : dataVal)
-                    }
-                }
-                
-                const joinedData = dataParts.join('\n')
-                
-                // Collect token events for JSON reconstruction
-                if (eventType === 'token' && dataParts.length > 0) {
-                    jsonString += joinedData
-                }
-                // Capture error events from the stream
-                else if (eventType === 'error' && dataParts.length > 0) {
-                    errorMessage = joinedData
-                }
-            }
-
-            // Debug: log raw accumulated data
-            console.log('Raw SSE accumulated length:', accumulated.length)
-            console.log('Extracted JSON string length:', jsonString.length)
-            console.log('JSON string preview:', jsonString.slice(0, 300))
-
-            // Check if there was an error event from the API
-            if (errorMessage) {
-                throw new Error(`API Error: ${errorMessage}`)
-            }
-
-            // Handle empty response
-            if (!jsonString.trim()) {
-                throw new Error('No response received from AI')
-            }
-
-            // Clean up markdown code blocks and extract JSON object
-            let cleanJson = jsonString.replace(/```json/gi, '').replace(/```/g, '').trim()
-            
-            // Extract JSON object from response - handle cases where LLM adds prose
-            // Use a more robust regex that finds the outermost complete JSON object
-            const jsonMatch = cleanJson.match(/\{[\s\S]*\}/)
-            if (!jsonMatch) {
-                // If no JSON found, create a fallback response
-                console.error('Failed to parse response. Clean JSON:', cleanJson.slice(0, 500))
-                console.error('Raw accumulated:', accumulated.slice(0, 1000))
-                
-                // Try to provide a meaningful fallback instead of failing completely
-                const fallbackResult: AssessmentResult = {
-                    level: 'Unknown',
-                    insights: ['Unable to generate structured analysis. The AI response was not in the expected format.'],
-                    recommendations: ['Try searching again or try a more specific organization name.'],
-                    disclaimer: 'Analysis could not be completed. This may be due to limited public information about the organization.',
-                    sources: articles
-                }
-                setResult(fallbackResult)
-                setIsLoading(false)
-                return
-            }
-            cleanJson = jsonMatch[0]
-            
-            console.log('Final JSON to parse:', cleanJson.slice(0, 300))
-            
-            let parsed: any
-            try {
-                parsed = JSON.parse(cleanJson)
-            } catch (parseErr) {
-                console.error('JSON parse error:', parseErr, 'Clean JSON:', cleanJson.slice(0, 500))
-                throw new Error('Invalid JSON format in AI response')
-            }
-
-            // Validate and ensure required fields have defaults
-            const validResult: AssessmentResult = {
-                level: ['Low', 'Medium', 'High', 'Unknown'].includes(parsed.level) ? parsed.level : 'Unknown',
-                insights: Array.isArray(parsed.insights) ? parsed.insights : ['No specific insights available.'],
-                recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : ['Consider conducting a formal digital maturity assessment.'],
-                disclaimer: typeof parsed.disclaimer === 'string' ? parsed.disclaimer : 'This analysis relies on public data and may not be comprehensive.',
-                sources: articles
-            }
-
-            setResult(validResult)
+            // Analyze using keyword-based heuristics (no LLM required)
+            const analysis = analyzeWithHeuristics(orgName, articles)
+            setResult(analysis)
 
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : 'Unknown error'
@@ -209,7 +164,7 @@ If 'No recent public search results' is found, provide generic recommendations b
                 Organization Pulse Check
             </h2>
             <p className="text-sm text-white/60 mb-6">
-                Enter an organization name to get an instant, AI-estimated digital maturity profile.
+                Enter an organization name to get an instant digital maturity estimate based on public news.
             </p>
 
             <form onSubmit={handleAnalyze} className="relative mb-6">
