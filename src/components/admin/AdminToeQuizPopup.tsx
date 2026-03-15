@@ -1,3 +1,10 @@
+/**
+ * @file AdminToeQuizPopup.tsx
+ * @description Continuous assessment popup for admins to provide quick TOE ratings.
+ * Randomly presents questions from the TOE framework and updates assessment scores.
+ * Demonstrates "continuous assessment" concept for ongoing readiness tracking.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,8 +17,17 @@ import type { ToeSection } from '@/data/toe-questions'
 import { TOE_QUESTIONS } from '@/data/toe-questions'
 import type { DimensionScores, ToeScores } from '@/lib/toe-scoring'
 
+/**
+ * Routes where the continuous assessment popup may appear.
+ * Popup triggers randomly when admins navigate to these pages.
+ */
 const TRIGGER_ROUTES = ['/dashboard', '/chat', '/privacy']
 
+/**
+ * AdminToeQuizPopup Component
+ * Floating popup that occasionally prompts admin users with a single TOE question.
+ * Answers incrementally update the user's overall assessment scores in real-time.
+ */
 export function AdminToeQuizPopup() {
     const pathname = usePathname()
     const [isVisible, setIsVisible] = useState(false)

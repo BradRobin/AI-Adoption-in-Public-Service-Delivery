@@ -1,3 +1,10 @@
+/**
+ * @file admin/page.tsx
+ * @description Admin dashboard overview page with key performance indicators.
+ * Displays system statistics including user counts, active users, services, and adoption rates.
+ * Server component that fetches data directly from Supabase with proper caching.
+ */
+
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import {
@@ -10,9 +17,15 @@ import {
 } from 'lucide-react'
 import { KpiCard } from '@/components/admin/KpiCard'
 
+/** Total number of integrated public services (matches ServiceHub configuration) */
 // Hardcoded for now as defined in ServiceHub
 const TOTAL_SERVICES = 5
 
+/**
+ * AdminPage Component
+ * Server-rendered admin dashboard homepage displaying system KPIs.
+ * Fetches live statistics from the database including user counts and adoption metrics.
+ */
 export default async function AdminPage() {
     const cookieStore = await cookies()
 

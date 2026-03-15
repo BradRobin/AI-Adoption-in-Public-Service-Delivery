@@ -1,3 +1,10 @@
+/**
+ * @file NewsFeed.tsx
+ * @description Real-time news feed component displaying AI and public service news.
+ * Fetches articles from the internal /api/news endpoint which proxies Google News RSS.
+ * Features loading skeletons, error handling, and manual refresh capability.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -9,10 +16,15 @@ import toast from 'react-hot-toast'
  * Represents a single news item sourced from the RSS feed.
  */
 type NewsItem = {
+    /** Article headline text */
     title: string
+    /** URL to the full article */
     link: string
+    /** Formatted publication date */
     pubDate: string
+    /** News outlet name */
     source: string
+    /** Optional article summary/excerpt */
     snippet?: string
 }
 

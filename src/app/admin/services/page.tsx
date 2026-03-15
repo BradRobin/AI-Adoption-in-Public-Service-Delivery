@@ -1,5 +1,16 @@
+/**
+ * @file admin/services/page.tsx
+ * @description Admin services management page displaying integrated public services.
+ * Shows service cards with status indicators, integration counts, and user statistics.
+ * Provides links to external service portals for verification.
+ */
+
 import { Briefcase, CheckCircle2, Stethoscope, CarFront, Droplets, GraduationCap, ExternalLink } from 'lucide-react'
 
+/**
+ * Static service configuration data.
+ * In production, this would be fetched from a database with real-time metrics.
+ */
 const services = [
     {
         id: 'health',

@@ -1,10 +1,20 @@
 /**
- * src/middleware.ts
- * Next.js Middleware for Route Protection
+ * @file middleware.ts
+ * @description Next.js Edge Middleware for authentication, authorization, and audit logging.
+ * Handles route protection for admin pages, user ban enforcement, and page view logging.
+ * Runs on Vercel's Edge Runtime for low-latency request processing.
  */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Main middleware function processing all matched routes.
+ * Performs session validation, ban checks, admin authorization, and audit logging.
+ *
+ * @param {NextRequest} request - Incoming HTTP request object
+ * @returns {Promise<NextResponse>} Modified response with updated cookies
+ */
 export async function middleware(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,

@@ -1,3 +1,10 @@
+/**
+ * @file api/chat/route.ts
+ * @description Streaming chat API endpoint for AI assistant conversations.
+ * Supports both local Ollama models and cloud providers via Server-Sent Events (SSE).
+ * Includes user context personalization based on role and location.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 
 /**
@@ -12,8 +19,11 @@ type ChatMessage = {
  * Defines the expected JSON payload for the chat endpoint.
  */
 type ChatRequestBody = {
+  /** Array of conversation messages */
   messages: ChatMessage[]
+  /** AI provider selection ('local' for Ollama, 'cloud' for external) */
   provider?: string
+  /** Optional custom system prompt override */
   systemPrompt?: string
 }
 

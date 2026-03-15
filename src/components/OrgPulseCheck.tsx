@@ -1,3 +1,10 @@
+/**
+ * @file OrgPulseCheck.tsx
+ * @description Organization digital maturity analyzer component.
+ * Performs keyword-based heuristic analysis on news mentions to estimate
+ * AI adoption levels without requiring expensive LLM API calls.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -10,22 +17,36 @@ import toast from 'react-hot-toast'
  * The structured shape of the digital maturity assessment.
  */
 type AssessmentResult = {
+    /** Categorized maturity level: Low, Medium, High, or Unknown */
     level: 'Low' | 'Medium' | 'High' | 'Unknown'
+    /** Array of insight strings based on analysis */
     insights: string[]
+    /** Array of actionable recommendations */
     recommendations: string[]
+    /** Disclaimer about data limitations */
     disclaimer: string
+    /** Optional source articles used in analysis */
     sources?: { title: string, link: string, source: string }[]
 }
 
 /**
  * Keywords used for heuristic-based digital maturity analysis.
+ * AI keywords indicate advanced digital transformation.
  */
 const AI_KEYWORDS = ['ai', 'artificial intelligence', 'machine learning', 'chatbot', 'genai', 'automation', 'digital transformation', 'smart', 'data analytics', 'predictive']
+
+/**
+ * General technology keywords indicating basic digital presence.
+ */
 const TECH_KEYWORDS = ['digital', 'online', 'platform', 'app', 'mobile', 'cloud', 'technology', 'innovation', 'ict', 'e-government', 'e-service']
 
 /**
  * Analyzes search results using keyword matching to estimate digital maturity.
- * No LLM required - pure heuristic analysis.
+ * No LLM required - pure heuristic analysis based on keyword frequency.
+ *
+ * @param {string} orgName - Name of the organization being analyzed
+ * @param {Array} articles - News articles returned from search
+ * @returns {AssessmentResult} Structured maturity assessment
  */
 function analyzeWithHeuristics(orgName: string, articles: { title: string, link: string, source: string }[]): AssessmentResult {
     if (articles.length === 0) {

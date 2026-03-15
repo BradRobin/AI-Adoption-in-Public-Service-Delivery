@@ -1,3 +1,9 @@
+/**
+ * @file DashboardCharts.tsx
+ * @description Dashboard visualization component with radar and bar charts.
+ * Displays TOE framework assessment scores using Recharts library.
+ */
+
 'use client'
 
 import {

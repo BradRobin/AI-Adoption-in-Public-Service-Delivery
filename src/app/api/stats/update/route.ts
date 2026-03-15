@@ -1,3 +1,10 @@
+/**
+ * @file api/stats/update/route.ts
+ * @description Edge API endpoint for simulating live market statistics updates.
+ * Randomly updates AI adoption rate or policy information to demonstrate
+ * real-time data changes in the dashboard via Supabase Realtime.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 

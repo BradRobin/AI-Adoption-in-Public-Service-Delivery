@@ -1,3 +1,10 @@
+/**
+ * @file profile/page.tsx
+ * @description User profile settings page for managing account details.
+ * Allows users to update username, email, password, and location.
+ * Changes are synchronized with both Supabase Auth and profiles table.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,6 +19,11 @@ import { NavigationMenu } from '@/components/NavigationMenu'
 import { CountySelect } from '@/components/CountySelect'
 import { supabase } from '@/lib/supabase/client'
 
+/**
+ * ProfilePage Component
+ * Provides a form interface for users to view and update their account settings.
+ * Fetches current profile data on mount and handles save with proper validation.
+ */
 export default function ProfilePage() {
     const router = useRouter()
     const [session, setSession] = useState<Session | null>(null)

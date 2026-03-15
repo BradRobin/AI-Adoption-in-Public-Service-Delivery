@@ -1,3 +1,9 @@
+/**
+ * @file ParticleBackground.tsx
+ * @description Decorative animated particle background component.
+ * Renders floating particles with CSS animations for visual enhancement.
+ */
+
 'use client'
 
 /**

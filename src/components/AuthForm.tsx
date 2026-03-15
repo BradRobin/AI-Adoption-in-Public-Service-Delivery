@@ -1,3 +1,9 @@
+/**
+ * @file AuthForm.tsx
+ * @description Unified authentication form supporting both login and signup modes.
+ * Features password strength validation, county selection, and Supabase integration.
+ */
+
 'use client'
 
 import { useMemo, useState } from 'react'

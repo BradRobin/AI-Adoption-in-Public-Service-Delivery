@@ -1,3 +1,10 @@
+/**
+ * @file privacy/page.tsx
+ * @description Privacy Policy and Terms of Service page with animated sections.
+ * Displays legal information, data collection practices, and security measures.
+ * Styled with gradient backgrounds and hover effects for visual appeal.
+ */
+
 'use client'
 
 import React from 'react'
@@ -15,13 +22,25 @@ import {
 } from 'lucide-react'
 import { NavigationMenu } from '@/components/NavigationMenu'
 
+/**
+ * Props for individual policy section cards.
+ */
 interface PolicySectionProps {
+    /** Section heading text */
     title: string
+    /** Lucide icon component for visual identification */
     icon: React.ElementType
+    /** Section content (paragraphs and lists) */
     children: React.ReactNode
+    /** Animation delay in seconds for staggered entrance */
     delay?: number
 }
 
+/**
+ * PolicySection Component
+ * Renders a styled card containing a privacy/legal policy section.
+ * Features animated entrance and hover effects.
+ */
 function PolicySection({ title, icon: Icon, children, delay = 0 }: PolicySectionProps) {
     return (
         <motion.div

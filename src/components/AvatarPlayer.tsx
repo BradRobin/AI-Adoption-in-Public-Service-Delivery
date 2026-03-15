@@ -1,3 +1,10 @@
+/**
+ * @file AvatarPlayer.tsx
+ * @description Simplified CSS/SVG digital avatar component with speech synthesis.
+ * Cost-effective placeholder for premium video avatar services (D-ID, HeyGen).
+ * Provides visual "talking" feedback synchronized with Web Speech API.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

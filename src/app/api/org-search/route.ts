@@ -1,10 +1,25 @@
+/**
+ * @file api/org-search/route.ts
+ * @description API endpoint for searching organization AI/tech mentions in news.
+ * Queries Google News RSS for recent articles about a specific organization.
+ * Returns top 3 relevant articles for the OrgPulseCheck heuristic analysis.
+ */
+
 import { NextResponse } from 'next/server'
 
+/** Force dynamic rendering to bypass caching */
 export const dynamic = 'force-dynamic'
 
 /**
  * Handles GET requests to fetch recent AI-related news/mentions for a specific organization.
  * It acts as a proxy for web_search and x_keyword_search by querying Google News RSS.
+ *
+ * @param {Request} req - Incoming request with 'q' query parameter for org name
+ * @returns {Promise<NextResponse>} JSON response with articles array
+ *
+ * @example
+ * // Request: GET /api/org-search?q=Kenya%20Revenue%20Authority
+ * // Response: { articles: [{ title: '...', link: '...', source: '...' }] }
  */
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)

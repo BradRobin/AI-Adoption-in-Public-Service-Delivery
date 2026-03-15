@@ -1,3 +1,10 @@
+/**
+ * @file chat/page.tsx
+ * @description Interactive AI chat interface page with streaming responses.
+ * Features conversation history, avatar speaking mode, and provider switching.
+ * Persists chat conversations to Supabase for cross-session continuity.
+ */
+
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -14,12 +21,18 @@ import { NavigationMenu } from '@/components/NavigationMenu'
 import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, X, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+/**
+ * Represents a single chat message with unique identifier.
+ */
 type ChatMessage = {
   id: string
   role: 'user' | 'assistant'
   content: string
 }
 
+/**
+ * Represents a persisted conversation record from Supabase.
+ */
 type Conversation = {
   id: string
   user_id: string

@@ -1,3 +1,10 @@
+/**
+ * @file ServiceAssistantModal.tsx
+ * @description Specialized chat modal for service-specific AI assistance.
+ * Each service (Health, Transport, Education, etc.) has custom system prompts
+ * that guide the AI to provide contextually relevant help for that domain.
+ */
+
 'use client'
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
@@ -15,9 +22,13 @@ export type ServiceAction = 'health_triage' | 'gig_proposal' | 'transport_guide'
  * Props for the ServiceAssistantModal component.
  */
 interface ServiceAssistantModalProps {
+    /** Controls visibility of the modal */
     isOpen: boolean
+    /** Callback to close the modal */
     onClose: () => void
+    /** Unique identifier for the service (e.g., 'health', 'transport') */
     serviceId: string
+    /** Human-readable title of the service */
     serviceTitle: string
 }
 
@@ -29,6 +40,11 @@ type Message = {
     content: string
 }
 
+/**
+ * Service-specific system prompts for domain-focused AI assistance.
+ * Each prompt defines the AI's persona, goals, rules, and response format
+ * tailored to the specific government service context.
+ */
 // System Prompts for Specific AI Agents
 const PROMPTS: Record<string, string> = {
     health: `You are a Maternal Health Triage Assistant for the Social Health Authority (SHA) Kenya.

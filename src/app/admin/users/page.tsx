@@ -1,10 +1,23 @@
+/**
+ * @file admin/users/page.tsx
+ * @description Admin user management page for viewing and managing platform users.
+ * Displays paginated user list with search, role badges, and ban/unban controls.
+ * Server component that pre-fetches user data for immediate display.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { UsersTable, UserProfile } from './UsersTable'
 import { Users, AlertCircle } from 'lucide-react'
 
+/** Force dynamic rendering to ensure fresh data on each request */
 export const dynamic = 'force-dynamic'
 
+/**
+ * AdminUsersPage Component
+ * Server-rendered page displaying all platform users in a searchable table.
+ * Includes summary statistics for total and banned user counts.
+ */
 export default async function AdminUsersPage() {
     const cookieStore = await cookies()
 

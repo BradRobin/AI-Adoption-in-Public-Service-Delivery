@@ -1,9 +1,24 @@
+/**
+ * @file admin/layout.tsx
+ * @description Root layout component for the admin dashboard section.
+ * Provides consistent sidebar and topbar navigation across all admin pages.
+ * Manages sidebar open/close state for responsive mobile navigation.
+ */
+
 'use client'
 
 import { useState } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 
+/**
+ * AdminLayout Component
+ * Wraps all admin pages with consistent navigation structure.
+ * Features collapsible sidebar, sticky topbar, and scrollable main content area.
+ *
+ * @param {Object} props - Layout props
+ * @param {React.ReactNode} props.children - Nested admin page content
+ */
 export default function AdminLayout({
     children,
 }: {

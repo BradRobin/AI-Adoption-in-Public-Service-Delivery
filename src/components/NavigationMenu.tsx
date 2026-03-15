@@ -1,3 +1,10 @@
+/**
+ * @file NavigationMenu.tsx
+ * @description Global slide-out navigation menu component with hamburger trigger.
+ * Provides navigation links to all major app sections including accessibility toggles.
+ * Uses Framer Motion for smooth slide-in/out animations.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -19,14 +26,27 @@ import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useAccessibility } from './AccessibilityProvider'
 
+/**
+ * Props for individual menu items within the navigation drawer.
+ */
 interface MenuItemProps {
+    /** Target navigation URL */
     href: string
+    /** Lucide icon component to display */
     icon: React.ElementType
+    /** Display text for the menu item */
     label: string
+    /** Optional click handler (used for logout action) */
     onClick?: () => void
+    /** Visual variant: default, danger (red), or admin (green accent) */
     variant?: 'default' | 'danger' | 'admin'
 }
 
+/**
+ * MenuItem Component
+ * Renders a single navigation link with icon and optional variant styling.
+ * Can be a link or a button depending on whether onClick is provided.
+ */
 function MenuItem({ href, icon: Icon, label, onClick, variant = 'default' }: MenuItemProps) {
     let colorClasses = 'text-white/80 hover:text-white hover:bg-white/5'
 

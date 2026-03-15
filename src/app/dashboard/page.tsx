@@ -1,3 +1,10 @@
+/**
+ * @file dashboard/page.tsx
+ * @description Main user dashboard page aggregating assessment results, news, and services.
+ * Features real-time updates via Supabase subscriptions and market statistics display.
+ * Protected route requiring authentication.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

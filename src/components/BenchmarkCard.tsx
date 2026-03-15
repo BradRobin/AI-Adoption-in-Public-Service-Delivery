@@ -1,3 +1,9 @@
+/**
+ * @file BenchmarkCard.tsx
+ * @description Visual comparison card showing user's AI readiness score vs national average.
+ * Provides immediate feedback on how the organization compares to Kenya's public sector benchmark.
+ */
+
 'use client'
 
 import { motion } from 'framer-motion'

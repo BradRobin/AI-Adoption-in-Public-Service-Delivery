@@ -1,3 +1,10 @@
+/**
+ * @file admin/auth/page.tsx
+ * @description Secure admin re-authentication gateway page.
+ * Requires admins to re-enter credentials before accessing the admin dashboard.
+ * Provides explicit rejection UI for non-admin users with countdown redirect.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -10,13 +17,22 @@ import { Lock, AlertOctagon, ShieldX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ParticleBackground } from '@/components/ParticleBackground'
 
+/**
+ * Zod validation schema for the re-authentication form.
+ */
 const reAuthSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
+/** TypeScript type inferred from the Zod schema */
 type ReAuthFormValues = z.infer<typeof reAuthSchema>
 
+/**
+ * AdminReAuth Component
+ * Secure gateway requiring credential re-entry for admin access.
+ * Verifies user role directly from database to prevent stale metadata exploitation.
+ */
 export default function AdminReAuth() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)

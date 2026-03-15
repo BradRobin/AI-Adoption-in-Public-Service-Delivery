@@ -1,14 +1,31 @@
+/**
+ * @file electron/main.js
+ * @description Electron main process entry point for the desktop application.
+ * Creates the main browser window and manages the application lifecycle.
+ * Connects to the locally-running Next.js server for rendering.
+ */
+
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 const http = require('http')
 
+/**
+ * Global reference to the main browser window.
+ * Prevents garbage collection from closing the window unexpectedly.
+ * @type {BrowserWindow|null}
+ */
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+/** Reference to the spawned Next.js server process (for production builds) */
 let nextServer
 
+/** Whether the app is running in development mode */
 const isDev = !app.isPackaged
+
+/** Port number for the Next.js development/production server */
 const PORT = 3000
 
 /**

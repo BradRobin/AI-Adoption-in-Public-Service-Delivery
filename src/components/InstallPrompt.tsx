@@ -1,3 +1,9 @@
+/**
+ * @file InstallPrompt.tsx
+ * @description PWA (Progressive Web App) install prompt component.
+ * Captures the browser's beforeinstallprompt event and provides a user-friendly install button.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

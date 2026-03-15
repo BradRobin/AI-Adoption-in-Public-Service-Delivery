@@ -1,16 +1,38 @@
+/**
+ * @file KpiCard.tsx
+ * @description Reusable Key Performance Indicator (KPI) card component for admin dashboards.
+ * Displays a metric with optional trend indicator and description.
+ * Styled with hover effects for interactive dashboard grids.
+ */
+
 import { ElementType } from 'react'
 
+/**
+ * Props for the KpiCard component.
+ */
 interface KpiCardProps {
+    /** Display title/label for the KPI */
     title: string
+    /** The numeric or string value to display prominently */
     value: string | number
+    /** Lucide icon component to display */
     icon: ElementType
+    /** Optional descriptive subtext */
     description?: string
+    /** Optional trend indicator showing change direction and magnitude */
     trend?: {
         value: string
         isPositive: boolean
     }
 }
 
+/**
+ * KpiCard Component
+ * Renders a dashboard metric card with optional trend indicator.
+ * Used on admin overview pages to display key system statistics.
+ *
+ * @param {KpiCardProps} props - Component configuration
+ */
 export function KpiCard({ title, value, icon: Icon, description, trend }: KpiCardProps) {
     return (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10 flex flex-col justify-between">

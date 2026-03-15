@@ -1,3 +1,9 @@
+/**
+ * @file ToeResults.tsx
+ * @description Assessment results display component with bar chart visualization.
+ * Shows TOE framework scores (Technological, Organizational, Environmental) and overall readiness.
+ */
+
 'use client'
 
 import {

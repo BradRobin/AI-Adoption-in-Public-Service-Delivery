@@ -1,3 +1,9 @@
+/**
+ * @file LikertScale.tsx
+ * @description Reusable Likert scale input component for survey-style questions.
+ * Integrates with react-hook-form for form state management and validation.
+ */
+
 'use client'
 
 import type { Control, FieldPath, FieldValues } from 'react-hook-form'

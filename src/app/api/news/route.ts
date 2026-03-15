@@ -1,3 +1,9 @@
+/**
+ * @file api/news/route.ts
+ * @description API endpoint for fetching AI and public service news from Google News RSS.
+ * Parses RSS feed, cleans HTML entities, and removes duplicate source attributions.
+ * Returns formatted news items for the NewsFeed dashboard component.
+ */
 
 import Parser from 'rss-parser'
 

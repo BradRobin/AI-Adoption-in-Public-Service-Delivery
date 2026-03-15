@@ -1,3 +1,10 @@
+/**
+ * @file admin/users/actions.ts
+ * @description Server Actions for admin user management operations.
+ * Contains secure, server-side functions for modifying user accounts.
+ * All actions include permission checks and audit logging.
+ */
+
 'use server'
 
 import { createServerClient } from '@supabase/ssr'
@@ -5,6 +12,17 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { logAdminAction } from '@/lib/adminLogger'
 
+/**
+ * Toggles a user's banned status (ban or unban).
+ * Performs authorization checks to ensure only admins can execute this action.
+ * Logs the action to the admin audit trail for compliance tracking.
+ *
+ * @param {string} userId - The UUID of the target user to ban/unban
+ * @param {boolean} currentBanStatus - The user's current ban status (true = banned)
+ * @returns {Promise<{success: boolean}>} Operation result
+ * @throws {Error} If caller is not authenticated or not an admin
+ * @throws {Error} If database operation fails
+ */
 export async function toggleUserBanStatus(userId: string, currentBanStatus: boolean) {
     const cookieStore = await cookies()
 

@@ -1,3 +1,10 @@
+/**
+ * @file admin/users/UsersTable.tsx
+ * @description Interactive data table component for admin user management.
+ * Features search filtering, pagination, and ban/unban actions.
+ * Built on TanStack Table for robust data handling and sorting.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -14,21 +21,42 @@ import { Search, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { toggleUserBanStatus } from './actions'
 import toast from 'react-hot-toast'
 
+/**
+ * Type definition for user profile data displayed in the table.
+ */
 export type UserProfile = {
+    /** Unique user identifier (UUID) */
     id: string
+    /** User's email address */
     email: string
+    /** User's role (e.g., 'user', 'admin') */
     role: string
+    /** Whether the user is currently banned from the platform */
     is_banned: boolean
+    /** ISO timestamp of last login, null if never logged in */
     last_login: string | null
+    /** ISO timestamp when the account was created */
     created_at: string
 }
 
+/**
+ * Props for the UsersTable component.
+ */
 interface UsersTableProps {
+    /** Array of user profiles to display */
     data: UserProfile[]
 }
 
+/** TanStack Table column helper for type-safe column definitions */
 const columnHelper = createColumnHelper<UserProfile>()
 
+/**
+ * UsersTable Component
+ * Renders a searchable, paginated table of platform users.
+ * Includes confirmation dialog for ban/unban actions.
+ *
+ * @param {UsersTableProps} props - Table configuration and data
+ */
 export function UsersTable({ data: initialData }: UsersTableProps) {
     const [globalFilter, setGlobalFilter] = useState('')
     const [isOpenDialog, setIsOpenDialog] = useState(false)

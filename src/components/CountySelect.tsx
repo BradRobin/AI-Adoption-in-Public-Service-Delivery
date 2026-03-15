@@ -1,14 +1,29 @@
+/**
+ * @file CountySelect.tsx
+ * @description Accessible, searchable dropdown component for selecting Kenyan counties.
+ * Features keyboard navigation, search filtering, and screen reader support.
+ * Used in signup, profile, and other forms requiring location selection.
+ */
+
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { KENYAN_COUNTIES } from '@/data/kenyan-counties'
 import { ChevronDown, Search, X } from 'lucide-react'
 
+/**
+ * Props for the CountySelect component.
+ */
 type CountySelectProps = {
+  /** Currently selected county value */
   value: string
+  /** Callback fired when selection changes */
   onChange: (value: string) => void
+  /** Optional input field ID for label association */
   id?: string
+  /** Placeholder text when no county is selected */
   placeholder?: string
+  /** Additional CSS classes */
   className?: string
 }
 

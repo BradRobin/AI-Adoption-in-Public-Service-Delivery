@@ -1,17 +1,37 @@
+/**
+ * @file AvatarAdvisor.tsx
+ * @description Animated SVG-based AI advisor avatar with text-to-speech capability.
+ * Features realistic blinking, lip-sync animation, and emotional expressions.
+ * Prioritizes Kenyan/East African voice options when available.
+ */
+
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Volume2, VolumeX, X } from 'lucide-react'
 
+/**
+ * Props for the AvatarAdvisor component.
+ */
 export interface AvatarAdvisorProps {
+    /** Whether the avatar is currently "listening" (thinking animation) */
     isListening?: boolean
+    /** Whether the avatar is actively speaking */
     isSpeaking?: boolean
+    /** Text to be spoken via Web Speech API */
     responseText?: string | null
+    /** Callback to close the avatar overlay */
     onClose?: () => void
+    /** Controls visibility of the entire component */
     isVisible?: boolean
 }
 
+/**
+ * AvatarAdvisor Component
+ * Renders a sophisticated animated SVG face that speaks AI responses aloud.
+ * Uses Web Speech API for text-to-speech with automatic lip-sync animation.
+ */
 export default function AvatarAdvisor({
     isListening = false,
     isSpeaking = false,

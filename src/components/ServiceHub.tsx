@@ -1,3 +1,10 @@
+/**
+ * @file ServiceHub.tsx
+ * @description Public services grid component displaying integrated Kenyan government services.
+ * Each service card provides quick access to external portals and AI-powered assistance.
+ * Serves as the main entry point for citizens to interact with public services.
+ */
+
 'use client'
 
 import { motion } from 'framer-motion'

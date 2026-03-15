@@ -1,3 +1,10 @@
+/**
+ * @file AdminSidebar.tsx
+ * @description Collapsible sidebar navigation component for the admin dashboard.
+ * Provides navigation links to admin sections with active state highlighting.
+ * Responsive design with mobile overlay and desktop static positioning.
+ */
+
 'use client'
 
 import Link from 'next/link'
@@ -12,11 +19,20 @@ import {
     X
 } from 'lucide-react'
 
+/**
+ * Props for the AdminSidebar component.
+ */
 interface AdminSidebarProps {
+    /** Controls sidebar visibility on mobile viewports */
     isOpen: boolean
+    /** Callback to update sidebar open/close state */
     setIsOpen: (isOpen: boolean) => void
 }
 
+/**
+ * Navigation link configuration for the admin sidebar.
+ * Each entry defines a route, display name, and associated icon.
+ */
 const navLinks = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Users', href: '/admin/users', icon: Users },

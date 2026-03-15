@@ -1,3 +1,10 @@
+/**
+ * @file assess/page.tsx
+ * @description TOE AI Readiness Self-Assessment page with Likert scale questions.
+ * Users rate their organization across Technological, Organizational, and Environmental dimensions.
+ * Results are computed locally and persisted to Supabase for historical tracking.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

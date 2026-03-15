@@ -1,3 +1,9 @@
+/**
+ * @file ToasterClient.tsx
+ * @description Global toast notification provider component.
+ * Configures react-hot-toast with dark theme styling matching the application design.
+ */
+
 'use client';
 
 import { Toaster } from 'react-hot-toast';

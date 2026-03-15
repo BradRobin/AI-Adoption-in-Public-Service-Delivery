@@ -1,3 +1,10 @@
+/**
+ * @file electron/preload.js
+ * @description Electron preload script for secure IPC bridge between Node.js and renderer.
+ * Uses contextBridge to expose limited, controlled APIs to the frontend.
+ * This script runs before the renderer process is loaded, enabling secure communication.
+ */
+
 const { contextBridge } = require('electron')
 
 /**

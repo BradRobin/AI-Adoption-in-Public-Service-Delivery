@@ -1,3 +1,10 @@
+/**
+ * @file AdminTopbar.tsx
+ * @description Top navigation bar component for the admin dashboard.
+ * Contains mobile menu toggle, search input, notification bell, and logout functionality.
+ * Provides consistent admin header across all admin pages.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -6,10 +13,21 @@ import { Menu, Search, Bell, UserCircle, LogOut } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
+/**
+ * Props for the AdminTopbar component.
+ */
 interface AdminTopbarProps {
+    /** Callback triggered when mobile menu button is clicked */
     onMenuClick: () => void
 }
 
+/**
+ * AdminTopbar Component
+ * Renders the admin dashboard header with search, notifications, and user controls.
+ * Handles admin sign-out with proper session cleanup and redirect.
+ *
+ * @param {AdminTopbarProps} props - Component configuration
+ */
 export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     const router = useRouter()
     const [isLoggingOut, setIsLoggingOut] = useState(false)
