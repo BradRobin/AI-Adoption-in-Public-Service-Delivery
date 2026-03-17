@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} text-tier-system antialiased`}
       >
         <AccessibilityProvider>
           <TopScrollBlur />
@@ -48,7 +48,7 @@ export default function RootLayout({
           {/* Skip to Content Link for Keyboard Users */}
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-green-500 focus:p-4 focus:text-black focus:outline-none focus:ring-4 focus:ring-white"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:bg-green-500 focus:p-4 focus:text-black focus:outline-none focus:ring-4 focus:ring-white"
           >
             Skip to main content
           </a>

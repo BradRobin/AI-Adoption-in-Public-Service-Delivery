@@ -313,7 +313,7 @@ export default function Dashboard() {
             <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                 <div className="text-xl font-bold tracking-tight text-white">PARP</div>
                 <div className="flex items-center gap-4">
-                    <span className="hidden text-sm text-white/60 sm:inline-block">
+                    <span className="text-tier-3 hidden text-sm sm:inline-block">
                         {session.user?.email}
                     </span>
                     <NavigationMenu />
@@ -326,10 +326,10 @@ export default function Dashboard() {
             <main id="main-content" className="relative z-10 mx-auto max-w-5xl px-6 py-12">
                 {/* Welcome Section */}
                 <div className={`mb-12 text-center transition-all duration-700 ease-out ${isGreetingVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-                    <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl">
+                    <h1 className="text-tier-1 text-3xl font-bold sm:text-5xl md:text-6xl">
                         Welcome back, <span className="text-green-400">{displayName}</span>
                     </h1>
-                    <p className="mt-4 text-lg text-white/70">
+                    <p className="text-tier-3 mt-4 text-lg">
                         Ready to continue your AI adoption journey?
                     </p>
                     {latestAssessment && (
@@ -355,13 +355,13 @@ export default function Dashboard() {
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 md:col-span-2 lg:col-span-3">
                         <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
-                            <h2 className="mb-4 text-xl font-semibold text-white">
+                            <h2 className="text-tier-2 mb-4 text-xl font-semibold">
                                 Kenya AI Adoption Insight
                             </h2>
                             <div className="flex flex-col gap-6 md:flex-row md:items-center">
                                 <div className="flex-1 space-y-2">
-                                    <p className="text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
-                                    <p className="text-white/80">
+                                    <p className="text-tier-1 text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
+                                    <p className="text-tier-3">
                                         of Kenyan businesses are already using ChatGPT or similar tools.
                                     </p>
                                     <p className="text-xs text-white/50">

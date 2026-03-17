@@ -4,6 +4,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --text-tier-1: rgb(255 255 255 / 1);
+  --text-tier-2: rgb(255 255 255 / 0.5);
+  --text-tier-3: rgb(255 255 255 / 0.2);
 }
 
 @theme inline {
@@ -24,6 +27,32 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Text Opacity Hierarchy */
+.text-tier-1 {
+  color: var(--text-tier-1);
+}
+
+.text-tier-2 {
+  color: var(--text-tier-2);
+}
+
+.text-tier-3 {
+  color: var(--text-tier-3);
+}
+
+/* Global semantic mapping for three-tier typography */
+:where(.text-tier-system) :where(h1, .text-title, [data-text-tier='1']) {
+  color: var(--text-tier-1);
+}
+
+:where(.text-tier-system) :where(h2, h3, h4, h5, h6, .text-subtitle, .text-headline, [data-text-tier='2']) {
+  color: var(--text-tier-2);
+}
+
+:where(.text-tier-system) :where(p, small, figcaption, caption, .text-description, .text-alt, [data-text-tier='3']) {
+  color: var(--text-tier-3);
 }
 
 /* Custom keyframe for particle animation */
@@ -70,6 +99,12 @@ html.high-contrast .text-white\/80 {
 
 html.high-contrast .text-zinc-500,
 html.high-contrast .text-zinc-300 {
+  color: #ffffff !important;
+}
+
+html.high-contrast .text-tier-1,
+html.high-contrast .text-tier-2,
+html.high-contrast .text-tier-3 {
   color: #ffffff !important;
 }
 
