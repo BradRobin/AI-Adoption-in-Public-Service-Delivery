@@ -44,7 +44,7 @@ export function NotificationsBell() {
       <button
         type="button"
         onClick={() => setIsOpen((previousValue) => !previousValue)}
-        className="relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-2 text-white transition-colors hover:bg-white/10"
+        className={`relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-2 text-white transition-colors hover:bg-white/10 ${isOpen ? 'z-70' : ''}`}
         aria-label="Open notifications"
       >
         <Bell size={20} />
@@ -67,33 +67,42 @@ export function NotificationsBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-70 mt-2 w-80 overflow-hidden rounded-xl border border-white/15 bg-zinc-950/95 shadow-2xl backdrop-blur-md">
-          <div className="border-b border-white/10 px-4 py-3">
-            <h3 className="text-sm font-semibold tracking-wide text-white">Notifications</h3>
-            <p className="text-xs text-white/60">Click an item to mark it as viewed.</p>
-          </div>
+        <>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close notifications"
+            className="fixed inset-0 z-60 bg-black/25 backdrop-blur-sm"
+          />
 
-          {notifications.length === 0 ? (
-            <div className="px-4 py-6 text-sm text-white/60">No new notifications.</div>
-          ) : (
-            <ul className="max-h-80 overflow-y-auto">
-              {notifications.map((notification) => (
-                <li key={notification.id}>
-                  <button
-                    type="button"
-                    onClick={() => viewNotification(notification.id)}
-                    className="w-full border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <p className="text-sm text-white">{notification.message}</p>
-                      <span className="shrink-0 text-xs text-white/50">{formatRelativeTime(notification.createdAt)}</span>
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          <div className="absolute right-0 top-full z-70 mt-2 w-80 overflow-hidden rounded-xl border border-white/15 bg-zinc-950/95 shadow-2xl backdrop-blur-md">
+            <div className="border-b border-white/10 px-4 py-3">
+              <h3 className="text-sm font-semibold tracking-wide text-white">Notifications</h3>
+              <p className="text-xs text-white/60">Click an item to mark it as viewed.</p>
+            </div>
+
+            {notifications.length === 0 ? (
+              <div className="px-4 py-6 text-sm text-white/60">No new notifications.</div>
+            ) : (
+              <ul className="max-h-80 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <li key={notification.id}>
+                    <button
+                      type="button"
+                      onClick={() => viewNotification(notification.id)}
+                      className="w-full border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-sm text-white">{notification.message}</p>
+                        <span className="shrink-0 text-xs text-white/50">{formatRelativeTime(notification.createdAt)}</span>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
       )}
     </div>
   )
