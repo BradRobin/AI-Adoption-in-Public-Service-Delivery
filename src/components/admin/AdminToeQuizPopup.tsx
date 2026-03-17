@@ -186,81 +186,88 @@ export function AdminToeQuizPopup() {
         <AnimatePresence>
             {isVisible && quizData && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="fixed bottom-6 right-6 z-50 w-full max-w-sm rounded-2xl border border-indigo-500/30 bg-black/80 p-5 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-60 flex items-center justify-center bg-black/35 backdrop-blur-sm px-4"
                 >
-                    <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2 text-indigo-400">
-                            <BrainCircuit size={18} />
-                            <span className="text-xs font-semibold uppercase tracking-wider">Continuous Assessment</span>
-                        </div>
-                        <button
-                            onClick={handleClose}
-                            aria-label="Close TOE sync prompt"
-                            className="text-white/40 hover:text-white transition-colors"
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
-
-                    <h3 className="text-lg font-medium text-white mb-2 leading-tight">
-                        Quick Check: {quizData.section}
-                    </h3>
-                    <p className="text-sm text-zinc-300 mb-5">
-                        {quizData.questionText}
-                    </p>
-
-                    <div className="flex flex-col gap-3">
-                        <div className="flex justify-between items-center bg-white/5 rounded-lg p-1 border border-white/5 relative">
-                            {/* Visual background indicator for selected state */}
-                            {selectedScore !== null && (
-                                <motion.div
-                                    className="absolute inset-y-1 bg-indigo-500/20 rounded-md border border-indigo-500/50"
-                                    layoutId="selectedBackground"
-                                    initial={false}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    style={{
-                                        width: `calc(20% - 4px)`,
-                                        left: `calc(${(selectedScore - 1) * 20}% + 2px)`
-                                    }}
-                                />
-                            )}
-
-                            {[1, 2, 3, 4, 5].map((score) => (
-                                <button
-                                    key={score}
-                                    onClick={() => setSelectedScore(score)}
-                                    className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${selectedScore === score ? 'text-indigo-300' : 'text-zinc-500 hover:text-zinc-300'}`}
-                                >
-                                    {score}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="flex justify-between text-[10px] text-zinc-500 uppercase tracking-wider px-2">
-                            <span>Strongly Disagree</span>
-                            <span>Strongly Agree</span>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        className="w-full max-w-sm rounded-2xl border border-indigo-500/30 bg-black/80 p-5 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl"
+                    >
+                        <div className="mb-3 flex items-start justify-between">
+                            <div className="flex items-center gap-2 text-indigo-400">
+                                <BrainCircuit size={18} />
+                                <span className="text-xs font-semibold uppercase tracking-wider">Continuous Assessment</span>
+                            </div>
+                            <button
+                                onClick={handleClose}
+                                aria-label="Close TOE sync prompt"
+                                className="text-white/40 transition-colors hover:text-white"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
 
-                        <button
-                            onClick={handleSubmit}
-                            disabled={selectedScore === null || isSubmitting}
-                            className={`mt-2 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-all ${selectedScore !== null
-                                    ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20'
-                                    : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
-                                }`}
-                        >
-                            {isSubmitting ? (
-                                <span className="animate-pulse">Updating Profile...</span>
-                            ) : (
-                                <>
-                                    <CheckCircle size={16} />
-                                    <span>Sync Readiness Score</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+                        <h3 className="mb-2 text-lg font-medium text-white leading-tight">
+                            Quick Check: {quizData.section}
+                        </h3>
+                        <p className="mb-5 text-sm text-zinc-300">
+                            {quizData.questionText}
+                        </p>
+
+                        <div className="flex flex-col gap-3">
+                            <div className="relative flex items-center justify-between rounded-lg border border-white/5 bg-white/5 p-1">
+                                {/* Visual background indicator for selected state */}
+                                {selectedScore !== null && (
+                                    <motion.div
+                                        className="absolute inset-y-1 rounded-md border border-indigo-500/50 bg-indigo-500/20"
+                                        layoutId="selectedBackground"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        style={{
+                                            width: `calc(20% - 4px)`,
+                                            left: `calc(${(selectedScore - 1) * 20}% + 2px)`
+                                        }}
+                                    />
+                                )}
+
+                                {[1, 2, 3, 4, 5].map((score) => (
+                                    <button
+                                        key={score}
+                                        onClick={() => setSelectedScore(score)}
+                                        className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${selectedScore === score ? 'text-indigo-300' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                    >
+                                        {score}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex justify-between px-2 text-[10px] uppercase tracking-wider text-zinc-500">
+                                <span>Strongly Disagree</span>
+                                <span>Strongly Agree</span>
+                            </div>
+
+                            <button
+                                onClick={handleSubmit}
+                                disabled={selectedScore === null || isSubmitting}
+                                className={`mt-2 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-all ${selectedScore !== null
+                                        ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20'
+                                        : 'cursor-not-allowed border border-white/5 bg-white/5 text-white/30'
+                                    }`}
+                            >
+                                {isSubmitting ? (
+                                    <span className="animate-pulse">Updating Profile...</span>
+                                ) : (
+                                    <>
+                                        <CheckCircle size={16} />
+                                        <span>Sync Readiness Score</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>
