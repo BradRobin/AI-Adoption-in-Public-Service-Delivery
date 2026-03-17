@@ -1,43 +1,15 @@
 /**
  * @file ToasterClient.tsx
- * @description Global toast notification provider component.
- * Configures react-hot-toast with dark theme styling matching the application design.
+ * @description Compatibility no-op component. Notifications are now shown in NotificationsBell.
  */
 
 'use client';
 
-import { Toaster } from 'react-hot-toast';
-
 /**
  * ToasterClient Component
- * Initializes the react-hot-toast notifications provider.
- * Should be mounted in the root layout to ensure potential global availability.
+ * Kept temporarily to avoid import breakage in legacy code paths.
  */
 export function ToasterClient() {
-  return (
-    <Toaster
-      position="top-right"
-      toastOptions={{
-        style: {
-          background: '#020617',
-          color: '#f9fafb',
-          borderRadius: '0.75rem',
-          border: '1px solid rgba(248,250,252,0.12)',
-        },
-        success: {
-          iconTheme: {
-            primary: '#22c55e',
-            secondary: '#020617',
-          },
-        },
-        error: {
-          iconTheme: {
-            primary: '#f97316',
-            secondary: '#020617',
-          },
-        },
-      }}
-    />
-  );
+  return null;
 }
 

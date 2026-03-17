@@ -12,7 +12,7 @@ import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Session } from '@supabase/supabase-js'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { NavigationMenu } from '@/components/NavigationMenu'

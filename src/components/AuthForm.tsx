@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 import { CountySelect } from '@/components/CountySelect'
 
 type AuthMode = 'login' | 'signup'

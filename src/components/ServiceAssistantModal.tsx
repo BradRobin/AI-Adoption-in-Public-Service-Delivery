@@ -11,7 +11,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Bot, AlertTriangle, FileText, CarFront, Droplets, GraduationCap, Stethoscope, Briefcase } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 
 /**
  * Identifier for the specific type of service action the assistant should handle.

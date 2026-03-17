@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Menu, Search, Bell, UserCircle, LogOut } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 
 /**
  * Props for the AdminTopbar component.

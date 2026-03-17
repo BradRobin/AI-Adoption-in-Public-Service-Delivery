@@ -23,8 +23,9 @@ import {
     LayoutDashboard,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 import { useAccessibility } from './AccessibilityProvider'
+import { NotificationsBell } from './NotificationsBell'
 
 /**
  * Props for individual menu items within the navigation drawer.
@@ -89,7 +90,9 @@ export function NavigationMenu() {
     const handleClose = () => setIsOpen(false)
 
     return (
-        <div className="relative">
+        <div className="relative flex items-center gap-2">
+            <NotificationsBell />
+
             {/* Hamburger Trigger */}
             <button
                 onClick={() => setIsOpen(true)}
@@ -139,7 +142,6 @@ export function NavigationMenu() {
                             {/* Accessibility Toggles */}
                             <button
                                 onClick={toggleHighContrast}
-                                aria-pressed={highContrast}
                                 className={`w-full text-left flex items-center justify-between rounded-lg px-4 py-3 transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${highContrast
                                         ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                                         : 'text-white/80 hover:text-white hover:bg-white/5'

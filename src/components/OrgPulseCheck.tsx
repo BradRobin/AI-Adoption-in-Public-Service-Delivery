@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Loader2, Building, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 
 /**
  * The structured shape of the digital maturity assessment.

@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-table'
 import { Search, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { toggleUserBanStatus } from './actions'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 
 /**
  * Type definition for user profile data displayed in the table.

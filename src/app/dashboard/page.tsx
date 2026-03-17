@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import toast from '@/lib/toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 import { DashboardCharts } from '@/components/DashboardCharts'
@@ -21,7 +21,6 @@ import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
 import { NavigationMenu } from '@/components/NavigationMenu'
-import { X } from 'lucide-react'
 
 const WEEKLY_REASSESSMENT_TOAST_ID = 'weekly-reassessment-complete'
 
@@ -104,25 +103,11 @@ export default function Dashboard() {
                 // Simulate "Weekly Check" notification once on load if assessment exists
                 // In production, this would be triggered by a real background cron job
                 setTimeout(() => {
-                    toast.success(
-                        (t) => (
-                            <div className="flex items-center gap-2">
-                                <span>Weekly Background Re-assessment Complete! Tracking against dynamic Kenya average.</span>
-                                <button
-                                    onClick={() => toast.dismiss(t.id)}
-                                    aria-label="Dismiss weekly reassessment notification"
-                                    className="ml-2 rounded-full p-1 text-black/40 hover:bg-black/10 dark:text-white/40 dark:hover:bg-white/10 transition-colors"
-                                >
-                                    <X size={16} />
-                                </button>
-                            </div>
-                        ),
-                        {
-                            id: WEEKLY_REASSESSMENT_TOAST_ID,
-                            icon: '📅',
-                            duration: 4000,
-                        }
-                    )
+                    toast.success('Weekly Background Re-assessment Complete! Tracking against dynamic Kenya average.', {
+                        id: WEEKLY_REASSESSMENT_TOAST_ID,
+                        icon: '📅',
+                        duration: 4000,
+                    })
                 }, 1500)
             }
         }

@@ -2,7 +2,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ToasterClient } from "@/components/ToasterClient";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
@@ -31,7 +30,7 @@ export const metadata: Metadata = {
 
 /**
  * RootLayout is the top-most layout component that wraps all pages.
- * It sets the html lang, loads fonts, and includes the ToasterClient for notifications.
+ * It sets the html lang, loads fonts, and includes global accessibility overlays.
  */
 export default function RootLayout({
   children,
@@ -56,7 +55,6 @@ export default function RootLayout({
 
           {children}
 
-          <ToasterClient />
           <AdminToeQuizPopup />
           <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
             Built by Engineer Brad Robinson

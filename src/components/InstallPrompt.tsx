@@ -7,7 +7,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { toast } from '@/lib/toast'
 
 /**
  * Custom event interface for the PWA beforeinstallprompt event.
