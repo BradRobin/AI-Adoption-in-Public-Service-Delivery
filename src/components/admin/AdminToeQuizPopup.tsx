@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, CheckCircle, BrainCircuit } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
+import { pushNotification } from '@/lib/notification-center'
 import type { ToeSection } from '@/data/toe-questions'
 import { TOE_QUESTIONS } from '@/data/toe-questions'
 import type { DimensionScores, ToeScores } from '@/lib/toe-scoring'
@@ -85,9 +86,22 @@ export function AdminToeQuizPopup() {
                     questionId: randomQuestion.id
                 })
 
-                // Slight delay so it doesn't instantly snap in their face
+                // Slight delay to stage the prompt as a notification instead of opening immediately
                 setTimeout(() => {
-                    setIsVisible(true)
+                    const promptId = `toe-sync-prompt-${randomQuestion.id}`
+                    pushNotification({
+                        id: promptId,
+                        type: 'info',
+                        message: `Quick TOE check ready: ${randomQuestion.text} Tap to answer and sync readiness score.`,
+                        onView: () => {
+                            setQuizData({
+                                section: randomSection,
+                                questionText: randomQuestion.text,
+                                questionId: randomQuestion.id,
+                            })
+                            setIsVisible(true)
+                        },
+                    })
                     setHasTriggeredRecently(true)
                 }, 1500)
             }
@@ -184,6 +198,7 @@ export function AdminToeQuizPopup() {
                         </div>
                         <button
                             onClick={handleClose}
+                            aria-label="Close TOE sync prompt"
                             className="text-white/40 hover:text-white transition-colors"
                         >
                             <X size={18} />

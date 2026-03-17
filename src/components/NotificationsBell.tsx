@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Bell } from 'lucide-react'
 import {
   getNotificationsSnapshot,
-  removeNotification,
   subscribeNotifications,
+  viewNotification,
 } from '@/lib/notification-center'
 
 function formatRelativeTime(timestamp: number) {
@@ -81,7 +81,7 @@ export function NotificationsBell() {
                 <li key={notification.id}>
                   <button
                     type="button"
-                    onClick={() => removeNotification(notification.id)}
+                    onClick={() => viewNotification(notification.id)}
                     className="w-full border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5"
                   >
                     <div className="flex items-start justify-between gap-4">

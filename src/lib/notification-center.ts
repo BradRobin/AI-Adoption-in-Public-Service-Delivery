@@ -5,6 +5,7 @@ export interface NotificationItem {
   message: string
   type: NotificationType
   createdAt: number
+  onView?: () => void
 }
 
 type Listener = () => void
@@ -35,6 +36,7 @@ export function pushNotification(input: {
   message: string
   type?: NotificationType
   id?: string
+  onView?: () => void
 }) {
   const normalizedMessage = input.message.trim()
   if (!normalizedMessage) return
@@ -42,15 +44,16 @@ export function pushNotification(input: {
   const id = input.id ?? generateNotificationId()
   const type = input.type ?? 'info'
   const createdAt = Date.now()
+  const onView = input.onView
 
   const existingIndex = notifications.findIndex((notification) => notification.id === id)
 
   if (existingIndex >= 0) {
     notifications = notifications.map((notification) =>
-      notification.id === id ? { ...notification, message: normalizedMessage, type, createdAt } : notification
+      notification.id === id ? { ...notification, message: normalizedMessage, type, createdAt, onView } : notification
     )
   } else {
-    notifications = [{ id, message: normalizedMessage, type, createdAt }, ...notifications].slice(0, 50)
+    notifications = [{ id, message: normalizedMessage, type, createdAt, onView }, ...notifications].slice(0, 50)
   }
 
   emitChange()
@@ -60,6 +63,14 @@ export function pushNotification(input: {
 export function removeNotification(id: string) {
   notifications = notifications.filter((notification) => notification.id !== id)
   emitChange()
+}
+
+export function viewNotification(id: string) {
+  const notification = notifications.find((item) => item.id === id)
+  if (notification?.onView) {
+    notification.onView()
+  }
+  removeNotification(id)
 }
 
 export function clearNotifications() {
