@@ -23,6 +23,8 @@ import { BenchmarkCard } from '@/components/BenchmarkCard'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { X } from 'lucide-react'
 
+const WEEKLY_REASSESSMENT_TOAST_ID = 'weekly-reassessment-complete'
+
 /**
  * Main dashboard view for authenticated users.
  * Aggregates various insights including market stats, organizational pulse check,
@@ -108,6 +110,7 @@ export default function Dashboard() {
                                 <span>Weekly Background Re-assessment Complete! Tracking against dynamic Kenya average.</span>
                                 <button
                                     onClick={() => toast.dismiss(t.id)}
+                                    aria-label="Dismiss weekly reassessment notification"
                                     className="ml-2 rounded-full p-1 text-black/40 hover:bg-black/10 dark:text-white/40 dark:hover:bg-white/10 transition-colors"
                                 >
                                     <X size={16} />
@@ -115,6 +118,7 @@ export default function Dashboard() {
                             </div>
                         ),
                         {
+                            id: WEEKLY_REASSESSMENT_TOAST_ID,
                             icon: '📅',
                             duration: 4000,
                         }
