@@ -401,6 +401,17 @@ export default function Dashboard() {
                         </div>
                     </div>
 
+                    {/* Adoption Benchmark (Conditional) */}
+                    {latestAssessment && (
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                            <BenchmarkCard
+                                userScore={latestAssessment.score}
+                                industryAvg={parseFloat(marketStats.ai_adoption_rate.value) || 42.1}
+                                source={marketStats.ai_adoption_rate.source}
+                            />
+                        </div>
+                    )}
+
                     {/* Service Hub Section */}
                     <div className="col-span-1 md:col-span-2 lg:col-span-3">
                         <ServiceHub />
@@ -412,23 +423,13 @@ export default function Dashboard() {
                         <NewsFeed />
                     </div>
 
-                    {/* Charts & Benchmarks (Conditional) */}
+                    {/* Charts (Conditional) */}
                     {latestAssessment && (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3 grid gap-6 lg:grid-cols-3">
-                            {/* Benchmark Card takes 1/3, Charts take 2/3 */}
-                            <div className="lg:col-span-1">
-                                <BenchmarkCard
-                                    userScore={latestAssessment.score}
-                                    industryAvg={parseFloat(marketStats.ai_adoption_rate.value) || 42.1}
-                                    source={marketStats.ai_adoption_rate.source}
-                                />
-                            </div>
-                            <div className="lg:col-span-2">
-                                <DashboardCharts
-                                    overall={latestAssessment.score}
-                                    dimensionScores={latestAssessment.dimension_scores}
-                                />
-                            </div>
+                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                            <DashboardCharts
+                                overall={latestAssessment.score}
+                                dimensionScores={latestAssessment.dimension_scores}
+                            />
                         </div>
                     )}
 
