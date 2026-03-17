@@ -5,6 +5,7 @@ import "./globals.css";
 import { ToasterClient } from "@/components/ToasterClient";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import { TopScrollBlur } from "@/components/TopScrollBlur";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AccessibilityProvider>
+          <TopScrollBlur />
+
           {/* Skip to Content Link for Keyboard Users */}
           <a
             href="#main-content"
