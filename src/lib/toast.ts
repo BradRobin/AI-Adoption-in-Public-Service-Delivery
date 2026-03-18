@@ -14,6 +14,7 @@ interface ToastOptions {
   id?: string
   duration?: number
   icon?: string
+  style?: Record<string, string | number>
 }
 
 function toText(content: ReactNode): string {
@@ -51,7 +52,17 @@ function publish(content: ToastContent, type: NotificationType, options?: ToastO
   return id
 }
 
-const toast = {
+type ToastFn = ((content: ToastContent, options?: ToastOptions) => string) & {
+  success: (content: ToastContent, options?: ToastOptions) => string
+  error: (content: ToastContent, options?: ToastOptions) => string
+  dismiss: (id?: string) => void
+}
+
+const baseToast = (content: ToastContent, options?: ToastOptions) => {
+  return publish(content, 'info', options)
+}
+
+const toast = Object.assign(baseToast, {
   success(content: ToastContent, options?: ToastOptions) {
     return publish(content, 'success', options)
   },
@@ -66,7 +77,7 @@ const toast = {
 
     clearNotifications()
   },
-}
+}) as ToastFn
 
 export { toast }
 export default toast
