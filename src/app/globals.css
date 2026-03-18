@@ -70,6 +70,51 @@ body {
   }
 }
 
+@keyframes services-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.services-carousel-mask {
+  overflow: hidden;
+  position: relative;
+}
+
+.services-carousel-mask::before,
+.services-carousel-mask::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  z-index: 1;
+}
+
+.services-carousel-mask::before {
+  left: 0;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.8), transparent);
+}
+
+.services-carousel-mask::after {
+  right: 0;
+  background: linear-gradient(to left, rgb(0 0 0 / 0.8), transparent);
+}
+
+.services-carousel-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  animation: services-marquee 20s linear infinite;
+  will-change: transform;
+}
+
 /* High Contrast Mode Overrides */
 html.high-contrast {
   --background: #000000 !important;

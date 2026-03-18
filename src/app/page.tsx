@@ -7,6 +7,18 @@ import { supabase } from '@/lib/supabase/client'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 
+const SUPPORTED_SERVICES = [
+  'SHA',
+  'NTSA',
+  'eCitizen',
+  'KRA iTax',
+  'NSSF',
+  'HELB',
+  'Huduma Kenya',
+  'IFMIS',
+  'CRB Services',
+]
+
 /**
  * The main Landing Page component for the PARP application.
  * Handles initial user entry, displays the hero section, and checks for existing user sessions
@@ -143,6 +155,27 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
+
+      {/* Supported Services Carousel */}
+      <section className="relative z-10 w-full border-t border-white/10 bg-black/55 py-3 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+            Supported Public Services
+          </div>
+          <div className="services-carousel-mask">
+            <div className="services-carousel-track">
+              {[...SUPPORTED_SERVICES, ...SUPPORTED_SERVICES].map((service, index) => (
+                <span
+                  key={`${service}-${index}`}
+                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80"
+                >
+                  {service}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="relative z-10 w-full border-t border-white/10 bg-black/50 py-6 text-center backdrop-blur-sm">
