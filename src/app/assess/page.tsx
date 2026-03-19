@@ -379,7 +379,7 @@ export default function AssessPage() {
                 onSubmit={handleSubmit(onSubmit)}
                 className="mt-8 space-y-6"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <button
                     type="button"
                     onClick={handlePreviousQuestion}
@@ -389,16 +389,9 @@ export default function AssessPage() {
                   >
                     &lt;
                   </button>
-                  <div className="text-sm text-white/45">
-                    {isCompletionStep ? 'Ready to submit' : `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
-                  </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.16em] text-white/45">
-                    <span>{answeredCount} of {totalQuestions} answered</span>
-                    <span>{progressPercent}% complete</span>
-                  </div>
                   <progress
                     value={answeredCount}
                     max={totalQuestions}
