@@ -401,19 +401,13 @@ export default function AssessPage() {
 
                 {!isCompletionStep && currentQuestion ? (
                   <section className="space-y-5 rounded-2xl border border-white/10 bg-black/35 p-5 shadow-lg backdrop-blur-sm md:p-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
                         {currentQuestion.sectionLabel}
-                      </div>
-                      <div className="text-sm text-white/45">
-                        Question {currentQuestionIndex + 1} of {totalQuestions}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-sm text-white/40">
-                        Section question {currentQuestion.sectionQuestionNumber} of {currentQuestion.sectionQuestionCount}
-                      </p>
                       <LikertScale
                         key={currentQuestion.id}
                         name={currentQuestion.id}
