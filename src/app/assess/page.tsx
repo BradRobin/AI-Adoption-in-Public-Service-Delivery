@@ -43,6 +43,27 @@ const SECTION_LABELS: Record<ToeSection, string> = {
 }
 
 /**
+ * Color themes per TOE dimension for the assessment UI.
+ */
+const SECTION_COLORS: Record<ToeSection, { badge: string; card: string; progress: string }> = {
+  technological: {
+    badge: 'border-blue-500/25 bg-blue-500/10 text-blue-300',
+    card: 'border-blue-500/20 bg-blue-900/20',
+    progress: 'assessment-progress--technological',
+  },
+  organizational: {
+    badge: 'border-green-500/25 bg-green-500/10 text-green-300',
+    card: 'border-green-500/20 bg-green-900/20',
+    progress: 'assessment-progress--organizational',
+  },
+  environmental: {
+    badge: 'border-orange-500/25 bg-orange-500/10 text-orange-300',
+    card: 'border-orange-500/20 bg-orange-900/20',
+    progress: 'assessment-progress--environmental',
+  },
+}
+
+/**
  * Defines the strict presentation order of the TOE dimensions in the assessment.
  */
 // Order in which sections are presented
@@ -318,6 +339,7 @@ export default function AssessPage() {
 
   const showResults = submittedData && scores
   const totalQuestions = QUESTION_SEQUENCE.length
+  const sectionTheme = currentQuestion ? SECTION_COLORS[currentQuestion.section] : null
   const answeredCount = QUESTION_SEQUENCE.reduce(
     (count, question) => count + (typeof formValues[question.id] === 'number' ? 1 : 0),
     0,
@@ -395,14 +417,14 @@ export default function AssessPage() {
                   <progress
                     value={answeredCount}
                     max={totalQuestions}
-                    className="assessment-progress h-2 w-full overflow-hidden rounded-full"
+                    className={`assessment-progress h-2 w-full overflow-hidden rounded-full${sectionTheme ? ` ${sectionTheme.progress}` : ''}`}
                   />
                 </div>
 
                 {!isCompletionStep && currentQuestion ? (
-                  <section className="space-y-5 rounded-2xl border border-white/10 bg-black/35 p-5 shadow-lg backdrop-blur-sm md:p-6">
+                  <section className={`space-y-5 rounded-2xl border p-5 shadow-lg backdrop-blur-sm transition-colors duration-500 md:p-6${sectionTheme ? ` ${sectionTheme.card}` : ' border-white/10 bg-black/35'}`}>
                     <div className="flex flex-wrap items-center gap-3">
-                      <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                      <div className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors duration-500${sectionTheme ? ` ${sectionTheme.badge}` : ' border-white/10 bg-white/5 text-white/60'}`}>
                         {currentQuestion.sectionLabel}
                       </div>
                     </div>

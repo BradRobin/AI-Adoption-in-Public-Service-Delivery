@@ -127,15 +127,19 @@ body {
 }
 
 .assessment-progress::-webkit-progress-value {
-  background: #4ade80;
+  background: var(--progress-fill-color, #4ade80);
   border-radius: 9999px;
   transition: width 300ms ease;
 }
 
 .assessment-progress::-moz-progress-bar {
-  background: #4ade80;
+  background: var(--progress-fill-color, #4ade80);
   border-radius: 9999px;
 }
+
+.assessment-progress--technological { --progress-fill-color: #3b82f6; }
+.assessment-progress--organizational { --progress-fill-color: #22c55e; }
+.assessment-progress--environmental  { --progress-fill-color: #f97316; }
 
 /* High Contrast Mode Overrides */
 html.high-contrast {
