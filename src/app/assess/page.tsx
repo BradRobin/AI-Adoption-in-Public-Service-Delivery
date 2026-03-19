@@ -339,13 +339,13 @@ export default function AssessPage() {
 
   const showResults = submittedData && scores
   const totalQuestions = QUESTION_SEQUENCE.length
+  const currentQuestion = QUESTION_SEQUENCE[currentQuestionIndex] ?? null
   const sectionTheme = currentQuestion ? SECTION_COLORS[currentQuestion.section] : null
   const answeredCount = QUESTION_SEQUENCE.reduce(
     (count, question) => count + (typeof formValues[question.id] === 'number' ? 1 : 0),
     0,
   )
   const progressPercent = Math.round((answeredCount / totalQuestions) * 100)
-  const currentQuestion = QUESTION_SEQUENCE[currentQuestionIndex] ?? null
   const currentQuestionValue = currentQuestion ? formValues[currentQuestion.id] : undefined
   const isCompletionStep = currentQuestionIndex >= totalQuestions
 
