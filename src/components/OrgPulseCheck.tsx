@@ -145,6 +145,16 @@ export function OrgPulseCheck() {
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<AssessmentResult | null>(null)
 
+    const handleVisitSite = () => {
+        const query = `${orgName.trim()} official site`
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank', 'noopener,noreferrer')
+    }
+
+    const handleDone = () => {
+        setOrgName('')
+        setResult(null)
+    }
+
     const handleAnalyze = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!orgName.trim() || isLoading) return
@@ -261,6 +271,23 @@ export function OrgPulseCheck() {
                             <div className="flex gap-2 items-start text-[10px] text-white/30 bg-white/5 p-2 rounded-lg">
                                 <AlertCircle size={12} className="mt-0.5" />
                                 <p>{result.disclaimer}</p>
+                            </div>
+
+                            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                                <button
+                                    type="button"
+                                    onClick={handleVisitSite}
+                                    className="flex-1 rounded-lg border border-blue-500/30 bg-blue-500/15 px-4 py-2.5 text-sm font-medium text-blue-300 transition hover:border-blue-400/50 hover:bg-blue-500/25"
+                                >
+                                    Visit Site
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleDone}
+                                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+                                >
+                                    Done
+                                </button>
                             </div>
                         </div>
                     </motion.div>
