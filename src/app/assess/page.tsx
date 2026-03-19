@@ -52,6 +52,16 @@ const SECTION_ORDER: ToeSection[] = [
   'environmental',
 ]
 
+const QUESTION_SEQUENCE = SECTION_ORDER.flatMap((section) =>
+  TOE_QUESTIONS[section].map((question, index) => ({
+    ...question,
+    section,
+    sectionLabel: SECTION_LABELS[section],
+    sectionQuestionNumber: index + 1,
+    sectionQuestionCount: TOE_QUESTIONS[section].length,
+  })),
+)
+
 // Zod schema for form validation
 const toeFormSchema = z.object(
   SECTION_ORDER.reduce(
@@ -80,6 +90,7 @@ export default function AssessPage() {
   const [scores, setScores] = useState<ToeScores | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
 
   // React Hook Form initialization with default values
   const {
@@ -103,6 +114,16 @@ export default function AssessPage() {
     ),
   })
 
+  const formValues = watch()
+
+  const getNextQuestionIndex = (values: Partial<ToeFormValues>) => {
+    const firstUnansweredIndex = QUESTION_SEQUENCE.findIndex(
+      (question) => typeof values[question.id] !== 'number',
+    )
+
+    return firstUnansweredIndex === -1 ? QUESTION_SEQUENCE.length : firstUnansweredIndex
+  }
+
   // Load draft from localStorage
   useEffect(() => {
     if (session?.user?.id && !submittedData) {
@@ -114,6 +135,7 @@ export default function AssessPage() {
           Object.keys(parsed).forEach((key) => {
             setValue(key, parsed[key])
           })
+          setCurrentQuestionIndex(getNextQuestionIndex(parsed))
           toast.success('Restored previous draft.')
         } catch {
           // Ignore invalid draft
@@ -125,8 +147,7 @@ export default function AssessPage() {
   const handleSaveDraft = () => {
     if (session?.user?.id) {
       const draftKey = `toe_draft_${session.user.id}`
-      const currentValues = watch()
-      localStorage.setItem(draftKey, JSON.stringify(currentValues))
+      localStorage.setItem(draftKey, JSON.stringify(formValues))
       toast.success('Draft saved successfully.')
     }
   }
@@ -236,7 +257,28 @@ export default function AssessPage() {
     setSubmittedData(null)
     setScores(null)
     setSaveError(null)
+    setCurrentQuestionIndex(0)
     window.scrollTo(0, 0)
+  }
+
+  const handlePreviousQuestion = () => {
+    setCurrentQuestionIndex((previousIndex) => Math.max(0, previousIndex - 1))
+  }
+
+  const handleNextQuestion = () => {
+    setCurrentQuestionIndex((previousIndex) =>
+      Math.min(QUESTION_SEQUENCE.length, previousIndex + 1),
+    )
+  }
+
+  const handleQuestionAnswered = () => {
+    setCurrentQuestionIndex((previousIndex) => {
+      if (previousIndex >= QUESTION_SEQUENCE.length - 1) {
+        return QUESTION_SEQUENCE.length
+      }
+
+      return previousIndex + 1
+    })
   }
 
   const handleSignOut = async () => {
@@ -275,6 +317,15 @@ export default function AssessPage() {
   }
 
   const showResults = submittedData && scores
+  const totalQuestions = QUESTION_SEQUENCE.length
+  const answeredCount = QUESTION_SEQUENCE.reduce(
+    (count, question) => count + (typeof formValues[question.id] === 'number' ? 1 : 0),
+    0,
+  )
+  const progressPercent = Math.round((answeredCount / totalQuestions) * 100)
+  const currentQuestion = QUESTION_SEQUENCE[currentQuestionIndex] ?? null
+  const currentQuestionValue = currentQuestion ? formValues[currentQuestion.id] : undefined
+  const isCompletionStep = currentQuestionIndex >= totalQuestions
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-black font-sans">
@@ -321,49 +372,90 @@ export default function AssessPage() {
           ) : (
             <>
               <p className="mt-3 text-sm text-white/80 md:text-base">
-                Rate each statement on a scale of 1 (Strongly Disagree) to 5
-                (Strongly Agree).
+                Answer one statement at a time. The card advances as soon as you select a response.
               </p>
 
               <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="mt-8 space-y-8"
+                className="mt-8 space-y-6"
               >
-                {SECTION_ORDER.map((section) => (
-                  <section key={section} className="space-y-4">
-                    <h2 className="text-lg font-medium text-white">
-                      {SECTION_LABELS[section]}
-                    </h2>
-                    <div className="space-y-6">
-                      {TOE_QUESTIONS[section].map((q) => (
-                        <LikertScale
-                          key={q.id}
-                          name={q.id}
-                          control={control}
-                          label={q.text}
-                          error={errors[q.id]?.message}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                ))}
-
-                <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+                <div className="flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={handleSaveDraft}
-                    className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10 md:text-base"
+                    onClick={handlePreviousQuestion}
+                    disabled={currentQuestionIndex === 0}
+                    aria-label="Go to previous question"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
                   >
-                    Save Draft
+                    &lt;
                   </button>
-                  <button
-                    type="submit"
-                    disabled={!isValid || isSaving}
-                    className="w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
-                  >
-                    Submit Assessment
-                  </button>
+                  <div className="text-sm text-white/45">
+                    {isCompletionStep ? 'Ready to submit' : `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
+                  </div>
                 </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.16em] text-white/45">
+                    <span>{answeredCount} of {totalQuestions} answered</span>
+                    <span>{progressPercent}% complete</span>
+                  </div>
+                  <progress
+                    value={answeredCount}
+                    max={totalQuestions}
+                    className="assessment-progress h-2 w-full overflow-hidden rounded-full"
+                  />
+                </div>
+
+                {!isCompletionStep && currentQuestion ? (
+                  <section className="space-y-5 rounded-2xl border border-white/10 bg-black/35 p-5 shadow-lg backdrop-blur-sm md:p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                        {currentQuestion.sectionLabel}
+                      </div>
+                      <div className="text-sm text-white/45">
+                        Question {currentQuestionIndex + 1} of {totalQuestions}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-sm text-white/40">
+                        Section question {currentQuestion.sectionQuestionNumber} of {currentQuestion.sectionQuestionCount}
+                      </p>
+                      <LikertScale
+                        key={currentQuestion.id}
+                        name={currentQuestion.id}
+                        control={control}
+                        label={currentQuestion.text}
+                        error={errors[currentQuestion.id]?.message}
+                        onValueChange={handleQuestionAnswered}
+                      />
+                    </div>
+                  </section>
+                ) : (
+                  <section className="space-y-4 rounded-2xl border border-white/10 bg-black/35 p-5 shadow-lg backdrop-blur-sm md:p-6">
+                    <div className="inline-flex rounded-full border border-green-500/25 bg-green-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-green-300">
+                      Assessment Complete
+                    </div>
+                    <h2 className="text-lg font-medium text-white md:text-xl">
+                      All questions answered
+                    </h2>
+                    <p className="text-sm text-white/65 md:text-base">
+                      Review your completion status and submit to generate your AI readiness results.
+                    </p>
+                  </section>
+                )}
+
+                {isCompletionStep && (
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={!isValid || isSaving}
+                      className="w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                    >
+                      Submit Assessment
+                    </button>
+                  </div>
+                )}
               </form>
             </>
           )}

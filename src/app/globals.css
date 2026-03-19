@@ -115,6 +115,28 @@ body {
   will-change: transform;
 }
 
+.assessment-progress {
+  appearance: none;
+  border: 0;
+  background: rgb(255 255 255 / 0.1);
+}
+
+.assessment-progress::-webkit-progress-bar {
+  background: rgb(255 255 255 / 0.1);
+  border-radius: 9999px;
+}
+
+.assessment-progress::-webkit-progress-value {
+  background: #4ade80;
+  border-radius: 9999px;
+  transition: width 300ms ease;
+}
+
+.assessment-progress::-moz-progress-bar {
+  background: #4ade80;
+  border-radius: 9999px;
+}
+
 /* High Contrast Mode Overrides */
 html.high-contrast {
   --background: #000000 !important;
