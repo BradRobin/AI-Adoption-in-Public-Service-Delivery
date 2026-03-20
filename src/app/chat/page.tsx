@@ -257,7 +257,7 @@ export default function ChatPage() {
   const [isThinking, setIsThinking] = useState(false)
   const [thinkingTime, setThinkingTime] = useState(0)
   const [thinkingDurations, setThinkingDurations] = useState<Record<string, number>>({})
-  const [isLocalAI, setIsLocalAI] = useState(true) // Default to Local (Ollama)
+
   const [showAvatar, setShowAvatar] = useState(false)
   const [avatarText, setAvatarText] = useState<string | null>(null)
 
@@ -486,7 +486,7 @@ export default function ChatPage() {
         .eq('id', currentConversationId)
     }
 
-    const currentProvider = isLocalAI ? 'ollama' : 'openai'
+    const currentProvider = 'ollama'
     let fullResponse = ''
 
     try {
@@ -971,20 +971,6 @@ export default function ChatPage() {
                   className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
                 />
                 <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
-                  {/* Local AI Toggle */}
-                  <label className="flex items-center gap-2 cursor-pointer text-xs text-white/70 hover:text-white select-none">
-                    <div className="relative inline-flex items-center h-5 rounded-full w-9 transition-colors focus:outline-none bg-white/20">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={isLocalAI}
-                        onChange={() => setIsLocalAI(!isLocalAI)}
-                      />
-                      <div className={`w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600`}></div>
-                    </div>
-                    <span className="hidden sm:inline">Local AI</span>
-                  </label>
-
                   {/* Avatar Toggle */}
                   <button
                     type="button"
