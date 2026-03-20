@@ -157,7 +157,7 @@ function renderWithPrivacyLink(text: string): React.ReactNode {
   )
 }
 
-
+function buildConversationTitle(messages: ChatMessage[]): string {
   const relevantMessages = messages.filter(
     (message) => message.content.trim().length > 0,
   )
