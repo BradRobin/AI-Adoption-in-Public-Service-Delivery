@@ -53,6 +53,149 @@ type SseEvent =
   | { event: 'error'; data: string }
   | { event: 'done'; data: string }
 
+const TITLE_STOP_WORDS = new Set([
+  'about',
+  'after',
+  'also',
+  'because',
+  'between',
+  'could',
+  'does',
+  'from',
+  'have',
+  'into',
+  'just',
+  'make',
+  'need',
+  'please',
+  'should',
+  'show',
+  'some',
+  'than',
+  'that',
+  'them',
+  'there',
+  'they',
+  'this',
+  'what',
+  'when',
+  'where',
+  'which',
+  'with',
+  'would',
+  'your',
+])
+
+const TITLE_PHRASES = [
+  { pattern: /report issue/i, label: 'Issue Report', weight: 10 },
+  { pattern: /ai readiness|readiness assessment/i, label: 'AI Readiness', weight: 9 },
+  { pattern: /technology[\s-]*organization[\s-]*environment|\btoe\b/i, label: 'TOE Factors', weight: 8 },
+  { pattern: /queue time|waiting time|service time/i, label: 'Service Timing', weight: 8 },
+  { pattern: /service delivery/i, label: 'Service Delivery', weight: 8 },
+  { pattern: /digital transformation/i, label: 'Digital Transformation', weight: 7 },
+  { pattern: /public service/i, label: 'Public Services', weight: 7 },
+  { pattern: /huduma center|huduma kenya|\bhuduma\b/i, label: 'Huduma', weight: 7 },
+  { pattern: /ecitizen/i, label: 'eCitizen', weight: 7 },
+  { pattern: /ntsa/i, label: 'NTSA', weight: 7 },
+  { pattern: /k\s*r\s*a|itax/i, label: 'KRA iTax', weight: 7 },
+  { pattern: /sha/i, label: 'SHA', weight: 7 },
+  { pattern: /nssf/i, label: 'NSSF', weight: 7 },
+  { pattern: /helb/i, label: 'HELB', weight: 7 },
+  { pattern: /ifmis/i, label: 'IFMIS', weight: 7 },
+  { pattern: /crb/i, label: 'CRB', weight: 7 },
+]
+
+const TITLE_TOKEN_LABELS: Record<string, string> = {
+  ai: 'AI',
+  adoption: 'Adoption',
+  assessment: 'Assessment',
+  automation: 'Automation',
+  chatbot: 'Chatbot',
+  county: 'County',
+  dashboard: 'Dashboard',
+  digital: 'Digital',
+  huduma: 'Huduma',
+  implementation: 'Implementation',
+  integration: 'Integration',
+  kenya: 'Kenya',
+  local: 'Local AI',
+  model: 'AI Model',
+  news: 'News',
+  ollama: 'Ollama',
+  openai: 'OpenAI',
+  organization: 'Organization',
+  organizational: 'Organizational',
+  policy: 'Policy',
+  readiness: 'Readiness',
+  report: 'Report',
+  service: 'Service',
+  services: 'Services',
+  strategy: 'Strategy',
+  support: 'Support',
+  technology: 'Technology',
+  technological: 'Technology',
+  transformation: 'Transformation',
+}
+
+function buildConversationTitle(messages: ChatMessage[]): string {
+  const relevantMessages = messages.filter(
+    (message) => message.content.trim().length > 0,
+  )
+
+  if (relevantMessages.length === 0) {
+    return 'New Chat'
+  }
+
+  const conceptScores = new Map<string, number>()
+  const addScore = (label: string, score: number) => {
+    conceptScores.set(label, (conceptScores.get(label) ?? 0) + score)
+  }
+
+  for (const message of relevantMessages) {
+    const content = message.content.trim()
+    const lowered = content.toLowerCase()
+    const roleWeight = message.role === 'user' ? 3 : 1
+
+    for (const phrase of TITLE_PHRASES) {
+      if (phrase.pattern.test(lowered)) {
+        addScore(phrase.label, phrase.weight * roleWeight)
+      }
+    }
+
+    const normalized = lowered.replace(/[^a-z0-9\s]/g, ' ')
+    for (const token of normalized.split(/\s+/)) {
+      if (!token) {
+        continue
+      }
+
+      if (TITLE_STOP_WORDS.has(token)) {
+        continue
+      }
+
+      if (token.length < 4 && !['ai', 'toe', 'sha', 'kra'].includes(token)) {
+        continue
+      }
+
+      const label = TITLE_TOKEN_LABELS[token]
+      if (label) {
+        addScore(label, roleWeight)
+      }
+    }
+  }
+
+  const rankedConcepts = [...conceptScores.entries()]
+    .sort((left, right) => right[1] - left[1] || left[0].length - right[0].length)
+    .map(([label]) => label)
+
+  if (rankedConcepts.length > 0) {
+    return rankedConcepts.slice(0, 2).join(' / ').slice(0, 60)
+  }
+
+  const fallbackMessage = relevantMessages.find((message) => message.role === 'user')?.content ?? relevantMessages[0].content
+  const compact = fallbackMessage.replace(/\s+/g, ' ').trim()
+  return compact.length > 60 ? `${compact.slice(0, 57).trim()}...` : compact
+}
+
 /**
  * Parses raw text from an SSE stream into structured event objects.
  * Handles the standard SSE format, accounting for newlines and data chunking.
@@ -273,15 +416,16 @@ export default function ChatPage() {
 
     // Ensure we capture current active convo state synchronously inside this function scope 
     let currentConversationId = activeConversationId
+    const existingConversation = currentConversationId
+      ? conversations.find((conversation) => conversation.id === currentConversationId) ?? null
+      : null
     let isBrandNewConversation = false
     let autoTitle = 'New Chat'
+    let shouldAutoRefreshTitle = false
 
     // If no active conversation, prep to create one
     if (!currentConversationId) {
       isBrandNewConversation = true
-      // Generate title from first 4 words of the prompt
-      const words = trimmed.split(' ')
-      autoTitle = words.length > 4 ? words.slice(0, 4).join(' ') + '...' : trimmed
     }
 
     const userMessage: ChatMessage = {
@@ -296,6 +440,16 @@ export default function ChatPage() {
       role: 'assistant',
       content: '',
     }
+
+    const userOnlyMessages = [...messages, userMessage]
+    const previousAutoTitle = buildConversationTitle(messages)
+    autoTitle = buildConversationTitle(userOnlyMessages)
+    shouldAutoRefreshTitle =
+      isBrandNewConversation ||
+      !existingConversation ||
+      existingConversation.title.trim().length === 0 ||
+      existingConversation.title === 'New Chat' ||
+      existingConversation.title === previousAutoTitle
 
     const nextMessages = [...messages, userMessage, thinkingMessage]
     setMessages(nextMessages)
@@ -317,6 +471,7 @@ export default function ChatPage() {
       if (!error && data) {
         currentConversationId = data.id
         setActiveConversationId(data.id)
+        setConversations((previous) => [data, ...previous.filter((conversation) => conversation.id !== data.id)])
       } else {
         console.error('Failed to create conversation', error)
       }
@@ -444,13 +599,33 @@ export default function ChatPage() {
       // Persist final messages state to database
       if (currentConversationId && fullResponse.length > 0) {
         const finalMessages = [...messages, userMessage, { id: placeholderId, role: 'assistant', content: fullResponse }]
+        const nextTitle = buildConversationTitle(finalMessages)
+        const updatePayload: Pick<Conversation, 'messages' | 'updated_at'> & { title?: string } = {
+          messages: finalMessages,
+          updated_at: new Date().toISOString(),
+        }
+
+        if (shouldAutoRefreshTitle) {
+          updatePayload.title = nextTitle
+        }
+
         await supabase
           .from('conversations')
-          .update({
-            messages: finalMessages,
-            updated_at: new Date().toISOString()
-          })
+          .update(updatePayload)
           .eq('id', currentConversationId)
+
+        setConversations((previous) =>
+          previous.map((conversation) =>
+            conversation.id === currentConversationId
+              ? {
+                  ...conversation,
+                  messages: finalMessages,
+                  updated_at: updatePayload.updated_at,
+                  title: shouldAutoRefreshTitle ? nextTitle : conversation.title,
+                }
+              : conversation,
+          ),
+        )
       }
 
       if (fullResponse) {
