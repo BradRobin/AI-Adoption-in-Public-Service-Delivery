@@ -137,7 +137,27 @@ const TITLE_TOKEN_LABELS: Record<string, string> = {
   transformation: 'Transformation',
 }
 
-function buildConversationTitle(messages: ChatMessage[]): string {
+function renderWithPrivacyLink(text: string): React.ReactNode {
+  const pattern = /(Privacy Policy|Privacy)/gi
+  const parts = text.split(pattern)
+  return parts.map((part, index) =>
+    pattern.test(part) ? (
+      <Link
+        key={index}
+        href="/privacy"
+        className="underline decoration-dotted text-green-400 hover:text-green-300 transition-colors"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {part}
+      </Link>
+    ) : (
+      <span key={index}>{part}</span>
+    ),
+  )
+}
+
+
   const relevantMessages = messages.filter(
     (message) => message.content.trim().length > 0,
   )
@@ -921,7 +941,9 @@ export default function ChatPage() {
                           </motion.span>
                         </div>
                       ) : (
-                        message.content
+                        message.role === 'assistant'
+                          ? renderWithPrivacyLink(message.content)
+                          : message.content
                       )}
                     </div>
                     {message.role === 'assistant' && !isCurrentlyStreaming && message.content.length > 0 && (
