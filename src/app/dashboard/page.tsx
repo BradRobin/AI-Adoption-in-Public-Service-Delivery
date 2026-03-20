@@ -311,7 +311,12 @@ export default function Dashboard() {
 
             {/* Navigation */}
             <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                <div className="text-xl font-bold tracking-tight text-white">PARP</div>
+                <Link
+                    href="/dashboard"
+                    className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+                >
+                    PARP
+                </Link>
                 <div className="flex items-center gap-4">
                     <span className="text-tier-3 hidden text-sm sm:inline-block">
                         {session.user?.email}

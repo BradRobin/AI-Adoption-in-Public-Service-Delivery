@@ -87,7 +87,12 @@ export default function LandingPage() {
 
       {/* Header / Nav */}
       <header className="relative z-20 flex w-full items-center justify-between px-6 py-4 md:px-12">
-        <div className="text-xl font-bold tracking-tight">PARP</div>
+        <Link
+          href="/dashboard"
+          className="text-xl font-bold tracking-tight transition-opacity hover:opacity-80"
+        >
+          PARP
+        </Link>
         <div className="flex gap-4">
           <Link
             href="/login"
