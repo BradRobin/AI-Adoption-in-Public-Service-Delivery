@@ -724,9 +724,9 @@ export default function ChatPage() {
                     className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} mb-2`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${message.role === 'user'
-                        ? 'rounded-br-sm bg-green-500 text-black'
-                        : 'rounded-bl-sm bg-white/10 text-white shadow-sm'
+                      className={`text-sm md:text-base ${message.role === 'user'
+                        ? 'max-w-[80%] rounded-2xl rounded-br-sm border border-green-400/30 bg-green-500 px-4 py-3 text-black'
+                        : 'max-w-full px-0 py-0 text-white'
                         }`}
                     >
                       {isCurrentlyStreaming && message.content === '' ? (
