@@ -17,6 +17,7 @@ import type { Session } from '@supabase/supabase-js'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import AvatarAdvisor from '@/components/AvatarAdvisor'
+import { usePrivacyConsent } from '@/components/PrivacyBanner'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, X, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -269,6 +270,7 @@ function parseSseEvents(raw: string): SseEvent[] {
  */
 export default function ChatPage() {
   const router = useRouter()
+  const { consentChatHistory, loading: consentLoading } = usePrivacyConsent()
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -363,6 +365,13 @@ export default function ChatPage() {
 
   // Fetch conversations when session exists
   useEffect(() => {
+    if (consentLoading) return
+    if (!consentChatHistory) {
+      setConversations([])
+      setActiveConversationId(null)
+      return
+    }
+
     if (!session?.user?.id) return
 
     const fetchConversations = async () => {
@@ -399,7 +408,7 @@ export default function ChatPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [session?.user?.id])
+  }, [session?.user?.id, consentChatHistory, consentLoading])
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -477,7 +486,7 @@ export default function ChatPage() {
     setIsThinking(true)
 
     // Instantly create the conversation in the database if brand new
-    if (isBrandNewConversation) {
+    if (isBrandNewConversation && consentChatHistory) {
       const { data, error } = await supabase
         .from('conversations')
         .insert({
@@ -495,7 +504,7 @@ export default function ChatPage() {
       } else {
         console.error('Failed to create conversation', error)
       }
-    } else if (currentConversationId) {
+    } else if (currentConversationId && consentChatHistory) {
       // Persist the user message immediately for existing chats
       await supabase
         .from('conversations')
@@ -617,8 +626,13 @@ export default function ChatPage() {
       }
 
       // Persist final messages state to database
-      if (currentConversationId && fullResponse.length > 0) {
-        const finalMessages = [...messages, userMessage, { id: placeholderId, role: 'assistant', content: fullResponse }]
+      if (currentConversationId && fullResponse.length > 0 && consentChatHistory) {
+        const assistantMessage: ChatMessage = {
+          id: placeholderId,
+          role: 'assistant',
+          content: fullResponse,
+        }
+        const finalMessages = [...messages, userMessage, assistantMessage]
         const nextTitle = buildConversationTitle(finalMessages)
         const updatePayload: Pick<Conversation, 'messages' | 'updated_at'> & { title?: string } = {
           messages: finalMessages,

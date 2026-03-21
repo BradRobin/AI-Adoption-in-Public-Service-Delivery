@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import PrivacyBanner, { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
 
 const geistSans = Geist({
@@ -43,22 +44,25 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} text-tier-system antialiased`}
       >
         <AccessibilityProvider>
-          <TopScrollBlur />
+          <PrivacyConsentProvider>
+            <TopScrollBlur />
 
-          {/* Skip to Content Link for Keyboard Users */}
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:bg-green-500 focus:p-4 focus:text-black focus:outline-none focus:ring-4 focus:ring-white"
-          >
-            Skip to main content
-          </a>
+            {/* Skip to Content Link for Keyboard Users */}
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:bg-green-500 focus:p-4 focus:text-black focus:outline-none focus:ring-4 focus:ring-white"
+            >
+              Skip to main content
+            </a>
 
-          {children}
+            {children}
 
-          <AdminToeQuizPopup />
-          <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
-            Built by Engineer Brad Robinson
-          </footer>
+            <AdminToeQuizPopup />
+            <PrivacyBanner />
+            <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
+              Built by Engineer Brad Robinson
+            </footer>
+          </PrivacyConsentProvider>
         </AccessibilityProvider>
       </body>
     </html>
