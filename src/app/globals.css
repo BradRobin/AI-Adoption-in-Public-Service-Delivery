@@ -80,6 +80,26 @@ body {
   }
 }
 
+@keyframes cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(34 197 94 / 0.25);
+  }
+
+  70% {
+    box-shadow: 0 0 0 12px rgb(34 197 94 / 0);
+  }
+}
+
+.cta-pulse-hover {
+  will-change: transform;
+}
+
+.cta-pulse-hover:hover,
+.cta-pulse-hover:focus-visible {
+  animation: cta-pulse 1.2s ease-in-out infinite;
+}
+
 .services-carousel-mask {
   overflow: hidden;
   position: relative;
@@ -185,4 +205,24 @@ html.high-contrast .text-green-400 {
   background-color: #00ff00 !important;
   color: #000000 !important;
   font-weight: bold !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .services-carousel-track {
+    animation: none !important;
+  }
+
+  .cta-pulse-hover:hover,
+  .cta-pulse-hover:focus-visible {
+    animation: none !important;
+  }
 }
