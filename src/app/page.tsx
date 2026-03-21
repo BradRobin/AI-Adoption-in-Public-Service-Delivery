@@ -23,6 +23,7 @@ const SUPPORTED_SERVICES = [
 
 const SOCIAL_PROOF_TARGET = 47892
 const SOCIAL_PROOF_START = 47210
+const DEMO_VIDEO_SRC = '/demo/parp-45s-reel.mp4'
 
 function ScorePreviewCard() {
   return (
@@ -298,9 +299,54 @@ export default function LandingPage() {
           <p className="mt-2 max-w-2xl text-sm text-white/70 sm:text-base">
             A quick walkthrough of PARP&apos;s readiness assessment flow, benchmark comparison, and next-step recommendations.
           </p>
-          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-blue-300/25 bg-blue-500/10 px-4 py-2 text-sm text-blue-100">
-            <PlayCircle size={16} />
-            Demo preview section anchor active
+
+          <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
+            <div className="overflow-hidden rounded-xl border border-white/15 bg-black/70 shadow-[0_24px_54px_rgb(0_0_0_/_0.45)]">
+              <video
+                className="aspect-video h-auto w-full bg-black"
+                controls
+                preload="metadata"
+                playsInline
+                aria-label="PARP 45-second demo reel"
+              >
+                <source src={DEMO_VIDEO_SRC} type="video/mp4" />
+                Your browser does not support embedded videos. Use the download link below to watch the demo.
+              </video>
+            </div>
+
+            <div className="rounded-xl border border-white/12 bg-black/35 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">What you&apos;ll see</p>
+              <ul className="mt-3 space-y-2 text-sm text-white/80">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-400" />
+                  Instant score generation flow from sign-up to results.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  Side-by-side benchmark against Kenya average.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-300" />
+                  Action plan hints for your first AI implementation wins.
+                </li>
+              </ul>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <a
+                  href={DEMO_VIDEO_SRC}
+                  className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-100 transition hover:border-blue-200 hover:bg-blue-500/25"
+                >
+                  <PlayCircle size={14} />
+                  Open Full Reel
+                </a>
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center rounded-full border border-green-300/30 bg-green-500/15 px-4 py-2 text-xs font-semibold text-green-200 transition hover:border-green-200 hover:bg-green-500/25"
+                >
+                  Start My Assessment
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
