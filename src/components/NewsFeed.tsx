@@ -7,8 +7,8 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Newspaper, RefreshCw, ArrowRight } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Newspaper, RefreshCw, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from '@/lib/toast'
 
@@ -37,6 +37,9 @@ export function NewsFeed() {
     const [news, setNews] = useState<NewsItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(false)
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+    const cardRefs = useRef<Array<HTMLElement | null>>([])
 
     const fetchNews = async () => {
         setIsLoading(true)
@@ -59,22 +62,76 @@ export function NewsFeed() {
         fetchNews()
     }, [])
 
+    const kenyaContext = useMemo(() => {
+        return news.map((item) => {
+            const title = `${item.title} ${item.snippet || ''}`.toLowerCase()
+
+            if (/health|hospital|nhif|medical|clinic|patient/.test(title)) {
+                return 'Stronger digital health services can reduce wait times and improve care access nationwide.'
+            }
+            if (/education|school|student|teacher|university|learning/.test(title)) {
+                return 'Smart education tools can improve learning outcomes in both urban and rural counties.'
+            }
+            if (/agri|farm|food|maize|drought|climate/.test(title)) {
+                return 'Data-driven agriculture helps farmers plan better and protect food security in Kenya.'
+            }
+            if (/transport|traffic|road|mobility|nairobi/.test(title)) {
+                return 'Better digital planning can ease congestion and make daily movement more predictable.'
+            }
+            if (/government|public|service|ecitizen|county/.test(title)) {
+                return 'Efficient digital public services save citizens time and improve trust in institutions.'
+            }
+
+            return 'This signals how AI adoption is shaping service delivery, jobs, and citizen experience in Kenya.'
+        })
+    }, [news])
+
+    const handleSurpriseMe = () => {
+        if (news.length === 0) return
+
+        let randomIndex = Math.floor(Math.random() * news.length)
+        if (news.length > 1 && selectedIndex !== null && randomIndex === selectedIndex) {
+            randomIndex = (randomIndex + 1) % news.length
+        }
+
+        setSelectedIndex(randomIndex)
+
+        const targetCard = cardRefs.current[randomIndex]
+        if (targetCard) {
+            targetCard.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            })
+        }
+    }
+
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
+        <div className="h-full rounded-2xl border border-orange-300/15 bg-[radial-gradient(circle_at_12%_0%,rgba(251,146,60,0.16),transparent_38%),linear-gradient(155deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md">
             {/* Header */}
-            <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
                     <Newspaper className="text-orange-400" aria-hidden="true" />
                     AI & Public Service News
                 </h2>
-                <button
-                    onClick={fetchNews}
-                    disabled={isLoading}
-                    aria-label="Refresh news feed"
-                    className="rounded-lg p-2 text-white/50 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
-                >
-                    <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} aria-hidden="true" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleSurpriseMe}
+                        disabled={isLoading || news.length === 0}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-orange-300/25 bg-orange-400/10 px-3 py-2 text-xs font-semibold tracking-wide text-orange-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-300/45 hover:bg-orange-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Show a random article"
+                    >
+                        <Sparkles size={14} aria-hidden="true" />
+                        Surprise Me
+                    </button>
+                    <button
+                        onClick={fetchNews}
+                        disabled={isLoading}
+                        aria-label="Refresh news feed"
+                        className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                        <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} aria-hidden="true" />
+                    </button>
+                </div>
             </div>
 
             {/* News List */}
@@ -110,11 +167,34 @@ export function NewsFeed() {
                     news.map((item, index) => (
                         <motion.article
                             key={index}
+                            ref={(el) => {
+                                cardRefs.current[index] = el
+                            }}
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -4 }}
                             transition={{ delay: index * 0.04, duration: 0.3 }}
-                            className="group rounded-lg border border-white/5 bg-black/30 p-4 transition-all duration-200 hover:border-orange-500/30 hover:bg-white/5 hover:shadow-lg hover:shadow-orange-500/5 hover:scale-[1.01]"
+                            onHoverStart={() => setHoveredIndex(index)}
+                            onHoverEnd={() => setHoveredIndex((current) => (current === index ? null : current))}
+                            onFocusCapture={() => setHoveredIndex(index)}
+                            onBlurCapture={() => setHoveredIndex((current) => (current === index ? null : current))}
+                            className={`group relative rounded-xl border p-4 transition-all duration-300 ${
+                                selectedIndex === index
+                                    ? 'border-orange-300/55 bg-orange-500/10 shadow-[0_12px_30px_rgba(251,146,60,0.16)] ring-1 ring-orange-300/40'
+                                    : 'border-white/10 bg-black/30 hover:border-orange-300/45 hover:bg-white/5 hover:shadow-[0_10px_24px_rgba(251,146,60,0.12)]'
+                            }`}
                         >
+                            <motion.div
+                                initial={false}
+                                animate={{ opacity: hoveredIndex === index ? 1 : 0, y: hoveredIndex === index ? 0 : 4 }}
+                                transition={{ duration: 0.18 }}
+                                className="pointer-events-none absolute -top-2 right-3 z-20 max-w-70 rounded-md border border-orange-300/30 bg-black/90 px-3 py-2 text-[11px] text-orange-100 shadow-xl"
+                                role="tooltip"
+                            >
+                                <p className="font-semibold text-orange-300">Why this matters in Kenya</p>
+                                <p className="mt-0.5 text-orange-100/90">{kenyaContext[index]}</p>
+                            </motion.div>
+
                             {/* Source & Date - ONLY display here, nowhere else */}
                             <div className="flex items-center gap-2 text-xs mb-2">
                                 <span className="font-semibold text-orange-400">{item.source}</span>
@@ -123,13 +203,13 @@ export function NewsFeed() {
                             </div>
 
                             {/* Title - clean, no source */}
-                            <h3 className="text-base font-semibold leading-snug text-white group-hover:text-orange-400 transition-colors line-clamp-2">
+                            <h3 className="line-clamp-2 text-base font-bold leading-snug text-white transition-colors group-hover:text-orange-300">
                                 {item.title}
                             </h3>
 
                             {/* Snippet - already cleaned by backend, no source */}
                             {item.snippet && (
-                                <p className="mt-2 text-sm text-white/60 leading-relaxed line-clamp-3">
+                                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">
                                     {item.snippet}
                                 </p>
                             )}
@@ -139,15 +219,19 @@ export function NewsFeed() {
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-orange-400/80 hover:text-orange-400 transition-colors group/link"
+                                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-orange-200 transition-colors hover:text-orange-100 group/link"
                                 aria-label={`Read full article: ${item.title}`}
                             >
                                 Read more
-                                <ArrowRight
-                                    size={12}
-                                    className="transition-transform duration-200 group-hover/link:translate-x-1"
+                                <motion.span
                                     aria-hidden="true"
-                                />
+                                    className="inline-block"
+                                    initial={false}
+                                    animate={{ x: hoveredIndex === index ? 3 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    →
+                                </motion.span>
                             </a>
                         </motion.article>
                     ))
