@@ -77,12 +77,17 @@ const services = [
     }
 ]
 
+type ServiceHubProps = {
+    demoMode?: boolean
+    onDemoAssist?: (service: { id: string; title: string }) => void
+}
+
 /**
  * ServiceHub Component
  * Displays a grid of available Kenyan public services.
  * Allows users to either visit the external portal directly or open a specialized AI assistant.
  */
-export function ServiceHub() {
+export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) {
     const [selectedService, setSelectedService] = useState<{ id: string; title: string } | null>(null)
 
     return (
@@ -148,23 +153,31 @@ export function ServiceHub() {
                             </a>
 
                             <button
-                                onClick={() => setSelectedService({ id: service.id, title: service.title })}
+                                onClick={() => {
+                                    if (demoMode) {
+                                        onDemoAssist?.({ id: service.id, title: service.title })
+                                        return
+                                    }
+                                    setSelectedService({ id: service.id, title: service.title })
+                                }}
                                 className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-400 transition-colors hover:bg-green-500 hover:text-black"
                             >
                                 <Bot size={14} />
-                                <span>AI Assist</span>
+                                <span>{demoMode ? 'Ask Demo Bot' : 'AI Assist'}</span>
                             </button>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            <ServiceAssistantModal
-                isOpen={!!selectedService}
-                onClose={() => setSelectedService(null)}
-                serviceId={selectedService?.id || ''}
-                serviceTitle={selectedService?.title || ''}
-            />
+            {!demoMode && (
+                <ServiceAssistantModal
+                    isOpen={!!selectedService}
+                    onClose={() => setSelectedService(null)}
+                    serviceId={selectedService?.id || ''}
+                    serviceTitle={selectedService?.title || ''}
+                />
+            )}
         </div>
     )
 }
