@@ -141,7 +141,7 @@ function StepTwoChatPreview() {
           transition={{ duration: 0.25 }}
           className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-white/10 bg-white/10 px-3 py-2 text-sm text-white/90"
         >
-          Buda, AI readiness yangu iko aje na ni-start wapi?
+          Sasa boss, nipatie quick readiness score, gigs na service shortcut za leo.
         </motion.div>
 
         <motion.div
@@ -150,7 +150,7 @@ function StepTwoChatPreview() {
           transition={{ duration: 0.3, delay: 0.1 }}
           className="max-w-[88%] rounded-2xl rounded-bl-md border border-green-400/20 bg-green-500/10 px-3 py-2 text-sm text-white/90"
         >
-          Uko fiti! Start na quick assessment kwanza, then nitakushow maneno ya tech, team na policy kwa step-by-step plan.
+          Karibu sana. Nakuonyesha score estimate, gigs 2 unaweza start wiki hii, na huduma gani upate faster kulingana na location yako. Twende Sheng ama English?
         </motion.div>
 
         <motion.div
@@ -267,7 +267,7 @@ export default function FirstTimeWelcomeModal() {
       },
       {
         title: 'Try the Kenyan AI Advisor',
-        subtitle: 'Chat in English, Kiswahili, or Sheng and get practical public-service guidance.',
+        subtitle: 'Get instant score insight, gig ideas, and public-service shortcuts in Sheng or English.',
       },
       {
         title: 'Quick Peek: Public Service Hub',

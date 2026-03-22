@@ -138,6 +138,12 @@ const TITLE_TOKEN_LABELS: Record<string, string> = {
   transformation: 'Transformation',
 }
 
+const HERO_EXAMPLE_PROMPT = {
+  label: 'Try example question',
+  prompt:
+    'Niko kaunti officer Nairobi. Nipatie quick AI readiness score estimate, 2 online gigs naweza anza this week, na public services naweza speed up leo.',
+}
+
 function renderWithPrivacyLink(text: string): React.ReactNode {
   const pattern = /(Privacy Policy|Privacy)/gi
   const parts = text.split(pattern)
@@ -291,7 +297,17 @@ export default function ChatPage() {
   const [editTitleValue, setEditTitleValue] = useState('')
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const thinkingTimeRef = useRef(0)
+
+  const handleStarterPromptClick = () => {
+    setInput(HERO_EXAMPLE_PROMPT.prompt)
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus()
+      const length = HERO_EXAMPLE_PROMPT.prompt.length
+      inputRef.current?.setSelectionRange(length, length)
+    })
+  }
 
   // Format thinking time as "Xs" or "Xm Ys"
   const formatThinkingTime = (seconds: number): string => {
@@ -913,13 +929,20 @@ export default function ChatPage() {
               className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
             >
               {messages.length === 0 && !isThinking && (
-                <div className="mt-6 rounded-xl border border-dashed border-white/15 bg-black/40 px-4 py-3 text-xs text-white/70 md:text-sm">
-                  <p className="font-medium text-white/80">
-                    Welcome to the AI Readiness Chat.
+                <div className="mt-6 rounded-2xl border border-green-400/25 bg-gradient-to-br from-green-500/10 via-black/50 to-blue-500/10 px-4 py-4 text-xs text-white/80 shadow-[0_18px_40px_-26px_rgba(74,222,128,0.9)] md:px-5 md:py-5 md:text-sm">
+                  <p className="text-base font-semibold text-white md:text-lg">
+                    Karibu sana. Tuanze na quick win leo.
                   </p>
-                  <p className="mt-1">
-                    Ask about your AI readiness, try predicting service times (e.g. &quot;Estimate queue time at Huduma Center&quot;), or report issues directly starting with &quot;Report issue:&quot;. Responses are personalized based on your role and location.
+                  <p className="mt-2 leading-relaxed text-white/80">
+                    I can instantly help you estimate your AI readiness score, suggest practical online gigs, and guide you through public services faster. Uliza kwa Sheng ama English, vile unafeel.
                   </p>
+                  <button
+                    type="button"
+                    onClick={handleStarterPromptClick}
+                    className="mt-3 inline-flex items-center rounded-full border border-green-300/35 bg-green-500/15 px-3 py-1.5 text-xs font-semibold text-green-200 transition hover:bg-green-500/25 hover:text-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300 md:text-sm"
+                  >
+                    {HERO_EXAMPLE_PROMPT.label}
+                  </button>
                 </div>
               )}
 
@@ -992,6 +1015,7 @@ export default function ChatPage() {
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                 <textarea
+                  ref={inputRef}
                   rows={1}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -1003,7 +1027,7 @@ export default function ChatPage() {
                       }
                     }
                   }}
-                  placeholder="Ask PARP AI"
+                  placeholder="Ask in Sheng or English (score, gigs, services)"
                   className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
                 />
                 <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
