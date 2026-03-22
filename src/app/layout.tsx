@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import FirstTimeWelcomeModal from "@/components/FirstTimeWelcomeModal";
 import PrivacyBanner, { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
 
@@ -57,6 +58,7 @@ export default function RootLayout({
 
             {children}
 
+            <FirstTimeWelcomeModal />
             <AdminToeQuizPopup />
             <PrivacyBanner />
             <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
