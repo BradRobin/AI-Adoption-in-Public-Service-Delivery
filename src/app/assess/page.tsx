@@ -366,7 +366,7 @@ export default function AssessPage() {
           <NavigationMenu />
         </div>
       </nav>
-      <main id="main-content" className="relative z-10 mx-auto w-full max-w-2xl px-4 pt-20 pb-24">
+      <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto w-full max-w-2xl px-4 pt-14 md:pt-20 md:pb-24">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur md:p-8">
           <h1 className="text-xl font-semibold text-white md:text-2xl">
             AI Readiness Assessment (TOE Framework)
@@ -412,7 +412,7 @@ export default function AssessPage() {
                     onClick={handlePreviousQuestion}
                     disabled={currentQuestionIndex === 0}
                     aria-label="Go to previous question"
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="mobile-touch-target flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     &lt;
                   </button>
@@ -464,7 +464,7 @@ export default function AssessPage() {
                     <button
                       type="submit"
                       disabled={!isValid || isSaving}
-                      className="w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                      className="mobile-touch-target w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
                     >
                       Submit Assessment
                     </button>
@@ -476,7 +476,7 @@ export default function AssessPage() {
 
           <Link
             href="/"
-            className="mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
+            className="mobile-touch-target mt-6 inline-flex items-center justify-center rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
           >
             Back to home
           </Link>

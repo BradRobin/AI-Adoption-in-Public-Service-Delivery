@@ -168,7 +168,7 @@ export default function ProfilePage() {
                 </div>
             </nav>
 
-            <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-md flex-col px-4 pt-16 pb-24 items-center justify-center">
+            <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto flex w-full max-w-md flex-col items-center justify-center px-4 pt-12 md:pt-16 md:pb-24">
                 <div className="flex w-full flex-col rounded-2xl border border-white/10 bg-black/60 shadow-xl backdrop-blur p-6">
                     <header className="mb-6 text-center">
                         <h1 className="text-2xl font-semibold text-white">Your Profile</h1>
@@ -224,15 +224,15 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="pt-2 border-t border-white/10">
-                            <label className="mb-1 block text-sm font-medium text-white/80">Role</label>
-                            <input type="text" disabled value={role} className="w-full rounded-lg border border-white/5 bg-white/5 px-3 py-2 text-sm text-white/40 cursor-not-allowed uppercase" />
+                            <label htmlFor="role" className="mb-1 block text-sm font-medium text-white/80">Role</label>
+                            <input id="role" type="text" disabled value={role} className="w-full rounded-lg border border-white/5 bg-white/5 px-3 py-2 text-sm text-white/40 cursor-not-allowed uppercase" />
                             <p className="mt-1 text-xs text-white/40">Roles are managed by administrators.</p>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-lg bg-green-500 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
+                            className="mobile-touch-target mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg bg-green-500 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
                         >
                             {isSaving ? 'Saving Changes...' : 'Save Profile'}
                         </button>

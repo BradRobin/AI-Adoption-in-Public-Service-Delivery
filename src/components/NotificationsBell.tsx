@@ -44,7 +44,7 @@ export function NotificationsBell() {
       <button
         type="button"
         onClick={() => setIsOpen((previousValue) => !previousValue)}
-        className={`relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-2 text-white transition-colors hover:bg-white/10 ${isOpen ? 'z-70' : ''}`}
+        className={`mobile-touch-target relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white transition-colors hover:bg-white/10 ${isOpen ? 'z-70' : ''}`}
         aria-label="Open notifications"
       >
         <Bell size={20} />
@@ -90,7 +90,7 @@ export function NotificationsBell() {
                     <button
                       type="button"
                       onClick={() => viewNotification(notification.id)}
-                      className="w-full border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5"
+                      className="mobile-touch-target w-full border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <p className="text-sm text-white">{notification.message}</p>

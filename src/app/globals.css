@@ -7,6 +7,7 @@
   --text-tier-1: rgb(255 255 255 / 1);
   --text-tier-2: rgb(255 255 255 / 0.5);
   --text-tier-3: rgb(255 255 255 / 0.2);
+  --mobile-bottom-nav-height: 4.75rem;
 }
 
 @theme inline {
@@ -27,6 +28,21 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.mobile-touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.mobile-safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 767px) {
+  .mobile-page-with-bottom-nav {
+    padding-bottom: calc(var(--mobile-bottom-nav-height) + max(1rem, env(safe-area-inset-bottom)));
+  }
 }
 
 /* Text Opacity Hierarchy */

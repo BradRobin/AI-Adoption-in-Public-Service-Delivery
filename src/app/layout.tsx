@@ -1,5 +1,5 @@
 // Basic Next.js font and metadata imports
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
@@ -7,6 +7,7 @@ import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 import FirstTimeWelcomeModal from "@/components/FirstTimeWelcomeModal";
 import PrivacyBanner, { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,12 @@ export const metadata: Metadata = {
     "Assess your AI readiness and chat with PARP about Technology–Organization–Environment (TOE) factors in the Kenyan context.",
   manifest: "/manifest.json",
   themeColor: "#000000",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 /**
@@ -57,6 +64,7 @@ export default function RootLayout({
             </a>
 
             {children}
+            <MobileBottomNav />
 
             <FirstTimeWelcomeModal />
             <AdminToeQuizPopup />

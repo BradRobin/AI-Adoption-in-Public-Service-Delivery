@@ -812,27 +812,27 @@ export default function ChatPage() {
         </div>
       </nav>
 
-      <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-4 pb-8 md:pt-20 md:pb-24">
+      <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-4 pb-8 md:pt-20 md:pb-24">
 
         {/* Mobile Sidebar Toggle Button (Visible only on small screens) */}
         <div className="mb-4 flex items-center gap-2 md:hidden">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+            className="mobile-touch-target flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
           >
             <Menu size={16} />
             <span>{isSidebarOpen ? 'Hide History' : 'View History'}</span>
           </button>
           <button
             onClick={handleNewChat}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-500/10 border border-green-500/20 px-4 py-2 text-sm text-green-400 transition hover:bg-green-500/20"
+            className="mobile-touch-target flex flex-1 items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-2 text-sm text-green-400 transition hover:bg-green-500/20"
           >
             <Plus size={16} />
             <span>New Chat</span>
           </button>
         </div>
 
-        <div className="flex min-h-[500px] flex-1 flex-col md:flex-row rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur max-h-[calc(100vh-6rem)] relative overflow-hidden">
+        <div className="relative flex min-h-[500px] max-h-[calc(100dvh-5.5rem)] flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur md:max-h-[calc(100vh-6rem)] md:flex-row">
 
           {/* History Sidebar */}
           <div className={`
@@ -874,9 +874,18 @@ export default function ChatPage() {
                           value={editTitleValue}
                           onChange={e => setEditTitleValue(e.target.value)}
                           onBlur={() => handleRenameSubmit(conv.id)}
+                          aria-label="Edit conversation title"
+                          placeholder="Rename conversation"
                           className="w-full bg-black/50 border border-green-500/50 rounded px-1.5 py-0.5 text-sm text-white outline-none"
                         />
-                        <button type="submit" className="text-green-400 p-0.5"><Check size={14} /></button>
+                        <button
+                          type="submit"
+                          className="text-green-400 p-0.5"
+                          aria-label="Save conversation title"
+                          title="Save conversation title"
+                        >
+                          <Check size={14} />
+                        </button>
                       </form>
                     ) : (
                       <div className="flex-1 min-w-0">
@@ -1011,7 +1020,7 @@ export default function ChatPage() {
 
             <form
               onSubmit={handleSend}
-              className="border-t border-white/10 bg-black/60 px-4 py-3"
+              className="mobile-safe-bottom sticky bottom-0 z-20 border-t border-white/10 bg-black/85 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)]"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                 <textarea
@@ -1028,17 +1037,16 @@ export default function ChatPage() {
                     }
                   }}
                   placeholder="Ask in Sheng or English (score, gigs, services)"
-                  className="max-h-28 min-h-[44px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+                  className="max-h-28 min-h-[48px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
                 />
                 <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
                   {/* Avatar Toggle */}
                   <button
                     type="button"
                     onClick={() => setShowAvatar(!showAvatar)}
-                    className={`ml-2 flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                    className={`mobile-touch-target ml-2 flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${showAvatar ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-white/20 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
                     title="Toggle 3D Avatar"
                     aria-label={showAvatar ? "Disable 3D Avatar" : "Enable 3D Avatar"}
-                    aria-pressed={showAvatar}
                   >
                     {showAvatar ? <Video size={14} aria-hidden="true" /> : <VideoOff size={14} aria-hidden="true" />}
                     <span className="hidden sm:inline">Avatar</span>
@@ -1048,7 +1056,7 @@ export default function ChatPage() {
                   type="submit"
                   disabled={isThinking || input.trim().length === 0}
                   aria-label={isThinking ? `Thinking for ${formatThinkingTime(thinkingTime)}` : 'Send message'}
-                  className="inline-flex h-10 min-w-[80px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
+                  className="mobile-touch-target inline-flex h-12 min-w-[96px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
                 >
                   {isThinking && (
                     <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />

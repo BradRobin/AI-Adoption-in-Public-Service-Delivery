@@ -58,7 +58,7 @@ function MenuItem({ href, icon: Icon, label, onClick, variant = 'default' }: Men
     }
 
     const content = (
-        <div className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors ${colorClasses}`}>
+        <div className={`mobile-touch-target flex items-center gap-3 rounded-lg px-4 py-3 transition-colors ${colorClasses}`}>
             <Icon size={18} />
             <span className="font-medium text-sm">{label}</span>
         </div>
@@ -96,7 +96,7 @@ export function NavigationMenu() {
             {/* Hamburger Trigger */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-2 text-white hover:bg-white/10 transition-colors"
+                className="mobile-touch-target flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white transition-colors hover:bg-white/10"
                 aria-label="Open menu"
             >
                 <Menu size={20} />
@@ -131,7 +131,7 @@ export function NavigationMenu() {
                             <button
                                 onClick={handleClose}
                                 aria-label="Close menu"
-                                className="rounded-full p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                className="mobile-touch-target rounded-full p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                             >
                                 <X size={20} aria-hidden="true" />
                             </button>
@@ -142,7 +142,7 @@ export function NavigationMenu() {
                             {/* Accessibility Toggles */}
                             <button
                                 onClick={toggleHighContrast}
-                                className={`w-full text-left flex items-center justify-between rounded-lg px-4 py-3 transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${highContrast
+                                className={`mobile-touch-target mb-4 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${highContrast
                                         ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                                         : 'text-white/80 hover:text-white hover:bg-white/5'
                                     }`}

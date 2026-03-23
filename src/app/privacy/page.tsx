@@ -54,7 +54,7 @@ function PolicySection({ title, icon: Icon, children, delay = 0 }: PolicySection
             </div>
 
             <div className="flex items-center gap-4 mb-6 relative z-10">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 text-indigo-400">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-linear-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400">
                     <Icon size={24} />
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
     return (
         <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30">
             {/* Navigation Overlay */}
-            <div className="fixed top-6 right-6 z-50">
+            <div className="fixed top-4 right-4 z-50 md:top-6 md:right-6">
                 <NavigationMenu />
             </div>
 
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
             </div>
 
-            <main id="main-content" className="relative z-10 max-w-4xl mx-auto px-6 py-20 md:py-32">
+            <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto max-w-4xl px-4 pt-20 md:px-6 md:py-32">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
                     <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/10 mb-6 text-indigo-400">
                         <Shield size={32} />
                     </div>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
+                    <h1 className="mb-6 bg-linear-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl lg:text-6xl">
                         Privacy & Security Policy
                     </h1>
                     <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto">
@@ -132,21 +132,21 @@ export default function PrivacyPolicyPage() {
                         </p>
                         <div className="grid sm:grid-cols-2 gap-4 mt-6">
                             <div className="flex items-start gap-3 p-4 rounded-xl bg-black/20 border border-white/5">
-                                <UserCheck className="text-green-400 mt-1 flex-shrink-0" size={20} />
+                                <UserCheck className="mt-1 shrink-0 text-green-400" size={20} />
                                 <div>
                                     <h4 className="font-medium text-white mb-1">Secure Authentication</h4>
                                     <p className="text-sm text-zinc-400">Powered by Supabase Auth, ensuring encrypted identity verification and secure session management.</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-4 rounded-xl bg-black/20 border border-white/5">
-                                <Database className="text-blue-400 mt-1 flex-shrink-0" size={20} />
+                                <Database className="mt-1 shrink-0 text-blue-400" size={20} />
                                 <div>
                                     <h4 className="font-medium text-white mb-1">Data Encryption</h4>
                                     <p className="text-sm text-zinc-400">All sensitive data is encrypted at rest and in transit using modern cryptographic standards.</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-4 rounded-xl bg-black/20 border border-white/5 sm:col-span-2">
-                                <Shield className="text-indigo-400 mt-1 flex-shrink-0" size={20} />
+                                <Shield className="mt-1 shrink-0 text-indigo-400" size={20} />
                                 <div>
                                     <h4 className="font-medium text-white mb-1">Secure Admin Portals</h4>
                                     <p className="text-sm text-zinc-400">Administrative access is strictly gated, requiring separate authentication and comprehensive audit logging for all system-level actions.</p>

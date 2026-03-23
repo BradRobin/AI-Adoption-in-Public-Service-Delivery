@@ -52,7 +52,7 @@ export function LikertScale<T extends FieldValues>({
               return (
                 <label
                   key={opt.value}
-                  className={`flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-green-400 ${isSelected
+                  className={`mobile-touch-target flex min-h-12 min-w-12 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-green-400 ${isSelected
                     ? 'border-white/50 bg-white/10'
                     : 'border-white/10 bg-black/40 hover:border-white/20'
                     }`}

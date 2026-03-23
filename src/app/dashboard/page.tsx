@@ -36,7 +36,11 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(true)
     const [latestAssessment, setLatestAssessment] = useState<{
         score: number
-        dimension_scores: any
+        dimension_scores: {
+            technological: number
+            organizational: number
+            environmental: number
+        }
         created_at?: string
         previousScore?: number | null
     } | null>(null)
@@ -70,7 +74,6 @@ export default function Dashboard() {
                 }
             } catch (error) {
                 if (process.env.NODE_ENV === 'development') {
-                    // eslint-disable-next-line no-console
                     console.error('Error checking session on dashboard:', error)
                 }
                 setSession(null)
@@ -142,7 +145,15 @@ export default function Dashboard() {
                 },
                 (payload) => {
                     // Update latest assessment immediately
-                    const newAssessment = payload.new as { score: number; dimension_scores: any, created_at: string }
+                    const newAssessment = payload.new as {
+                        score: number
+                        dimension_scores: {
+                            technological: number
+                            organizational: number
+                            environmental: number
+                        }
+                        created_at: string
+                    }
                     setLatestAssessment(prev => ({
                         score: newAssessment.score,
                         dimension_scores: newAssessment.dimension_scores,
@@ -224,12 +235,6 @@ export default function Dashboard() {
         return () => clearTimeout(timer)
     }, [])
 
-    const handleSignOut = async () => {
-        await supabase.auth.signOut()
-        toast.success('You have been signed out.')
-        router.replace('/login')
-    }
-
     if (isLoading && !redirectTakingLong) {
         return (
             <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
@@ -253,7 +258,7 @@ export default function Dashboard() {
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <Link
                             href="/login"
-                            className="flex h-12 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600"
+                            className="flex h-12 min-w-35 items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600"
                         >
                             Login
                         </Link>
@@ -328,7 +333,7 @@ export default function Dashboard() {
             <InstallPrompt />
 
             {/* Main Content */}
-            <main id="main-content" className="relative z-10 mx-auto max-w-5xl px-6 py-12">
+            <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto max-w-5xl px-4 pt-8 md:px-6 md:pt-12 md:pb-12">
                 {/* Welcome Section */}
                 <div className={`mb-12 text-center transition-all duration-700 ease-out ${isGreetingVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
                     <h1 className="text-tier-1 text-3xl font-bold sm:text-5xl md:text-6xl">
@@ -385,7 +390,7 @@ export default function Dashboard() {
                                     {!latestAssessment && (
                                         <Link
                                             href="/assess"
-                                            className="mt-2 inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
+                                            className="mobile-touch-target mt-2 inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
                                         >
                                             Check My Readiness
                                         </Link>
@@ -430,7 +435,7 @@ export default function Dashboard() {
                     {/* Action Cards (Chat & Assessment) */}
                     <Link
                         href="/assess"
-                        className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
+                        className="mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
@@ -448,7 +453,7 @@ export default function Dashboard() {
 
                     <Link
                         href="/chat"
-                        className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
+                        className="mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">
