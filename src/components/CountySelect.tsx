@@ -46,14 +46,31 @@ export function CountySelect({
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
+  const sortedCounties = useMemo(
+    () => [...KENYAN_COUNTIES].sort((a, b) => a.localeCompare(b)),
+    []
+  )
+
   // Filter counties based on search query
   const filteredCounties = useMemo(() => {
-    if (!searchQuery.trim()) return [...KENYAN_COUNTIES]
+    if (!searchQuery.trim()) return sortedCounties
+
     const query = searchQuery.toLowerCase()
-    return KENYAN_COUNTIES.filter((county) =>
-      county.toLowerCase().includes(query)
-    )
-  }, [searchQuery])
+    const startsWithMatches: string[] = []
+    const containsMatches: string[] = []
+
+    sortedCounties.forEach((county) => {
+      const countyLower = county.toLowerCase()
+
+      if (countyLower.startsWith(query)) {
+        startsWithMatches.push(county)
+      } else if (countyLower.includes(query)) {
+        containsMatches.push(county)
+      }
+    })
+
+    return [...startsWithMatches, ...containsMatches]
+  }, [searchQuery, sortedCounties])
 
   // Scroll highlighted item into view
   useEffect(() => {
