@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 import { ParticleBackground } from '@/components/ParticleBackground'
+import { TypingTagline } from '@/components/TypingTagline'
 import type { Session } from '@supabase/supabase-js'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { PlayCircle } from 'lucide-react'
@@ -151,12 +152,15 @@ export default function LandingPage() {
 
       {/* Header / Nav */}
       <header className="relative z-20 flex w-full items-center justify-between px-6 py-4 md:px-12">
-        <Link
-          href="/dashboard"
-          className="text-xl font-bold tracking-tight transition-opacity hover:opacity-80"
-        >
-          PARP
-        </Link>
+        <div className="flex flex-col items-start gap-0.5">
+          <Link
+            href="/dashboard"
+            className="text-xl font-bold tracking-tight transition-opacity hover:opacity-80"
+          >
+            PARP
+          </Link>
+          <TypingTagline className="min-h-[1.1rem] text-[11px] font-medium text-white/70 sm:text-xs" />
+        </div>
         <div className="flex gap-4">
           <Link
             href="/login"

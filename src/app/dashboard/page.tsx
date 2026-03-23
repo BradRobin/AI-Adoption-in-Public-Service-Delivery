@@ -21,6 +21,7 @@ import { OrgPulseCheck } from '@/components/OrgPulseCheck'
 import { NewsFeed } from '@/components/NewsFeed'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
 import { NavigationMenu } from '@/components/NavigationMenu'
+import { TypingTagline } from '@/components/TypingTagline'
 
 const WEEKLY_REASSESSMENT_TOAST_ID = 'weekly-reassessment-complete'
 
@@ -316,12 +317,15 @@ export default function Dashboard() {
 
             {/* Navigation */}
             <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                <Link
-                    href="/dashboard"
-                    className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
-                >
-                    PARP
-                </Link>
+                <div className="flex flex-col items-start gap-0.5">
+                    <Link
+                        href="/dashboard"
+                        className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+                    >
+                        PARP
+                    </Link>
+                    <TypingTagline className="min-h-[1.1rem] text-[11px] font-medium text-white/70 sm:text-xs" />
+                </div>
                 <div className="flex items-center gap-4">
                     <span className="text-tier-3 hidden text-sm sm:inline-block">
                         {session.user?.email}

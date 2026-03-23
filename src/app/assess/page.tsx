@@ -19,6 +19,7 @@ import { z } from 'zod'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { LikertScale } from '@/components/LikertScale'
 import { NavigationMenu } from '@/components/NavigationMenu'
+import { TypingTagline } from '@/components/TypingTagline'
 import { ToeResults } from '@/components/ToeResults'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -353,12 +354,15 @@ export default function AssessPage() {
     <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-black font-sans">
       <ParticleBackground />
       <nav className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-        <Link
-          href="/dashboard"
-          className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
-        >
-          PARP
-        </Link>
+        <div className="flex flex-col items-start gap-0.5">
+          <Link
+            href="/dashboard"
+            className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+          >
+            PARP
+          </Link>
+          <TypingTagline className="min-h-[1.1rem] text-[11px] font-medium text-white/70 sm:text-xs" />
+        </div>
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-white/60 sm:inline-block">
             {session.user?.email}

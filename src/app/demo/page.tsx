@@ -8,6 +8,7 @@ import { ParticleBackground } from '@/components/ParticleBackground'
 import { ToeResults } from '@/components/ToeResults'
 import { ServiceHub } from '@/components/ServiceHub'
 import { BenchmarkCard } from '@/components/BenchmarkCard'
+import { TypingTagline } from '@/components/TypingTagline'
 import {
   clearDemoChatState,
   createDefaultDemoMessages,
@@ -165,12 +166,15 @@ export default function DemoPage() {
       <div className="sticky top-0 z-30 border-b border-white/10 bg-black/75 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-lg font-bold tracking-tight text-white transition-opacity hover:opacity-80"
-            >
-              PARP Demo
-            </Link>
+            <div className="flex flex-col items-start gap-0.5">
+              <Link
+                href="/"
+                className="text-lg font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+              >
+                PARP
+              </Link>
+              <TypingTagline className="min-h-4 text-[10px] font-medium text-white/70 sm:text-[11px]" />
+            </div>
             <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-300">
               Cold User Experience
             </span>
