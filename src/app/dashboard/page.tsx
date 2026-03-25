@@ -250,7 +250,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (!hasValidAdoptionRate) return
 
-        const durationMs = 1200
+        const durationMs = 2000
         const startTime = performance.now()
         let frameId = 0
 
