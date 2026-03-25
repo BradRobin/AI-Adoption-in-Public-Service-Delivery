@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
@@ -39,7 +39,6 @@ function ResetPasswordFallback() {
 
 function ResetPasswordContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -67,6 +66,10 @@ function ResetPasswordContent() {
 
     const verifyRecoveryLink = async () => {
       try {
+        const searchParams =
+          typeof window !== 'undefined'
+            ? new URLSearchParams(window.location.search)
+            : new URLSearchParams('')
         const code = searchParams.get('code')
         const tokenHash = searchParams.get('token_hash')
         const type = searchParams.get('type')
@@ -176,7 +179,7 @@ function ResetPasswordContent() {
     return () => {
       isMounted = false
     }
-  }, [searchParams])
+  }, [])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
