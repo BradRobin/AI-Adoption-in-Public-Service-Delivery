@@ -15,11 +15,12 @@ const ROUTES = [
 test.describe('responsive layout guard', () => {
   for (const route of ROUTES) {
     test(`no horizontal overflow on ${route}`, async ({ page }) => {
-      await page.goto(route)
-      await page.waitForLoadState('networkidle')
+      // waitUntil: 'domcontentloaded' avoids ERR_ABORTED on auth redirects and
+      // 'networkidle' timeouts on pages with Supabase realtime connections.
+      await page.goto(route, { waitUntil: 'domcontentloaded' })
 
       // Let intro animations and async UI settle to catch post-load overflow.
-      await page.waitForTimeout(300)
+      await page.waitForTimeout(500)
 
       const metrics = await page.evaluate(() => {
         const root = document.scrollingElement ?? document.documentElement

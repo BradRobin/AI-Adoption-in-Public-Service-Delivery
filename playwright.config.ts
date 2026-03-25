@@ -4,6 +4,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000'
 
 export default defineConfig({
   testDir: './tests/responsive',
+  timeout: 60_000,
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',

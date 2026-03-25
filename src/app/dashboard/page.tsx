@@ -364,31 +364,31 @@ export default function Dashboard() {
                 </div>
 
                 {/* Dashboard Grid */}
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
+                    <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
                             <h2 className="text-tier-2 mb-4 text-xl font-semibold">
                                 Kenya AI Adoption Insight
                             </h2>
                             <div className="flex flex-col gap-6 md:flex-row md:items-center">
-                                <div className="flex-1 space-y-2">
-                                    <p className="text-tier-1 text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
+                                <div className="min-w-0 flex-1 space-y-2">
+                                    <p className="break-words text-tier-1 text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
                                     <p className="text-tier-3">
                                         of Kenyan businesses are already using ChatGPT or similar tools.
                                     </p>
-                                    <p className="text-xs text-white/50">
+                                    <p className="truncate text-xs text-white/50">
                                         Source: {marketStats.ai_adoption_rate.source}
                                     </p>
                                 </div>
                                 <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
-                                <div className="flex-1 space-y-3">
+                                <div className="min-w-0 flex-1 space-y-3">
                                     <p className="text-sm font-semibold text-white/90">Latest Policy Update:</p>
-                                    <p className="text-white">
+                                    <p className="break-words text-white">
                                         {marketStats.policy_update.value}
                                     </p>
-                                    <p className="text-xs text-white/50">
+                                    <p className="truncate text-xs text-white/50">
                                         Source: {marketStats.policy_update.source}
                                     </p>
                                     {!latestAssessment && (
@@ -406,7 +406,7 @@ export default function Dashboard() {
 
                     {/* Adoption Benchmark (Conditional) */}
                     {latestAssessment && (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                        <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
                             <BenchmarkCard
                                 userScore={latestAssessment.score}
                                 industryAvg={parseFloat(marketStats.ai_adoption_rate.value) || 42.1}
@@ -416,19 +416,19 @@ export default function Dashboard() {
                     )}
 
                     {/* Service Hub Section */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                    <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
                         <ServiceHub />
                     </div>
 
                     {/* Org Pulse Check & News Feed (2 Columns) */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3 grid gap-6 lg:grid-cols-2">
+                    <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
                         <OrgPulseCheck />
                         <NewsFeed />
                     </div>
 
                     {/* Charts (Conditional) */}
                     {latestAssessment && (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                        <div className="col-span-1 min-w-0 overflow-hidden md:col-span-2 lg:col-span-3">
                             <DashboardCharts
                                 overall={latestAssessment.score}
                                 dimensionScores={latestAssessment.dimension_scores}
