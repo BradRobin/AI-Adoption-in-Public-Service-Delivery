@@ -28,7 +28,7 @@ const DEMO_VIDEO_SRC = '/demo/parp-45s-reel.mp4'
 
 function ScorePreviewCard() {
   return (
-    <div className="w-65 rounded-2xl border border-white/20 bg-black/90 p-4 text-left shadow-2xl backdrop-blur-md">
+    <div className="w-full max-w-xs rounded-2xl border border-white/20 bg-black/90 p-4 text-left shadow-2xl backdrop-blur-md">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/60">Instant Preview</p>
         <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300">
@@ -225,7 +225,7 @@ export default function LandingPage() {
               <motion.div whileHover={prefersReducedMotion ? undefined : { y: -2 }}>
                 <Link
                   href="/signup"
-                  className="cta-pulse-hover relative flex h-13 w-full min-w-55 items-center justify-center overflow-hidden rounded-full border border-green-300/40 bg-green-500 px-8 text-base font-bold text-black transition sm:w-auto"
+                  className="cta-pulse-hover relative flex h-13 w-full min-w-0 items-center justify-center overflow-hidden rounded-full border border-green-300/40 bg-green-500 px-8 text-base font-bold text-black transition sm:min-w-55 sm:w-auto"
                   aria-describedby="hero-score-preview"
                 >
                   <span className="relative z-10">Get My Score Free →</span>
@@ -260,7 +260,7 @@ export default function LandingPage() {
             <motion.div whileHover={prefersReducedMotion ? undefined : { y: -2 }}>
               <Link
                 href="#demo"
-                className="group relative flex h-13 w-full min-w-55 items-center justify-center gap-2 rounded-full border border-blue-400/60 bg-blue-500/5 px-8 text-base font-semibold text-blue-200 transition hover:border-blue-300 hover:bg-blue-500/10 hover:text-blue-100 sm:w-auto"
+                className="group relative flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-full border border-blue-400/60 bg-blue-500/5 px-8 text-base font-semibold text-blue-200 transition hover:border-blue-300 hover:bg-blue-500/10 hover:text-blue-100 sm:min-w-55 sm:w-auto"
               >
                 <PlayCircle size={18} />
                 <span>Watch 45-Second Demo</span>
@@ -305,7 +305,7 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
-            <div className="overflow-hidden rounded-xl border border-white/15 bg-black/70 shadow-[0_24px_54px_rgb(0_0_0_/_0.45)]">
+            <div className="overflow-hidden rounded-xl border border-white/15 bg-black/70 shadow-[0_24px_54px_rgb(0_0_0/0.45)]">
               <video
                 className="aspect-video h-auto w-full bg-black"
                 controls

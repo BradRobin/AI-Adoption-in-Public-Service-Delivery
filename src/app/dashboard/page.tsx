@@ -259,7 +259,7 @@ export default function Dashboard() {
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <Link
                             href="/login"
-                            className="flex h-12 min-w-35 items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600"
+                            className="flex h-12 w-full min-w-0 items-center justify-center rounded-lg bg-green-500 px-6 font-medium text-white transition-colors hover:bg-green-600 sm:w-auto sm:min-w-35"
                         >
                             Login
                         </Link>
@@ -347,7 +347,7 @@ export default function Dashboard() {
                         Ready to continue your AI adoption journey?
                     </p>
                     {latestAssessment && (
-                        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                        <div className="mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
                             <span>Current readiness: {latestAssessment.score}%</span>
                             {latestAssessment.previousScore && (
                                 <span className={latestAssessment.score >= latestAssessment.previousScore ? "text-green-400" : "text-red-400"}>
@@ -355,7 +355,7 @@ export default function Dashboard() {
                                 </span>
                             )}
                             {latestAssessment.created_at && (
-                                <span className="ml-2 border-l border-white/20 pl-2 text-white/50">
+                                <span className="text-white/50 sm:ml-2 sm:border-l sm:border-white/20 sm:pl-2">
                                     {getRelativeTime(latestAssessment.created_at)}
                                 </span>
                             )}
