@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -21,7 +21,23 @@ function analyzePassword(password: string) {
   return { score, hasMinLength, hasLetter, hasNumberOrSymbol }
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordFallback() {
+  return (
+    <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
+      <ParticleBackground />
+      <main
+        id="main-content"
+        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8"
+      >
+        <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-115">
+          <p className="text-center text-sm text-white/80">Loading reset form...</p>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [password, setPassword] = useState('')
@@ -373,5 +389,13 @@ export default function ResetPasswordPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordFallback />}>
+      <ResetPasswordContent />
+    </Suspense>
   )
 }
