@@ -55,6 +55,17 @@ export default function Dashboard() {
         ai_adoption_rate: { value: '41.5%', source: 'Loading...' },
         policy_update: { value: 'Loading...', source: '' },
     })
+    const [animatedAdoptionRate, setAnimatedAdoptionRate] = useState(0)
+
+    const parsedAdoptionRate = Number.parseFloat(marketStats.ai_adoption_rate.value)
+    const hasValidAdoptionRate = Number.isFinite(parsedAdoptionRate)
+    const adoptionRateDecimals = (() => {
+        const match = marketStats.ai_adoption_rate.value.match(/-?\d+(?:\.(\d+))?/)
+        return match?.[1]?.length ?? 0
+    })()
+    const adoptionRateDisplay = hasValidAdoptionRate
+        ? `${animatedAdoptionRate.toFixed(adoptionRateDecimals)}%`
+        : marketStats.ai_adoption_rate.value
 
     // Effect: Check for active session on mount and subscribe to auth changes
     useEffect(() => {
@@ -236,6 +247,30 @@ export default function Dashboard() {
         return () => clearTimeout(timer)
     }, [])
 
+    useEffect(() => {
+        if (!hasValidAdoptionRate) return
+
+        const durationMs = 1200
+        const startTime = performance.now()
+        let frameId = 0
+
+        const animate = (now: number) => {
+            const progress = Math.min((now - startTime) / durationMs, 1)
+            const easedProgress = 1 - Math.pow(1 - progress, 3)
+            setAnimatedAdoptionRate(parsedAdoptionRate * easedProgress)
+
+            if (progress < 1) {
+                frameId = requestAnimationFrame(animate)
+            }
+        }
+
+        frameId = requestAnimationFrame(animate)
+
+        return () => {
+            cancelAnimationFrame(frameId)
+        }
+    }, [hasValidAdoptionRate, parsedAdoptionRate])
+
     if (isLoading && !redirectTakingLong) {
         return (
             <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
@@ -374,7 +409,7 @@ export default function Dashboard() {
                             </h2>
                             <div className="flex flex-col gap-6 md:flex-row md:items-center">
                                 <div className="min-w-0 flex-1 space-y-2">
-                                    <p className="break-words text-tier-1 text-3xl font-bold text-green-400">{marketStats.ai_adoption_rate.value}</p>
+                                    <p className="wrap-break-word text-tier-1 text-3xl font-bold text-green-400">{adoptionRateDisplay}</p>
                                     <p className="text-tier-3">
                                         of Kenyan businesses are already using ChatGPT or similar tools.
                                     </p>
@@ -385,7 +420,7 @@ export default function Dashboard() {
                                 <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
                                 <div className="min-w-0 flex-1 space-y-3">
                                     <p className="text-sm font-semibold text-white/90">Latest Policy Update:</p>
-                                    <p className="break-words text-white">
+                                    <p className="wrap-break-word text-white">
                                         {marketStats.policy_update.value}
                                     </p>
                                     <p className="truncate text-xs text-white/50">
