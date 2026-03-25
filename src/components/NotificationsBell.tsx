@@ -75,7 +75,7 @@ export function NotificationsBell() {
             className="fixed inset-0 z-60 bg-black/25 backdrop-blur-sm"
           />
 
-          <div className="absolute right-0 top-full z-70 mt-2 w-80 overflow-hidden rounded-xl border border-white/15 bg-zinc-950/95 shadow-2xl backdrop-blur-md">
+          <div className="absolute right-0 top-full z-70 mt-2 w-[min(20rem,calc(100vw-1rem))] overflow-hidden rounded-xl border border-white/15 bg-zinc-950/95 shadow-2xl backdrop-blur-md">
             <div className="border-b border-white/10 px-4 py-3">
               <h3 className="text-sm font-semibold tracking-wide text-white">Notifications</h3>
               <p className="text-xs text-white/60">Click an item to mark it as viewed.</p>

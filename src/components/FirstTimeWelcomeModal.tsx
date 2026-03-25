@@ -424,7 +424,7 @@ export default function FirstTimeWelcomeModal() {
                       <button
                         type="button"
                         onClick={startAssessment}
-                        className="inline-flex h-12 min-w-[240px] items-center justify-center rounded-xl bg-green-500 px-6 text-base font-bold text-black shadow-[0_18px_45px_-25px_rgba(74,222,128,0.95)] transition hover:-translate-y-0.5 hover:bg-green-400"
+                        className="inline-flex h-12 w-full min-w-0 items-center justify-center rounded-xl bg-green-500 px-6 text-base font-bold text-black shadow-[0_18px_45px_-25px_rgba(74,222,128,0.95)] transition hover:-translate-y-0.5 hover:bg-green-400 sm:w-auto sm:min-w-60"
                       >
                         Start My Real Assessment
                       </button>

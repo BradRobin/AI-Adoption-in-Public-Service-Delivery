@@ -237,18 +237,18 @@ export default function PrivacyBanner() {
                 <p>We respect your privacy. Only anonymous data used to improve the app.</p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <button
                   type="button"
                   onClick={handleAcceptAll}
-                  className="w-32 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-500"
+                  className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-500 sm:w-32"
                 >
                   Accept All
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpen(true)}
-                  className="w-32 rounded-lg border border-white/30 bg-transparent px-4 py-2 text-sm font-medium text-tier-1 transition hover:bg-white/10"
+                  className="w-full rounded-lg border border-white/30 bg-transparent px-4 py-2 text-sm font-medium text-tier-1 transition hover:bg-white/10 sm:w-32"
                 >
                   Customize
                 </button>

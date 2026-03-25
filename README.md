@@ -77,6 +77,31 @@ PARP is a comprehensive digital dashboard designed to help Kenyan public sector 
 - Includes a PWA Manifest for "Add to Home Screen" installation.
 - Works offline with cached app shell.
 
+### Mobile QA Checklist
+
+Use this quick checklist before releasing UI changes:
+
+- No horizontal page scroll on key routes: `/`, `/login`, `/signup`, `/privacy`, `/reset-password`, `/dashboard`, `/assess`, `/chat`, `/profile`.
+- Hero cards and action buttons stack correctly on small screens (320px to 430px widths).
+- Drawers, modals, and dropdowns stay within viewport width.
+- Status badges/chips wrap gracefully instead of forcing overflow.
+- Images, videos, and embedded content scale to container width.
+- Bottom navigation does not cover primary actions and forms.
+
+### Automated Responsive Regression Test
+
+Run the viewport overflow regression suite:
+
+```bash
+npm run test:responsive
+```
+
+Run in interactive UI mode:
+
+```bash
+npm run test:responsive:ui
+```
+
 ## ⚠️ Ethical Disclaimer
 
 This tool uses AI to estimate organizational maturity based on public data. It does not access private internal systems. All assessments should be verified by human auditors.
