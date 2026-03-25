@@ -262,7 +262,7 @@ export default function FirstTimeWelcomeModal() {
   const stepMeta = useMemo(
     () => [
       {
-        title: 'Welcome! Your AI Readiness Score is Ready',
+        title: 'Your AI Readiness Score is Ready',
         subtitle: 'In seconds, see where you stand and how to improve with confidence.',
       },
       {
