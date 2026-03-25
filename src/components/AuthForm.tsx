@@ -48,11 +48,15 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [forgotEmail, setForgotEmail] = useState('')
   const [location, setLocation] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showForgotPrompt, setShowForgotPrompt] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSendingReset, setIsSendingReset] = useState(false)
 
   const { score, hasMinLength, hasLetter, hasNumberOrSymbol } = useMemo(
     () => analyzePassword(password),
@@ -68,6 +72,54 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
     setMode(nextMode)
     setError(null)
     setSuccessMessage(null)
+    setShowForgotPrompt(false)
+    setForgotMessage(null)
+  }
+
+  const handleForgotPassword = async (event: FormEvent) => {
+    event.preventDefault()
+    setForgotMessage(null)
+
+    const trimmedEmail = forgotEmail.trim()
+    if (!trimmedEmail || trimmedEmail.length > 50) {
+      setForgotMessage('Please enter a valid email address.')
+      toast.error('Please enter a valid email address.')
+      return
+    }
+
+    try {
+      setIsSendingReset(true)
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmedEmail }),
+      })
+
+      let data: { message?: string } | null = null
+      try {
+        data = await response.json()
+      } catch {
+        data = null
+      }
+
+      if (!response.ok) {
+        const message = data?.message || 'Unable to send reset link. Please try again.'
+        setForgotMessage(message)
+        toast.error(message)
+        return
+      }
+
+      const success =
+        data?.message ||
+        'If an account exists for that email, a reset link has been sent.'
+      setForgotMessage(success)
+      toast.success(success)
+    } catch {
+      setForgotMessage('Unable to send reset link. Please try again.')
+      toast.error('Unable to send reset link. Please try again.')
+    } finally {
+      setIsSendingReset(false)
+    }
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -439,6 +491,20 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                 </svg>
               )}
             </button>
+
+            <div className="mt-2 text-right">
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotEmail(email.trim())
+                  setForgotMessage(null)
+                  setShowForgotPrompt(true)
+                }}
+                className="text-xs font-medium text-green-400 hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
         )}
 
@@ -486,6 +552,63 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
           )}
         </div>
       </form>
+
+      {showForgotPrompt && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-sm rounded-xl border border-white/10 bg-black/90 p-5 shadow-lg backdrop-blur">
+            <h2 className="text-lg font-medium text-white">Reset your password</h2>
+            <p className="mt-1 text-sm text-white/70">
+              Enter your email and we&apos;ll send you a secure reset link.
+            </p>
+
+            <form onSubmit={handleForgotPassword} className="mt-4 space-y-3">
+              <div>
+                <label
+                  htmlFor="forgot-email"
+                  className="mb-1 block text-sm font-medium text-white/80"
+                >
+                  Email
+                </label>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  value={forgotEmail}
+                  maxLength={50}
+                  onChange={(event) => setForgotEmail(event.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              {forgotMessage && (
+                <p className="text-xs text-white/80">{forgotMessage}</p>
+              )}
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPrompt(false)}
+                  className="rounded-lg border border-white/20 px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSendingReset}
+                  className="inline-flex items-center justify-center rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
+                >
+                  {isSendingReset && (
+                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-white border-t-transparent" />
+                  )}
+                  {isSendingReset ? 'Sending...' : 'Send reset link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
