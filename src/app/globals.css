@@ -4,9 +4,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --text-tier-1: rgb(255 255 255 / 1);
-  --text-tier-2: rgb(255 255 255 / 0.5);
-  --text-tier-3: rgb(255 255 255 / 0.2);
+  --text-tier-1: rgb(255 255 255 / 0.87);
+  --text-tier-2: rgb(255 255 255 / 0.60);
+  --text-tier-3: rgb(255 255 255 / 0.38);
   --mobile-bottom-nav-height: 4.75rem;
 }
 
