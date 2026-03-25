@@ -60,7 +60,7 @@ export function DashboardCharts({
     return (
         <div className="grid gap-6 md:grid-cols-2">
             {/* Overall Score & Radar Chart */}
-            <div className="flex flex-col items-center justify-center space-y-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="flex flex-col items-center justify-center space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
                 <div className="text-center">
                     <span className="text-4xl font-bold text-green-400">{overall}</span>
                     <span className="text-xl text-white/60"> / 100</span>
@@ -103,7 +103,7 @@ export function DashboardCharts({
             </div>
 
             {/* Bar Breakdown */}
-            <div className="flex flex-col justify-center space-y-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="flex flex-col justify-center space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
                 <h3 className="mb-2 text-lg font-semibold text-white">Dimension Breakdown</h3>
                 <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">

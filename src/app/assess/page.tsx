@@ -318,7 +318,7 @@ export default function AssessPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
             <p className="text-sm text-white/80 md:text-base">Checking session...</p>
           </div>
-          <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur">
+          <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-xl backdrop-blur">
             <div className="h-4 w-40 animate-pulse rounded-full bg-white/10" />
             <div className="space-y-2">
               <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />
@@ -371,7 +371,7 @@ export default function AssessPage() {
         </div>
       </nav>
       <main id="main-content" className="mobile-page-with-bottom-nav relative z-10 mx-auto w-full max-w-2xl px-4 pt-14 md:pt-20 md:pb-24">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur md:p-8">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-xl backdrop-blur md:p-8">
           <h1 className="text-xl font-semibold text-white md:text-2xl">
             AI Readiness Assessment (TOE Framework)
           </h1>

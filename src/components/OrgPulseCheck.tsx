@@ -71,13 +71,13 @@ function analyzeWithHeuristics(orgName: string, articles: { title: string, link:
     let aiScore = 0
     let techScore = 0
     const insights: string[] = []
-    
+
     const allTitles = articles.map(a => a.title.toLowerCase()).join(' ')
-    
+
     AI_KEYWORDS.forEach(keyword => {
         if (allTitles.includes(keyword)) aiScore++
     })
-    
+
     TECH_KEYWORDS.forEach(keyword => {
         if (allTitles.includes(keyword)) techScore++
     })
@@ -189,7 +189,7 @@ export function OrgPulseCheck() {
     }
 
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
             <h2 className="mb-4 text-xl font-semibold text-white flex items-center gap-2">
                 <Building className="text-blue-400" />
                 Organization Pulse Check

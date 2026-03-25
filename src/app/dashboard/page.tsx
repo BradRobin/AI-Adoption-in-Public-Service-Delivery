@@ -403,7 +403,7 @@ export default function Dashboard() {
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
-                        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-white/20">
+                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm transition hover:border-white/20">
                             <h2 className="text-tier-2 mb-4 text-xl font-semibold">
                                 Kenya AI Adoption Insight
                             </h2>

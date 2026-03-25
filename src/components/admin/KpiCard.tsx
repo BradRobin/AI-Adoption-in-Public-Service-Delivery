@@ -35,7 +35,7 @@ interface KpiCardProps {
  */
 export function KpiCard({ title, value, icon: Icon, description, trend }: KpiCardProps) {
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10 flex flex-col justify-between">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-white/70">{title}</h3>
                 <div className="rounded-lg bg-green-500/10 p-2 text-green-400">

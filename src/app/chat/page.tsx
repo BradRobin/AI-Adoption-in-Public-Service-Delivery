@@ -669,11 +669,11 @@ export default function ChatPage() {
           previous.map((conversation) =>
             conversation.id === currentConversationId
               ? {
-                  ...conversation,
-                  messages: finalMessages,
-                  updated_at: updatePayload.updated_at,
-                  title: shouldAutoRefreshTitle ? nextTitle : conversation.title,
-                }
+                ...conversation,
+                messages: finalMessages,
+                updated_at: updatePayload.updated_at,
+                title: shouldAutoRefreshTitle ? nextTitle : conversation.title,
+              }
               : conversation,
           ),
         )
@@ -777,7 +777,7 @@ export default function ChatPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
             <p className="text-sm text-white/80 md:text-base">Checking session...</p>
           </div>
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur">
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-xl backdrop-blur">
             <div className="h-4 w-32 animate-pulse rounded-full bg-white/10" />
             <div className="space-y-2">
               <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />

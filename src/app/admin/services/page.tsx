@@ -92,7 +92,7 @@ export default function AdminServicesPage() {
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {services.map((service) => (
-                    <div key={service.id} className="group flex flex-col rounded-xl border border-white/10 bg-white/5 p-6 transition-all hover:border-white/20 hover:bg-white/10">
+                    <div key={service.id} className="group flex flex-col rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 transition-all hover:border-white/20 hover:bg-white/10">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center justify-center p-3 rounded-lg bg-white/10 group-hover:bg-green-500/20 transition-colors">
                                 <service.icon className="text-white group-hover:text-green-400 transition-colors" size={24} />

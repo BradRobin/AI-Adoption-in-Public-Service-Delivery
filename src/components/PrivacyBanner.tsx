@@ -160,7 +160,7 @@ function ToggleRow({
   icon: ReactNode
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6">
       <div className="mt-0.5 text-green-300">{icon}</div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-tier-1">{title}</p>
@@ -171,14 +171,12 @@ function ToggleRow({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition ${
-          checked ? 'bg-green-500' : 'bg-white/20'
-        }`}
+        className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition ${checked ? 'bg-green-500' : 'bg-white/20'
+          }`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-            checked ? 'translate-x-5' : 'translate-x-1'
-          }`}
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${checked ? 'translate-x-5' : 'translate-x-1'
+            }`}
         />
       </button>
     </div>

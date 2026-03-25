@@ -274,19 +274,19 @@ export default function LandingPage() {
             transition={{ duration: 0.55, delay: 0.32, ease: 'easeOut' }}
             className="mt-8 grid grid-cols-1 gap-5 pt-4 text-left md:grid-cols-3"
           >
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
               <h3 className="mb-2 font-semibold text-green-400">TOE Framework</h3>
               <p className="text-sm text-gray-300">
                 Scientifically grounded scoring across technological, organizational, and environmental readiness.
               </p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
               <h3 className="mb-2 font-semibold text-blue-400">Actionable Output</h3>
               <p className="text-sm text-gray-300">
                 Receive a practical score with immediate guidance, not generic AI advice.
               </p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
               <h3 className="mb-2 font-semibold text-red-300">Kenya-Relevant Benchmark</h3>
               <p className="text-sm text-gray-300">
                 Compare your readiness to a localized public service baseline in seconds.

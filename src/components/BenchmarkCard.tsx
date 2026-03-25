@@ -29,7 +29,7 @@ export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardP
     const diff = (userScore - industryAvg).toFixed(1)
 
     return (
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-4">
                 <div className={`p-2 rounded-lg ${isAboveAvg ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                     <Award size={24} />

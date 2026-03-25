@@ -128,10 +128,10 @@ export default async function AdminPage() {
 
             {/* Placeholder Content Area for future charts/tables */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-48 flex items-center justify-center text-white/30 border-dashed md:col-span-2">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm h-48 flex items-center justify-center text-white/30 border-dashed md:col-span-2">
                     Activity Chart Placeholder
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-48 flex items-center justify-center text-white/30 border-dashed lg:col-span-1">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm h-48 flex items-center justify-center text-white/30 border-dashed lg:col-span-1">
                     System Health Checklist
                 </div>
             </div>

@@ -190,7 +190,7 @@ export default function DemoPage() {
       </div>
 
       <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6">
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-green-300">Instant Value Preview</p>
@@ -212,7 +212,7 @@ export default function DemoPage() {
 
         <section className="grid gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3 space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">TOE Readiness Snapshot</h2>
                 <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/70">
@@ -233,7 +233,7 @@ export default function DemoPage() {
             <BenchmarkCard userScore={toeResult.overall} industryAvg={42.3} source="Kenya Public Sector Pulse 2026" />
           </div>
 
-          <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
             <div className="mb-4 flex items-center gap-2">
               <Sparkles size={16} className="text-green-300" />
               <h2 className="text-lg font-semibold">Live Public Service Hub</h2>
@@ -245,7 +245,7 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Bot size={18} className="text-green-300" />
@@ -280,11 +280,10 @@ export default function DemoPage() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`max-w-[92%] rounded-xl px-4 py-3 text-sm leading-relaxed sm:max-w-[80%] ${
-                    message.role === 'assistant'
+                  className={`max-w-[92%] rounded-xl px-4 py-3 text-sm leading-relaxed sm:max-w-[80%] ${message.role === 'assistant'
                       ? 'mr-auto border border-white/10 bg-white/10 text-white'
                       : 'ml-auto border border-green-500/20 bg-green-500/15 text-green-100'
-                  }`}
+                    }`}
                 >
                   {message.content}
                 </div>
