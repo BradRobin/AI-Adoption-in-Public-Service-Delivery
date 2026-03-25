@@ -29,8 +29,8 @@ export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardP
     const diff = (userScore - industryAvg).toFixed(1)
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-4">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-3">
                 <div className={`p-2 rounded-lg ${isAboveAvg ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                     <Award size={24} />
                 </div>
@@ -40,7 +40,7 @@ export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardP
                 </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2 text-white/80">
                     <span>
                         Your score: <strong className="text-white">{userScore.toFixed(1)}%</strong> vs. Kenya average <strong className="text-white">{industryAvg.toFixed(1)}%</strong>

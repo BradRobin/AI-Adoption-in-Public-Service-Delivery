@@ -399,15 +399,15 @@ export default function Dashboard() {
                 </div>
 
                 {/* Dashboard Grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-6 xl:gap-8">
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
-                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm transition hover:border-white/20">
-                            <h2 className="text-tier-2 mb-4 text-xl font-semibold">
+                        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition hover:border-white/20">
+                            <h2 className="text-tier-2 mb-3 text-xl font-semibold">
                                 Kenya AI Adoption Insight
                             </h2>
-                            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-center">
                                 <div className="min-w-0 flex-1 space-y-2">
                                     <p className="wrap-break-word text-tier-1 text-3xl font-bold text-green-400">{adoptionRateDisplay}</p>
                                     <p className="text-tier-3">
@@ -456,7 +456,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Org Pulse Check & News Feed (2 Columns) */}
-                    <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3 grid grid-cols-1 gap-4 sm:gap-4 md:gap-6 lg:grid-cols-2">
                         <OrgPulseCheck />
                         <NewsFeed />
                     </div>

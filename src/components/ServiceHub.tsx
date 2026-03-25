@@ -101,7 +101,7 @@ export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 transition-all hover:border-white/20 hover:bg-white/10"
+                        className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 transition-all hover:border-white/20 hover:bg-white/10"
                     >
                         {/* Background logo with fade effect for services with logos */}
                         {service.logo && (
