@@ -1,7 +1,7 @@
 /**
  * @file chat/page.tsx
  * @description Interactive AI chat interface page with streaming responses.
- * Features conversation history, avatar speaking mode, and provider switching.
+ * Features; conversation history, avatar speaking mode, and provider switching.
  * Persists chat conversations to Supabase for cross-session continuity.
  */
 
