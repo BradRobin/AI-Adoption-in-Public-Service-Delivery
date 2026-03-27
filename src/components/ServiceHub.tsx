@@ -17,7 +17,7 @@ import {
     ExternalLink,
     Bot
 } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ServiceAssistantModal } from './ServiceAssistantModal'
 
 /**
@@ -89,31 +89,200 @@ type ServiceHubProps = {
  */
 export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) {
     const [selectedService, setSelectedService] = useState<{ id: string; title: string } | null>(null)
+    const [cardsPerView, setCardsPerView] = useState(1)
+    const [currentIndex, setCurrentIndex] = useState(1)
+    const [enableTrackAnimation, setEnableTrackAnimation] = useState(true)
+    const [cardStep, setCardStep] = useState(0)
+    const [pausedUntil, setPausedUntil] = useState(0)
+    const pointerStartX = useRef<number | null>(null)
+    const loopTimeoutRef = useRef<number | null>(null)
+    const animationFrameRef = useRef<number | null>(null)
+
+    useEffect(() => {
+        const updateCardsPerView = () => {
+            let nextCardsPerView = 1
+
+            if (window.innerWidth < 640) {
+                nextCardsPerView = 1
+            } else if (window.innerWidth <= 1024) {
+                nextCardsPerView = 2
+            } else {
+                nextCardsPerView = 3
+            }
+
+            setCardsPerView((prev) => {
+                if (prev === nextCardsPerView) {
+                    return prev
+                }
+
+                setEnableTrackAnimation(false)
+                setCurrentIndex(nextCardsPerView)
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current)
+                }
+                animationFrameRef.current = requestAnimationFrame(() => setEnableTrackAnimation(true))
+                return nextCardsPerView
+            })
+        }
+
+        updateCardsPerView()
+        window.addEventListener('resize', updateCardsPerView)
+        return () => {
+            window.removeEventListener('resize', updateCardsPerView)
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current)
+            }
+        }
+    }, [])
+
+    const extendedServices = useMemo(() => {
+        const headClones = services.slice(0, cardsPerView)
+        const tailClones = services.slice(-cardsPerView)
+        return [...tailClones, ...services, ...headClones]
+    }, [cardsPerView])
+
+    const pauseAutoplay = () => {
+        setPausedUntil(Date.now() + 5000)
+    }
+
+    const scheduleLoopReset = useCallback((index: number) => {
+        if (loopTimeoutRef.current) {
+            window.clearTimeout(loopTimeoutRef.current)
+        }
+
+        loopTimeoutRef.current = window.setTimeout(() => {
+            if (index >= services.length + cardsPerView) {
+                setEnableTrackAnimation(false)
+                setCurrentIndex(cardsPerView)
+                requestAnimationFrame(() => setEnableTrackAnimation(true))
+                return
+            }
+
+            if (index < cardsPerView) {
+                setEnableTrackAnimation(false)
+                setCurrentIndex(services.length + cardsPerView - 1)
+                requestAnimationFrame(() => setEnableTrackAnimation(true))
+            }
+        }, 420)
+    }, [cardsPerView])
+
+    const goToNext = useCallback((manual = false) => {
+        if (manual) {
+            pauseAutoplay()
+        }
+
+        setCurrentIndex((prev) => {
+            const next = prev + 1
+            scheduleLoopReset(next)
+            return next
+        })
+    }, [scheduleLoopReset])
+
+    const goToPrevious = useCallback((manual = false) => {
+        if (manual) {
+            pauseAutoplay()
+        }
+
+        setCurrentIndex((prev) => {
+            const next = prev - 1
+            scheduleLoopReset(next)
+            return next
+        })
+    }, [scheduleLoopReset])
+
+    useEffect(() => {
+        const measureCardStep = () => {
+            const card = document.querySelector<HTMLElement>('[data-service-card]')
+            if (!card) {
+                return
+            }
+
+            setCardStep(card.getBoundingClientRect().width + 16)
+        }
+
+        const frame = requestAnimationFrame(measureCardStep)
+        window.addEventListener('resize', measureCardStep)
+
+        return () => {
+            cancelAnimationFrame(frame)
+            window.removeEventListener('resize', measureCardStep)
+        }
+    }, [cardsPerView, extendedServices.length])
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            if (Date.now() < pausedUntil) {
+                return
+            }
+            goToNext()
+        }, 2000)
+
+        return () => window.clearInterval(timer)
+    }, [goToNext, pausedUntil])
+
+    useEffect(() => {
+        return () => {
+            if (loopTimeoutRef.current) {
+                window.clearTimeout(loopTimeoutRef.current)
+            }
+        }
+    }, [])
+
+    const onPointerDown = (x: number) => {
+        pointerStartX.current = x
+    }
+
+    const onPointerUp = (x: number) => {
+        if (pointerStartX.current === null) {
+            return
+        }
+
+        const deltaX = x - pointerStartX.current
+        pointerStartX.current = null
+
+        if (Math.abs(deltaX) < 40) {
+            return
+        }
+
+        if (deltaX < 0) {
+            goToNext(true)
+        } else {
+            goToPrevious(true)
+        }
+    }
+
+    const activeDot = (currentIndex - cardsPerView + services.length) % services.length
 
     return (
         <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">Public Services Hub</h2>
-            {/* Grid Layout: 1 col mobile, 2 col tablet, 3 col desktop */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                {services.map((service, index) => (
+            <div className="space-y-4">
+                <div
+                    className="overflow-x-hidden"
+                    onMouseDown={(event) => onPointerDown(event.clientX)}
+                    onMouseUp={(event) => onPointerUp(event.clientX)}
+                    onMouseLeave={(event) => onPointerUp(event.clientX)}
+                    onTouchStart={(event) => onPointerDown(event.touches[0].clientX)}
+                    onTouchEnd={(event) => onPointerUp(event.changedTouches[0].clientX)}
+                >
                     <motion.div
-                        key={service.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 transition-all hover:border-white/20 hover:bg-white/10"
+                        className="flex gap-4"
+                        animate={{ x: -(currentIndex * cardStep) }}
+                        transition={enableTrackAnimation ? { duration: 0.4, ease: 'easeInOut' } : { duration: 0 }}
                     >
+                        {extendedServices.map((service, index) => (
+                            <div
+                                key={`${service.id}-${index}`}
+                                data-service-card
+                                className="group relative shrink-0 basis-full sm:basis-[calc((100%-16px)/2)] lg:basis-[calc((100%-32px)/3)] flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm shadow-black/25 transition-all hover:border-white/20 hover:bg-white/10"
+                            >
                         {/* Background logo with fade effect for services with logos */}
                         {service.logo && (
                             <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
                                 <img
                                     src={service.logo}
                                     alt=""
-                                    className="h-full w-full object-cover opacity-25 group-hover:opacity-50 transition-opacity duration-300"
-                                    style={{
-                                        maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)',
-                                        WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%)'
-                                    }}
+                                    className="h-full w-full object-cover opacity-25 transition-opacity duration-300 group-hover:opacity-50 mask-[linear-gradient(to_left,rgba(0,0,0,1)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0)_100%)]"
                                 />
                             </div>
                         )}
@@ -166,8 +335,26 @@ export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) 
                                 <span>{demoMode ? 'Ask Demo Bot' : 'AI Assist'}</span>
                             </button>
                         </div>
+                            </div>
+                        ))}
                     </motion.div>
-                ))}
+                </div>
+
+                <div className="flex justify-center gap-2">
+                    {services.map((service, index) => (
+                        <button
+                            key={service.id}
+                            type="button"
+                            aria-label={`Go to ${service.title}`}
+                            onClick={() => {
+                                pauseAutoplay()
+                                setEnableTrackAnimation(true)
+                                setCurrentIndex(cardsPerView + index)
+                            }}
+                            className={`h-2 rounded-full transition-all ${activeDot === index ? 'w-6 bg-green-400' : 'w-2 bg-white/30 hover:bg-white/60'}`}
+                        />
+                    ))}
+                </div>
             </div>
 
             {!demoMode && (
