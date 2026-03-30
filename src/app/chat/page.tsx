@@ -47,7 +47,7 @@ type Conversation = {
 /**
  * Defines the structure of Server-Sent Events (SSE) chunks returned by the chat API.
  */
-// SSE event types for handling stream chunks
+// SSE event types for handling stream chunks.
 type SseEvent =
   | { event: 'open'; data: string }
   | { event: 'info'; data: string }
