@@ -29,7 +29,7 @@ export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardP
     const diff = (userScore - industryAvg).toFixed(1)
 
     return (
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+        <div className="glass-surface relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4">
             <div className="flex items-center gap-2 mb-3">
                 <div className={`p-2 rounded-lg ${isAboveAvg ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                     <Award size={24} />
@@ -57,16 +57,12 @@ export function BenchmarkCard({ userScore, industryAvg, source }: BenchmarkCardP
                         aria-valuemin={0}
                         aria-valuemax={100}
                     />
-                    {/* Marker for Industry Avg */}
-                    <div
-                        className="absolute top-[-4px] h-4 w-1 bg-white/30"
-                        style={{ left: `${industryAvg}%` }}
-                        title={`National Avg: ${industryAvg}%`}
-                    />
                 </div>
-                <div className="flex justify-between text-xs mt-1 text-white/30">
+                <div className="mt-1 flex items-center justify-between gap-3 text-xs text-white/30">
                     <span>0%</span>
-                    <span style={{ marginLeft: `${Math.max(0, industryAvg - 15)}%` }}>Avg: {industryAvg.toFixed(1)}%</span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white/50">
+                        Kenya avg: {industryAvg.toFixed(1)}%
+                    </span>
                     <span>100%</span>
                 </div>
             </div>

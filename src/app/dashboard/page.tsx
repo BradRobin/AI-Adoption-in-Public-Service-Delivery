@@ -382,7 +382,7 @@ export default function Dashboard() {
                         Ready to continue your AI adoption journey?
                     </p>
                     {latestAssessment && (
-                        <div className="mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                        <div className="glass-surface mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
                             <span>Current readiness: {latestAssessment.score}%</span>
                             {latestAssessment.previousScore && (
                                 <span className={latestAssessment.score >= latestAssessment.previousScore ? "text-green-400" : "text-red-400"}>
@@ -403,7 +403,7 @@ export default function Dashboard() {
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
-                        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition hover:border-white/20">
+                        <div className="glass-surface overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 transition hover:border-white/20">
                             <h2 className="text-tier-2 mb-3 text-xl font-semibold">
                                 Kenya AI Adoption Insight
                             </h2>
@@ -474,7 +474,7 @@ export default function Dashboard() {
                     {/* Action Cards (Chat & Assessment) */}
                     <Link
                         href="/assess"
-                        className="mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
@@ -492,7 +492,7 @@ export default function Dashboard() {
 
                     <Link
                         href="/chat"
-                        className="mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">

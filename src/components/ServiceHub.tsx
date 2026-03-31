@@ -274,7 +274,7 @@ export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) 
                             <div
                                 key={`${service.id}-${index}`}
                                 data-service-card
-                                className="group relative shrink-0 basis-full sm:basis-[calc((100%-16px)/2)] lg:basis-[calc((100%-32px)/3)] flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm shadow-black/25 transition-all hover:border-white/20 hover:bg-white/10"
+                                className="glass-surface group relative flex shrink-0 basis-full flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm shadow-black/25 transition-all hover:border-white/20 hover:bg-white/10 sm:basis-[calc((100%-16px)/2)] lg:basis-[calc((100%-32px)/3)]"
                             >
                         {/* Background logo with fade effect for services with logos */}
                         {service.logo && (

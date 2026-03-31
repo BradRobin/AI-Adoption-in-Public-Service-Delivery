@@ -189,7 +189,7 @@ export function OrgPulseCheck() {
     }
 
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+        <div className="glass-surface rounded-xl border border-white/10 bg-white/5 p-4">
             <h2 className="mb-4 text-xl font-semibold text-white flex items-center gap-2">
                 <Building className="text-blue-400" />
                 Organization Pulse Check

@@ -13,39 +13,32 @@
  */
 export function ParticleBackground() {
   const particles = [
-    { top: '10%', left: '15%', size: 2, delay: 0 },
-    { top: '20%', left: '80%', size: 1, delay: 0.5 },
-    { top: '35%', left: '25%', size: 3, delay: 1 },
-    { top: '45%', left: '60%', size: 2, delay: 0.2 },
-    { top: '55%', left: '10%', size: 1, delay: 0.8 },
-    { top: '65%', left: '90%', size: 2, delay: 0.3 },
-    { top: '75%', left: '40%', size: 1, delay: 0.6 },
-    { top: '85%', left: '70%', size: 3, delay: 0.1 },
-    { top: '15%', left: '50%', size: 1, delay: 0.4 },
-    { top: '30%', left: '5%', size: 2, delay: 0.7 },
-    { top: '50%', left: '35%', size: 1, delay: 0.9 },
-    { top: '70%', left: '55%', size: 2, delay: 0.25 },
-    { top: '25%', left: '95%', size: 1, delay: 0.55 },
-    { top: '60%', left: '20%', size: 3, delay: 0.35 },
-    { top: '40%', left: '85%', size: 2, delay: 0.65 },
+    'top-[10%] left-[15%] h-3 w-3 bg-red-500/85 shadow-[0_0_12px_rgba(239,68,68,0.55)] [animation-delay:0s]',
+    'top-[20%] left-[80%] h-2 w-2 bg-green-400/85 shadow-[0_0_10px_rgba(74,222,128,0.55)] [animation-delay:0.5s]',
+    'top-[35%] left-[25%] h-4 w-4 bg-red-400/80 shadow-[0_0_14px_rgba(248,113,113,0.5)] [animation-delay:1s]',
+    'top-[45%] left-[60%] h-3 w-3 bg-green-500/80 shadow-[0_0_12px_rgba(34,197,94,0.5)] [animation-delay:0.2s]',
+    'top-[55%] left-[10%] h-2 w-2 bg-red-500/85 shadow-[0_0_10px_rgba(239,68,68,0.55)] [animation-delay:0.8s]',
+    'top-[65%] left-[90%] h-3 w-3 bg-green-400/85 shadow-[0_0_12px_rgba(74,222,128,0.55)] [animation-delay:0.3s]',
+    'top-[75%] left-[40%] h-2 w-2 bg-red-400/85 shadow-[0_0_10px_rgba(248,113,113,0.5)] [animation-delay:0.6s]',
+    'top-[85%] left-[70%] h-4 w-4 bg-green-500/80 shadow-[0_0_14px_rgba(34,197,94,0.5)] [animation-delay:0.1s]',
+    'top-[15%] left-[50%] h-2 w-2 bg-red-500/80 shadow-[0_0_10px_rgba(239,68,68,0.5)] [animation-delay:0.4s]',
+    'top-[30%] left-[5%] h-3 w-3 bg-green-400/85 shadow-[0_0_12px_rgba(74,222,128,0.55)] [animation-delay:0.7s]',
+    'top-[50%] left-[35%] h-2 w-2 bg-red-400/80 shadow-[0_0_10px_rgba(248,113,113,0.48)] [animation-delay:0.9s]',
+    'top-[70%] left-[55%] h-3 w-3 bg-green-500/85 shadow-[0_0_12px_rgba(34,197,94,0.55)] [animation-delay:0.25s]',
+    'top-[25%] left-[95%] h-2 w-2 bg-red-500/85 shadow-[0_0_10px_rgba(239,68,68,0.55)] [animation-delay:0.55s]',
+    'top-[60%] left-[20%] h-4 w-4 bg-green-400/80 shadow-[0_0_14px_rgba(74,222,128,0.5)] [animation-delay:0.35s]',
+    'top-[40%] left-[85%] h-3 w-3 bg-red-400/85 shadow-[0_0_12px_rgba(248,113,113,0.52)] [animation-delay:0.65s]',
   ]
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 overflow-hidden"
+      className="particle-background-layer pointer-events-none fixed inset-0 overflow-hidden"
       aria-hidden
     >
-      {particles.map((p, i) => (
+      {particles.map((particleClassName, i) => (
         <div
           key={i}
-          className="absolute rounded-full bg-white/40"
-          style={{
-            top: p.top,
-            left: p.left,
-            width: p.size * 4,
-            height: p.size * 4,
-            animation: `particle-float 4s ease-in-out ${p.delay}s infinite`,
-          }}
+          className={`absolute rounded-full animate-[particle-float_4s_ease-in-out_infinite] ${particleClassName}`}
         />
       ))}
     </div>

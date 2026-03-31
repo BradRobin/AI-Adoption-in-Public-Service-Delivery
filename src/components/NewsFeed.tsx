@@ -107,7 +107,7 @@ export function NewsFeed() {
     }
 
     return (
-        <div className="h-full rounded-xl border border-orange-300/15 bg-[radial-gradient(circle_at_12%_0%,rgba(251,146,60,0.16),transparent_38%),linear-gradient(155deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md">
+        <div className="glass-surface h-full rounded-xl border border-orange-300/15 bg-[radial-gradient(circle_at_12%_0%,rgba(251,146,60,0.16),transparent_38%),linear-gradient(155deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.28)]">
             {/* Header */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
@@ -182,7 +182,7 @@ export function NewsFeed() {
                                 onHoverEnd={() => setHoveredIndex((current) => (current === index ? null : current))}
                                 onFocusCapture={() => setHoveredIndex(index)}
                                 onBlurCapture={() => setHoveredIndex((current) => (current === index ? null : current))}
-                                className={`group relative w-[84%] shrink-0 snap-center rounded-xl border p-4 transition-all duration-300 sm:w-[72%] md:w-auto md:shrink md:snap-none ${selectedIndex === index
+                                className={`glass-surface group relative w-[84%] shrink-0 snap-center rounded-xl border p-4 transition-all duration-300 sm:w-[72%] md:w-auto md:shrink md:snap-none ${selectedIndex === index
                                         ? 'border-orange-300/55 bg-orange-500/10 shadow-[0_12px_30px_rgba(251,146,60,0.16)] ring-1 ring-orange-300/40'
                                         : 'border-white/10 bg-black/30 hover:border-orange-300/45 hover:bg-white/5 hover:shadow-[0_10px_24px_rgba(251,146,60,0.12)]'
                                     }`}

@@ -160,7 +160,7 @@ function ToggleRow({
   icon: ReactNode
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6">
+    <div className="glass-surface flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6">
       <div className="mt-0.5 text-green-300">{icon}</div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-tier-1">{title}</p>

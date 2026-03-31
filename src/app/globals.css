@@ -120,6 +120,16 @@ canvas {
   }
 }
 
+.particle-background-layer {
+  z-index: 0;
+}
+
+.glass-surface {
+  isolation: isolate;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
 .cta-pulse-hover {
   will-change: transform;
 }
