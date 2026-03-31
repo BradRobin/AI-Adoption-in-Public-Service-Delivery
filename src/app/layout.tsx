@@ -8,6 +8,7 @@ import FirstTimeWelcomeModal from "@/components/FirstTimeWelcomeModal";
 import PrivacyBanner, { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { ThemeProvider } from "@/lib/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} text-tier-system antialiased`}
       >
+        {/* Flash-of-wrong-theme prevention: runs before React hydration */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('parp-theme');if(t!=='dark')document.documentElement.classList.add('light-mode');}catch(e){document.documentElement.classList.add('light-mode');}`,
+          }}
+        />
+        <ThemeProvider>
         <AccessibilityProvider>
           <PrivacyConsentProvider>
             <TopScrollBlur />
@@ -74,6 +83,7 @@ export default function RootLayout({
             </footer>
           </PrivacyConsentProvider>
         </AccessibilityProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

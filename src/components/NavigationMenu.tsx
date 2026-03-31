@@ -21,6 +21,7 @@ import {
     LogOut,
     User,
     LayoutDashboard,
+    Settings,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
@@ -96,7 +97,7 @@ export function NavigationMenu() {
             {/* Hamburger Trigger */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="mobile-touch-target flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white transition-colors hover:bg-white/10"
+                className="mobile-touch-target flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
                 aria-label="Open menu"
             >
                 <Menu size={20} />
@@ -157,6 +158,7 @@ export function NavigationMenu() {
                             <div onClick={handleClose}><MenuItem href="/chat" icon={MessageSquare} label="Chat Assistant" /></div>
                             <div onClick={handleClose}><MenuItem href="/assess" icon={ClipboardCheck} label="Self Assessment" /></div>
                             <div onClick={handleClose}><MenuItem href="/profile" icon={User} label="Profile Settings" /></div>
+                            <div onClick={handleClose}><MenuItem href="/settings" icon={Settings} label="App Settings" /></div>
 
                             <div className="my-4 h-px w-full bg-white/5" />
 

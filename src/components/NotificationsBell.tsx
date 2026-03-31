@@ -44,7 +44,7 @@ export function NotificationsBell() {
       <button
         type="button"
         onClick={() => setIsOpen((previousValue) => !previousValue)}
-        className={`mobile-touch-target relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white transition-colors hover:bg-white/10 ${isOpen ? 'z-70' : ''}`}
+        className={`mobile-touch-target relative flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/10 ${isOpen ? 'z-70' : ''}`}
         aria-label="Open notifications"
       >
         <Bell size={20} />

@@ -265,3 +265,88 @@ html.high-contrast .text-green-400 {
     animation: none !important;
   }
 }
+
+  /* ── Light Mode ──────────────────────────────────────────────────────────────
+     Applied via html.light-mode class (the default). Dark mode removes it.
+     Overrides the dark-first palette globally without touching components.
+     ─────────────────────────────────────────────────────────────────────────── */
+
+  html.light-mode {
+    --text-tier-1: rgb(0 0 0 / 0.87);
+    --text-tier-2: rgb(0 0 0 / 0.60);
+    --text-tier-3: rgb(0 0 0 / 0.38);
+    color-scheme: light;
+  }
+
+  html.light-mode body {
+    background-color: #ffffff;
+    color: rgb(0 0 0 / 0.87);
+  }
+
+  /* Solid black → white */
+  html.light-mode .bg-black {
+    background-color: #ffffff !important;
+  }
+
+  /* Translucent black → proportionally light */
+  html.light-mode .bg-black\/20 { background-color: rgba(0,0,0,0.04)       !important; }
+  html.light-mode .bg-black\/25 { background-color: rgba(0,0,0,0.05)       !important; }
+  html.light-mode .bg-black\/30 { background-color: rgba(0,0,0,0.06)       !important; }
+  html.light-mode .bg-black\/35 { background-color: rgba(0,0,0,0.07)       !important; }
+  html.light-mode .bg-black\/40 { background-color: rgba(0,0,0,0.04)       !important; }
+  html.light-mode .bg-black\/50 { background-color: rgba(0,0,0,0.05)       !important; }
+  html.light-mode .bg-black\/60 { background-color: rgba(240,240,240,0.90) !important; }
+  html.light-mode .bg-black\/70 { background-color: rgba(245,245,245,0.93) !important; }
+  html.light-mode .bg-black\/75 { background-color: rgba(245,245,245,0.95) !important; }
+  html.light-mode .bg-black\/80 { background-color: rgba(248,248,248,0.96) !important; }
+  html.light-mode .bg-black\/85 { background-color: rgba(250,250,250,0.97) !important; }
+  html.light-mode .bg-black\/90 { background-color: rgba(252,252,252,0.97) !important; }
+
+  /* Dark zinc/gray surfaces → light */
+  html.light-mode .bg-zinc-950\/95,
+  html.light-mode .bg-zinc-950     { background-color: rgba(255,255,255,0.97) !important; }
+  html.light-mode .bg-zinc-900\/95,
+  html.light-mode .bg-zinc-900     { background-color: #f5f5f4 !important; }
+  html.light-mode .bg-gray-900     { background-color: #f5f5f4 !important; }
+
+  /* White text → dark text (preserving opacity hierarchy) */
+  html.light-mode .text-white      { color: #0a0a0a          !important; }
+  html.light-mode .text-white\/90  { color: rgba(0,0,0,0.90) !important; }
+  html.light-mode .text-white\/80  { color: rgba(0,0,0,0.80) !important; }
+  html.light-mode .text-white\/75  { color: rgba(0,0,0,0.75) !important; }
+  html.light-mode .text-white\/70  { color: rgba(0,0,0,0.70) !important; }
+  html.light-mode .text-white\/65  { color: rgba(0,0,0,0.65) !important; }
+  html.light-mode .text-white\/60  { color: rgba(0,0,0,0.60) !important; }
+  html.light-mode .text-white\/50  { color: rgba(0,0,0,0.50) !important; }
+  html.light-mode .text-white\/40  { color: rgba(0,0,0,0.40) !important; }
+  html.light-mode .text-white\/30  { color: rgba(0,0,0,0.30) !important; }
+  html.light-mode .text-white\/20  { color: rgba(0,0,0,0.20) !important; }
+
+  /* White borders → dark borders */
+  html.light-mode .border-white      { border-color: #0a0a0a          !important; }
+  html.light-mode .border-white\/5   { border-color: rgba(0,0,0,0.05) !important; }
+  html.light-mode .border-white\/10  { border-color: rgba(0,0,0,0.10) !important; }
+  html.light-mode .border-white\/12  { border-color: rgba(0,0,0,0.12) !important; }
+  html.light-mode .border-white\/15  { border-color: rgba(0,0,0,0.15) !important; }
+  html.light-mode .border-white\/20  { border-color: rgba(0,0,0,0.20) !important; }
+  html.light-mode .border-white\/30  { border-color: rgba(0,0,0,0.30) !important; }
+
+  /* Glass card surfaces: flip white-wash → subtle dark-wash */
+  html.light-mode .bg-white\/5   { background-color: rgba(0,0,0,0.03) !important; }
+  html.light-mode .bg-white\/10  { background-color: rgba(0,0,0,0.06) !important; }
+  html.light-mode .bg-white\/15  { background-color: rgba(0,0,0,0.09) !important; }
+  html.light-mode .bg-white\/20  { background-color: rgba(0,0,0,0.12) !important; }
+
+  /* Carousel edge masks */
+  html.light-mode .services-carousel-mask::before {
+    background: linear-gradient(to right, rgb(255 255 255 / 0.9), transparent);
+  }
+  html.light-mode .services-carousel-mask::after {
+    background: linear-gradient(to left, rgb(255 255 255 / 0.9), transparent);
+  }
+
+  /* Assessment progress bar track */
+  html.light-mode .assessment-progress,
+  html.light-mode .assessment-progress::-webkit-progress-bar {
+    background: rgb(0 0 0 / 0.08);
+  }
