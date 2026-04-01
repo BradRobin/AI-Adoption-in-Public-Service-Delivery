@@ -15,6 +15,32 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand green — centred on #006600 */
+  --color-green-50:  #f2fef2;
+  --color-green-100: #e0fce0;
+  --color-green-200: #b8f0b8;
+  --color-green-300: #77dd77;
+  --color-green-400: #33aa33;
+  --color-green-500: #006600;
+  --color-green-600: #004f00;
+  --color-green-700: #003800;
+  --color-green-800: #002400;
+  --color-green-900: #001200;
+  --color-green-950: #000800;
+
+  /* Brand red — centred on #BB0000 */
+  --color-red-50:  #fff5f5;
+  --color-red-100: #ffe0e0;
+  --color-red-200: #ffb3b3;
+  --color-red-300: #ff6666;
+  --color-red-400: #cc1111;
+  --color-red-500: #BB0000;
+  --color-red-600: #990000;
+  --color-red-700: #770000;
+  --color-red-800: #550000;
+  --color-red-900: #330000;
+  --color-red-950: #180000;
 }
 
 @media (prefers-color-scheme: dark) {

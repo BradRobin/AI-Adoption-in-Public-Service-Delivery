@@ -32,7 +32,7 @@ type ClickTarget = { x: number; y: number; time: number }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const PARTICLE_COLORS = ['#ef4444', '#4ade80'] as const
+const PARTICLE_COLORS = ['#BB0000', '#006600'] as const
 const PARTICLE_COUNT = 135
 const HOVER_RADIUS_PX = 180
 /** Added px/frame of velocity toward the cursor at closest approach */
