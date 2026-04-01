@@ -20,6 +20,24 @@ import {
     YAxis,
 } from 'recharts'
 import type { DimensionScores } from '@/lib/toe-scoring'
+import { useTheme } from '@/lib/theme-context'
+
+const CHART_THEME = {
+    grid: 'rgba(255,255,255,0.1)',
+    gridLight: 'rgba(0,0,0,0.08)',
+    text: 'rgba(255,255,255,0.7)',
+    textLight: 'rgba(0,0,0,0.6)',
+    tooltipBackground: 'rgba(0,0,0,0.8)',
+    tooltipBackgroundLight: 'rgba(255,255,255,0.96)',
+    tooltipBorder: '1px solid rgba(255,255,255,0.1)',
+    tooltipBorderLight: '1px solid rgba(0,0,0,0.08)',
+    tooltipText: '#fff',
+    tooltipTextLight: '#171717',
+    barBackground: 'rgba(255,255,255,0.05)',
+    barBackgroundLight: 'rgba(0,0,0,0.05)',
+    cursor: 'rgba(255,255,255,0.05)',
+    cursorLight: 'rgba(0,0,0,0.04)',
+}
 
 /**
  * Props for the DashboardCharts component.
@@ -49,6 +67,9 @@ export function DashboardCharts({
     overall,
     dimensionScores,
 }: DashboardChartsProps) {
+    const { theme } = useTheme()
+    const isLightMode = theme === 'light'
+
     const chartData = (
         ['technological', 'organizational', 'environmental'] as const
     ).map((key) => ({
@@ -63,16 +84,16 @@ export function DashboardCharts({
             <div className="glass-surface flex flex-col items-center justify-center space-y-3 rounded-xl border border-white/10 bg-white/5 p-5 md:space-y-4 md:p-6">
                 <div className="text-center">
                     <span className="text-4xl font-bold text-green-400">{overall}</span>
-                    <span className="text-xl text-white/60"> / 100</span>
-                    <p className="text-sm text-white/50">Overall Readiness</p>
+                    <span className="text-tier-2 text-xl"> / 100</span>
+                    <p className="text-tier-2 text-sm">Overall Readiness</p>
                 </div>
                 <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
-                            <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                            <PolarGrid stroke={isLightMode ? CHART_THEME.gridLight : CHART_THEME.grid} />
                             <PolarAngleAxis
                                 dataKey="subject"
-                                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+                                tick={{ fill: isLightMode ? CHART_THEME.textLight : CHART_THEME.text, fontSize: 12 }}
                             />
                             <PolarRadiusAxis
                                 angle={30}
@@ -90,10 +111,10 @@ export function DashboardCharts({
                             />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    backgroundColor: isLightMode ? CHART_THEME.tooltipBackgroundLight : CHART_THEME.tooltipBackground,
+                                    border: isLightMode ? CHART_THEME.tooltipBorderLight : CHART_THEME.tooltipBorder,
                                     borderRadius: '8px',
-                                    color: '#fff',
+                                    color: isLightMode ? CHART_THEME.tooltipTextLight : CHART_THEME.tooltipText,
                                 }}
                                 itemStyle={{ color: '#22c55e' }}
                             />
@@ -104,7 +125,7 @@ export function DashboardCharts({
 
             {/* Bar Breakdown */}
             <div className="glass-surface flex flex-col justify-center space-y-3 rounded-xl border border-white/10 bg-white/5 p-5 md:space-y-4 md:p-6">
-                <h3 className="mb-2 text-lg font-semibold text-white">Dimension Breakdown</h3>
+                <h3 className="text-tier-1 mb-2 text-lg font-semibold">Dimension Breakdown</h3>
                 <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -116,18 +137,18 @@ export function DashboardCharts({
                             <YAxis
                                 type="category"
                                 dataKey="subject"
-                                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+                                tick={{ fill: isLightMode ? CHART_THEME.textLight : CHART_THEME.text, fontSize: 12 }}
                                 width={40}
                                 axisLine={false}
                                 tickLine={false}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                cursor={{ fill: isLightMode ? CHART_THEME.cursorLight : CHART_THEME.cursor }}
                                 contentStyle={{
-                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    backgroundColor: isLightMode ? CHART_THEME.tooltipBackgroundLight : CHART_THEME.tooltipBackground,
+                                    border: isLightMode ? CHART_THEME.tooltipBorderLight : CHART_THEME.tooltipBorder,
                                     borderRadius: '8px',
-                                    color: '#fff',
+                                    color: isLightMode ? CHART_THEME.tooltipTextLight : CHART_THEME.tooltipText,
                                 }}
                             />
                             <Bar
@@ -136,7 +157,7 @@ export function DashboardCharts({
                                 fill="#22c55e"
                                 radius={[0, 4, 4, 0]}
                                 barSize={20}
-                                background={{ fill: 'rgba(255,255,255,0.05)' }}
+                                background={{ fill: isLightMode ? CHART_THEME.barBackgroundLight : CHART_THEME.barBackground }}
                             />
                         </BarChart>
                     </ResponsiveContainer>

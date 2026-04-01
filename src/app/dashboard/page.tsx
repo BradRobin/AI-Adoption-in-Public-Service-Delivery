@@ -382,7 +382,7 @@ export default function Dashboard() {
                         Ready to continue your AI adoption journey?
                     </p>
                     {latestAssessment && (
-                        <div className="glass-surface mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                        <div className="glass-surface text-tier-2 mt-4 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm">
                             <span>Current readiness: {latestAssessment.score}%</span>
                             {latestAssessment.previousScore && (
                                 <span className={latestAssessment.score >= latestAssessment.previousScore ? "text-green-400" : "text-red-400"}>
@@ -390,7 +390,7 @@ export default function Dashboard() {
                                 </span>
                             )}
                             {latestAssessment.created_at && (
-                                <span className="text-white/50 sm:ml-2 sm:border-l sm:border-white/20 sm:pl-2">
+                                <span className="text-tier-3 sm:ml-2 sm:border-l sm:border-white/20 sm:pl-2">
                                     {getRelativeTime(latestAssessment.created_at)}
                                 </span>
                             )}
@@ -400,6 +400,43 @@ export default function Dashboard() {
 
                 {/* Dashboard Grid */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-6 xl:gap-8">
+
+                    {/* Action Cards (Chat & Assessment) */}
+                    <Link
+                        href="/assess"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(0,102,0,0.30)] hover:border-green-500/60 hover:shadow-[0_0_48px_rgba(0,102,0,0.55)]"
+                    >
+                        <div className="relative z-10">
+                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-tier-1 mb-2 text-xl font-bold">Take Assessment</h3>
+                            <p className="text-tier-2 text-sm">
+                                Evaluate your organization&apos;s readiness using the TOE framework. Get detailed scores and insights.
+                            </p>
+                        </div>
+                        <div className="absolute inset-0 z-0 bg-green-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                    </Link>
+
+                    <Link
+                        href="/chat"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(187,0,0,0.30)] hover:border-red-500/60 hover:shadow-[0_0_48px_rgba(187,0,0,0.55)]"
+                    >
+                        <div className="relative z-10">
+                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-500/20 text-red-400 group-hover:bg-red-500 group-hover:text-black transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-tier-1 mb-2 text-xl font-bold">Chat with AI</h3>
+                            <p className="text-tier-2 text-sm">
+                                Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
+                            </p>
+                        </div>
+                        <div className="absolute inset-0 z-0 bg-red-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                    </Link>
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">
@@ -413,17 +450,17 @@ export default function Dashboard() {
                                     <p className="text-tier-3">
                                         of Kenyan businesses are already using ChatGPT or similar tools.
                                     </p>
-                                    <p className="truncate text-xs text-white/50">
+                                    <p className="text-tier-3 truncate text-xs">
                                         Source: {marketStats.ai_adoption_rate.source}
                                     </p>
                                 </div>
                                 <div className="h-px w-full bg-white/10 md:h-24 md:w-px"></div>
                                 <div className="min-w-0 flex-1 space-y-3">
-                                    <p className="text-sm font-semibold text-white/90">Latest Policy Update:</p>
-                                    <p className="wrap-break-word text-white">
+                                    <p className="text-tier-1 text-sm font-semibold">Latest Policy Update:</p>
+                                    <p className="text-tier-1 wrap-break-word">
                                         {marketStats.policy_update.value}
                                     </p>
-                                    <p className="truncate text-xs text-white/50">
+                                    <p className="text-tier-3 truncate text-xs">
                                         Source: {marketStats.policy_update.source}
                                     </p>
                                     {!latestAssessment && (
@@ -470,43 +507,6 @@ export default function Dashboard() {
                             />
                         </div>
                     )}
-
-                    {/* Action Cards (Chat & Assessment) */}
-                    <Link
-                        href="/assess"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(0,102,0,0.30)] hover:border-green-500/60 hover:shadow-[0_0_48px_rgba(0,102,0,0.55)]"
-                    >
-                        <div className="relative z-10">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                                </svg>
-                            </div>
-                            <h3 className="mb-2 text-xl font-bold text-white">Take Assessment</h3>
-                            <p className="text-sm text-white/70">
-                                Evaluate your organization&apos;s readiness using the TOE framework. Get detailed scores and insights.
-                            </p>
-                        </div>
-                        <div className="absolute inset-0 z-0 bg-green-500/5 opacity-0 transition group-hover:opacity-100"></div>
-                    </Link>
-
-                    <Link
-                        href="/chat"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(187,0,0,0.30)] hover:border-red-500/60 hover:shadow-[0_0_48px_rgba(187,0,0,0.55)]"
-                    >
-                        <div className="relative z-10">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-500/20 text-red-400 group-hover:bg-red-500 group-hover:text-black transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                                </svg>
-                            </div>
-                            <h3 className="mb-2 text-xl font-bold text-white">Chat with AI</h3>
-                            <p className="text-sm text-white/70">
-                                Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
-                            </p>
-                        </div>
-                        <div className="absolute inset-0 z-0 bg-red-500/5 opacity-0 transition group-hover:opacity-100"></div>
-                    </Link>
 
                 </div>
             </main>
