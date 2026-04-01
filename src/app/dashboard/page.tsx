@@ -474,7 +474,7 @@ export default function Dashboard() {
                     {/* Action Cards (Chat & Assessment) */}
                     <Link
                         href="/assess"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-green-900/40 to-black p-8 transition hover:border-green-500/50 hover:shadow-lg hover:shadow-green-900/20"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(0,102,0,0.30)] hover:border-green-500/60 hover:shadow-[0_0_48px_rgba(0,102,0,0.55)]"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
@@ -492,10 +492,10 @@ export default function Dashboard() {
 
                     <Link
                         href="/chat"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-blue-900/40 to-black p-8 transition hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-900/20"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(187,0,0,0.30)] hover:border-red-500/60 hover:shadow-[0_0_48px_rgba(187,0,0,0.55)]"
                     >
                         <div className="relative z-10">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-black transition-colors">
+                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-500/20 text-red-400 group-hover:bg-red-500 group-hover:text-black transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                                 </svg>
@@ -505,7 +505,7 @@ export default function Dashboard() {
                                 Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
                             </p>
                         </div>
-                        <div className="absolute inset-0 z-0 bg-blue-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                        <div className="absolute inset-0 z-0 bg-red-500/5 opacity-0 transition group-hover:opacity-100"></div>
                     </Link>
 
                 </div>
