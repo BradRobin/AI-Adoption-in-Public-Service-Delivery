@@ -376,3 +376,8 @@ html.high-contrast .text-green-400 {
   html.light-mode .assessment-progress::-webkit-progress-bar {
     background: rgb(0 0 0 / 0.08);
   }
+
+  /* Notification count badge — keep text white in light mode */
+  html.light-mode .bg-red-500.text-white {
+    color: #ffffff !important;
+  }
