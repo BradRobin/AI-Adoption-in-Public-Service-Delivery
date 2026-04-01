@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -27,6 +27,16 @@ import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
 import { useAccessibility } from './AccessibilityProvider'
 import { NotificationsBell } from './NotificationsBell'
+
+const PREFETCH_ROUTES = [
+    '/dashboard',
+    '/chat',
+    '/assess',
+    '/profile',
+    '/settings',
+    '/privacy',
+    '/admin/auth',
+] as const
 
 /**
  * Props for individual menu items within the navigation drawer.
@@ -80,6 +90,22 @@ export function NavigationMenu() {
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
     const { highContrast, toggleHighContrast } = useAccessibility()
+
+    useEffect(() => {
+        for (const route of PREFETCH_ROUTES) {
+            router.prefetch(route)
+        }
+    }, [router])
+
+    useEffect(() => {
+        if (!isOpen) {
+            return
+        }
+
+        for (const route of PREFETCH_ROUTES) {
+            router.prefetch(route)
+        }
+    }, [isOpen, router])
 
     const handleSignOut = async () => {
         setIsOpen(false)

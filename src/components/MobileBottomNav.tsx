@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { ClipboardCheck, LayoutDashboard, MessageSquare } from 'lucide-react'
 
 type NavItem = {
@@ -32,6 +33,13 @@ function isActiveRoute(pathname: string, href: string) {
 
 export function MobileBottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    for (const { href } of NAV_ITEMS) {
+      router.prefetch(href)
+    }
+  }, [router])
 
   if (!pathname || !isVisiblePath(pathname)) {
     return null
@@ -51,6 +59,7 @@ export function MobileBottomNav() {
               <Link
                 key={href}
                 href={href}
+                prefetch
                 aria-current={active ? 'page' : undefined}
                 className={`mobile-touch-target flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors ${
                   active

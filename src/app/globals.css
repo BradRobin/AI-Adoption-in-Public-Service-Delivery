@@ -16,7 +16,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Brand green — centred on #006600 */
+  /* Brand green ï¿½ centred on #006600 */
   --color-green-50:  #f2fef2;
   --color-green-100: #e0fce0;
   --color-green-200: #b8f0b8;
@@ -29,7 +29,7 @@
   --color-green-900: #001200;
   --color-green-950: #000800;
 
-  /* Brand red — centred on #BB0000 */
+  /* Brand red ï¿½ centred on #BB0000 */
   --color-red-50:  #fff5f5;
   --color-red-100: #ffe0e0;
   --color-red-200: #ffb3b3;
@@ -60,6 +60,20 @@ html,
 body {
   max-width: 100%;
   overflow-x: clip;
+}
+
+html {
+  -ms-overflow-style: none;
+}
+
+body {
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 
 img,
@@ -377,7 +391,7 @@ html.high-contrast .text-green-400 {
     background: rgb(0 0 0 / 0.08);
   }
 
-  /* Notification count badge — keep text white in light mode */
+  /* Notification count badge ï¿½ keep text white in light mode */
   html.light-mode .bg-red-500.text-white {
     color: #ffffff !important;
   }

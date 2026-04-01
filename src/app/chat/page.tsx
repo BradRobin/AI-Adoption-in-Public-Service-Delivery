@@ -10,18 +10,22 @@
 import { useEffect, useRef, useState } from 'react'
 import toast from '@/lib/toast'
 import type { FormEvent } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Session } from '@supabase/supabase-js'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { supabase } from '@/lib/supabase/client'
-import AvatarAdvisor from '@/components/AvatarAdvisor'
 import { usePrivacyConsent } from '@/components/PrivacyBanner'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { TypingTagline } from '@/components/TypingTagline'
-import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, X, Menu } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, Menu } from 'lucide-react'
+import { motion } from 'framer-motion'
+
+const AvatarAdvisor = dynamic(() => import('@/components/AvatarAdvisor'), {
+  ssr: false,
+})
 
 /**
  * Represents a single chat message with unique identifier.
@@ -416,7 +420,7 @@ export default function ChatPage() {
           table: 'conversations',
           filter: `user_id=eq.${session.user.id}`,
         },
-        (payload) => {
+        () => {
           fetchConversations()
         }
       )
@@ -433,12 +437,6 @@ export default function ChatPage() {
 
     container.scrollTop = container.scrollHeight
   }, [messages.length, isThinking])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    toast.success('You have been signed out.')
-    router.replace('/login')
-  }
 
   const handleSpeak = (text: string) => {
     // Reveal the 3D Avatar Player overlay and feed it the AI response text

@@ -8,20 +8,68 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
-import { DashboardCharts } from '@/components/DashboardCharts'
-import { InstallPrompt } from '@/components/InstallPrompt'
-import { ServiceHub } from '@/components/ServiceHub'
-import { OrgPulseCheck } from '@/components/OrgPulseCheck'
-import { NewsFeed } from '@/components/NewsFeed'
-import { BenchmarkCard } from '@/components/BenchmarkCard'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { TypingTagline } from '@/components/TypingTagline'
+
+function WidgetFallback({ className = 'h-48' }: { className?: string }) {
+    return (
+        <div className={`glass-surface animate-pulse rounded-xl border border-white/10 bg-white/5 ${className}`} />
+    )
+}
+
+const DashboardCharts = dynamic(
+    () => import('@/components/DashboardCharts').then((module) => module.DashboardCharts),
+    {
+        ssr: false,
+        loading: () => <WidgetFallback className="h-80" />,
+    },
+)
+
+const InstallPrompt = dynamic(
+    () => import('@/components/InstallPrompt').then((module) => module.InstallPrompt),
+    {
+        ssr: false,
+    },
+)
+
+const ServiceHub = dynamic(
+    () => import('@/components/ServiceHub').then((module) => module.ServiceHub),
+    {
+        ssr: false,
+        loading: () => <WidgetFallback className="h-72" />,
+    },
+)
+
+const OrgPulseCheck = dynamic(
+    () => import('@/components/OrgPulseCheck').then((module) => module.OrgPulseCheck),
+    {
+        ssr: false,
+        loading: () => <WidgetFallback className="h-72" />,
+    },
+)
+
+const NewsFeed = dynamic(
+    () => import('@/components/NewsFeed').then((module) => module.NewsFeed),
+    {
+        ssr: false,
+        loading: () => <WidgetFallback className="h-72" />,
+    },
+)
+
+const BenchmarkCard = dynamic(
+    () => import('@/components/BenchmarkCard').then((module) => module.BenchmarkCard),
+    {
+        ssr: false,
+        loading: () => <WidgetFallback className="h-40" />,
+    },
+)
 
 const WEEKLY_REASSESSMENT_TOAST_ID = 'weekly-reassessment-complete'
 

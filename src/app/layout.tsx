@@ -1,14 +1,25 @@
 // Basic Next.js font and metadata imports
 import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AdminToeQuizPopup } from "@/components/admin/AdminToeQuizPopup";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
-import FirstTimeWelcomeModal from "@/components/FirstTimeWelcomeModal";
-import PrivacyBanner, { PrivacyConsentProvider } from "@/components/PrivacyBanner";
+import { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ThemeProvider } from "@/lib/theme-context";
+
+const FirstTimeWelcomeModal = dynamic(() => import("@/components/FirstTimeWelcomeModal"), {
+  ssr: false,
+});
+
+const AdminToeQuizPopup = dynamic(() => import("@/components/admin/AdminToeQuizPopup").then((module) => module.AdminToeQuizPopup), {
+  ssr: false,
+});
+
+const DeferredPrivacyBanner = dynamic(() => import("@/components/PrivacyBanner"), {
+  ssr: false,
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,7 +88,7 @@ export default function RootLayout({
 
             <FirstTimeWelcomeModal />
             <AdminToeQuizPopup />
-            <PrivacyBanner />
+            <DeferredPrivacyBanner />
           </PrivacyConsentProvider>
         </AccessibilityProvider>
         </ThemeProvider>
