@@ -43,7 +43,7 @@ export function MobileBottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 md:hidden"
     >
       <div className="mobile-safe-bottom mx-auto w-full max-w-3xl px-3">
-        <div className="flex items-center justify-between rounded-t-2xl border border-white/15 bg-black/90 px-2 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.45)] backdrop-blur-md">
+        <div className="flex items-center justify-between rounded-t-2xl border border-white/15 bg-black/90 px-2 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.45)]">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActiveRoute(pathname, href)
 

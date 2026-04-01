@@ -78,9 +78,6 @@ export default function RootLayout({
             <FirstTimeWelcomeModal />
             <AdminToeQuizPopup />
             <PrivacyBanner />
-            <footer className="w-full text-center text-xs text-white/30 py-6 pointer-events-none relative z-50">
-              Built by Engineer Brad Robinson
-            </footer>
           </PrivacyConsentProvider>
         </AccessibilityProvider>
         </ThemeProvider>
