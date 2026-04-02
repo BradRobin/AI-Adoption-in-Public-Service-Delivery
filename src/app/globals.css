@@ -240,6 +240,16 @@ canvas {
 .assessment-progress--organizational { --progress-fill-color: #22c55e; }
 .assessment-progress--environmental  { --progress-fill-color: #f97316; }
 
+.parp-ai-scrollbar-hidden {
+  -ms-overflow-style: none;
+}
+
+.parp-ai-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* High Contrast Mode Overrides */
 html.high-contrast {
   --background: #000000 !important;
@@ -394,4 +404,24 @@ html.high-contrast .text-green-400 {
   /* Notification count badge � keep text white in light mode */
   html.light-mode .bg-red-500.text-white {
     color: #ffffff !important;
+  }
+
+  html.light-mode .parp-ai-card,
+  html.light-mode .parp-ai-card h1,
+  html.light-mode .parp-ai-card h2,
+  html.light-mode .parp-ai-card h3,
+  html.light-mode .parp-ai-card h4,
+  html.light-mode .parp-ai-card p,
+  html.light-mode .parp-ai-card span,
+  html.light-mode .parp-ai-card div,
+  html.light-mode .parp-ai-card article,
+  html.light-mode .parp-ai-card label,
+  html.light-mode .parp-ai-card a,
+  html.light-mode .parp-ai-card button,
+  html.light-mode .parp-ai-card textarea {
+    color: #ffffff !important;
+  }
+
+  html.light-mode .parp-ai-card textarea::placeholder {
+    color: rgb(255 255 255 / 0.6) !important;
   }

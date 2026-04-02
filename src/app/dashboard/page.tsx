@@ -865,7 +865,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <section className="relative min-w-0 overflow-hidden rounded-xl bg-[#a01010] p-6 shadow-[0_6px_24px_rgba(160,16,16,0.22)]">
+                    <section className="parp-ai-card relative min-w-0 overflow-hidden rounded-xl bg-[#a01010] p-6 shadow-[0_6px_24px_rgba(160,16,16,0.22)]">
                         <div className="relative z-10 flex h-full min-h-112 flex-col">
                             <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
@@ -886,7 +886,7 @@ export default function Dashboard() {
                                     <button
                                         type="button"
                                         onClick={startNewParpAiSession}
-                                        className="mobile-touch-target rounded-lg border border-white/35 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white hover:text-[#a01010]"
+                                        className="mobile-touch-target rounded-lg border border-white/35 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 hover:text-white"
                                     >
                                         New Session
                                     </button>
@@ -905,7 +905,7 @@ export default function Dashboard() {
                                                     key={starter}
                                                     type="button"
                                                     onClick={() => setDashboardChatInput(starter)}
-                                                    className="rounded-full border border-white/30 bg-white/10 px-3 py-2 text-left text-xs font-medium text-white transition hover:bg-white hover:text-[#a01010]"
+                                                    className="rounded-full border border-white/30 bg-white/10 px-3 py-2 text-left text-xs font-medium text-white transition hover:bg-white/20 hover:text-white"
                                                 >
                                                     {starter}
                                                 </button>
@@ -913,7 +913,7 @@ export default function Dashboard() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+                                    <div className="parp-ai-scrollbar-hidden max-h-80 space-y-3 overflow-y-auto pr-1">
                                         {dashboardChatMessages.map((message) => (
                                             <article
                                                 key={message.id}
@@ -960,7 +960,7 @@ export default function Dashboard() {
                                     <button
                                         type="submit"
                                         disabled={!dashboardChatInput.trim() || isDashboardChatLoading || !parpAiSessionId}
-                                        className="mobile-touch-target rounded-lg border border-white bg-white px-4 py-2 text-xs font-semibold text-[#a01010] transition hover:bg-transparent hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="mobile-touch-target rounded-lg border border-white bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {isDashboardChatLoading ? 'Sending...' : 'Send to PARP AI'}
                                     </button>
