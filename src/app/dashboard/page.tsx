@@ -633,7 +633,7 @@ export default function Dashboard() {
                                     </p>
 
                                     {/* Likert scale */}
-                                    <div className="mt-4 grid grid-cols-5 gap-2">
+                                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-5">
                                         {LIKERT_PREVIEW_OPTIONS.map((option) => {
                                             const isSelected = toeQuizAnswers[activeToeQuestion.id] === option.value
                                             return (
@@ -642,22 +642,17 @@ export default function Dashboard() {
                                                     type="button"
                                                     onClick={() => handleToeQuizAnswer(option.value)}
                                                     aria-label={`${option.label} (${option.value})`}
-                                                    className={`mobile-touch-target rounded-lg border py-2 text-xs font-bold transition-colors ${
+                                                    className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
                                                         isSelected
                                                             ? 'border-white bg-white text-[#2d8a2d]'
                                                             : 'border-white/50 bg-transparent text-white hover:border-white hover:bg-white/20'
                                                     }`}
                                                 >
-                                                    {option.value}
+                                                    {option.label}
                                                 </button>
                                             )
                                         })}
                                     </div>
-                                    <p className="mt-2 text-right text-xs font-medium text-[#f7f9fa]/70">
-                                        {toeQuizAnswers[activeToeQuestion.id]
-                                            ? LIKERT_PREVIEW_OPTIONS.find((o) => o.value === toeQuizAnswers[activeToeQuestion.id])?.label
-                                            : '1 = Strongly Disagree · 5 = Strongly Agree'}
-                                    </p>
                                 </section>
                             )}
 
