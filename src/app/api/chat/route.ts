@@ -7,6 +7,16 @@
 
 import { createClient } from '@supabase/supabase-js'
 
+type AuthenticatedUser = {
+  id: string
+  email?: string | null
+  user_metadata?: {
+    username?: string
+    location?: string
+    [key: string]: unknown
+  }
+}
+
 /**
  * Represents a single message in the chat conversation.
  */
@@ -46,9 +56,24 @@ type ParpAiChatResponseBody = {
   feature: ParpAiFeature
 }
 
+type UserChatContext = {
+  username: string
+  role: string
+  location: string
+  adoptionRate: number | null
+  adoptionRateLabel: string
+}
+
 const PARP_AI_FEATURE: ParpAiFeature = 'chat_with_parp_ai'
 
-const parpAiSystemInstructions = `You are PARP AI operating inside the Chat with PARP AI dashboard card for the PARP Platform.
+function generateParpAiSystemInstructions(context: UserChatContext) {
+  return `You are PARP AI operating inside the Chat with PARP AI dashboard card for the PARP Platform.
+
+Live user context:
+- Username: ${context.username}
+- Role: ${context.role}
+- Location: ${context.location}
+- Latest adoption rate: ${context.adoptionRateLabel}
 
 Mode requirements:
 - Answer questions about AI adoption, AI governance, implementation strategy, procurement, regulation, risk management, and rollout planning in Kenya.
@@ -60,6 +85,8 @@ Response requirements:
 - Return clean, markdown-safe output suitable for direct dashboard rendering.
 - Prefer short sections and bullets when they make the answer easier to act on.
 - Give actionable next steps, likely stakeholders, implementation risks, and sequencing guidance when relevant.
+- Use the live user context when relevant.
+- If the user asks for their adoption rate, readiness score, or current score, use the live adoption rate above and do not invent another number.
 - Be explicit when you are uncertain.
 
 Safety and policy requirements:
@@ -67,6 +94,7 @@ Safety and policy requirements:
 - Do not invent Kenyan laws, regulations, standards, regulators, circulars, or government programs.
 - If the user needs legal interpretation or compliance confirmation, say that you are not providing legal advice and recommend checking the latest official Kenyan legal or regulatory source.
 - Stay in Chat with PARP AI mode unless the backend changes the feature.`
+}
 
 function isParpAiChatRequestBody(body: unknown): body is ParpAiChatRequestBody {
   if (!body || typeof body !== 'object') {
@@ -92,8 +120,90 @@ function buildLlmMessages(systemPrompt: string, history: ChatMessage[]) {
  * System prompt defining the AI's persona, language preferences, and base context.
  * Used when no custom system prompt is provided.
  */
+function formatUsername(user: AuthenticatedUser | undefined | null) {
+  const rawUsername = user?.user_metadata?.username?.trim()
+  if (rawUsername) {
+    return rawUsername
+  }
+
+  const email = user?.email?.trim()
+  if (!email) {
+    return 'User'
+  }
+
+  return email.split('@')[0] || 'User'
+}
+
+function normalizeProfileLocation(location: string | null | undefined, user: AuthenticatedUser | undefined | null) {
+  if (location && location.trim()) {
+    return location.trim()
+  }
+
+  const metadataLocation = user?.user_metadata?.location
+  if (typeof metadataLocation === 'string' && metadataLocation.trim()) {
+    return metadataLocation.trim()
+  }
+
+  return 'Kenya'
+}
+
+function formatAdoptionRateLabel(adoptionRate: number | null) {
+  return adoptionRate === null ? 'No recorded assessment yet' : `${adoptionRate}%`
+}
+
+function isAdoptionRateQuestion(message: string) {
+  return /(what(?:'s| is)?\s+my\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score)|my\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score)|current\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score))/i.test(
+    message,
+  )
+}
+
+function buildAdoptionRateResponse(context: UserChatContext) {
+  if (context.adoptionRate === null) {
+    return `${context.username}, I do not have a recorded adoption rate for your account yet. Complete your latest assessment and I will be able to report your current adoption rate in real time.`
+  }
+
+  return `${context.username}, your current adoption rate is ${context.adoptionRate}%. This is pulled from your latest recorded assessment in real time.`
+}
+
+async function fetchUserChatContext(opts: {
+  token: string
+  userId: string
+  user?: AuthenticatedUser | null
+}) {
+  const supabase = createAuthenticatedSupabaseClient(opts.token)
+
+  const [{ data: profile, error: profileError }, { data: latestAssessment, error: assessmentError }] = await Promise.all([
+    supabase.from('profiles').select('role, location').eq('id', opts.userId).maybeSingle(),
+    supabase
+      .from('assessments')
+      .select('score')
+      .eq('user_id', opts.userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  if (profileError) {
+    throw profileError
+  }
+
+  if (assessmentError) {
+    throw assessmentError
+  }
+
+  const adoptionRate = typeof latestAssessment?.score === 'number' ? latestAssessment.score : null
+
+  return {
+    username: formatUsername(opts.user),
+    role: profile?.role?.trim() || 'Citizen/User',
+    location: normalizeProfileLocation(profile?.location, opts.user),
+    adoptionRate,
+    adoptionRateLabel: formatAdoptionRateLabel(adoptionRate),
+  } satisfies UserChatContext
+}
+
 // Function generating the system prompt with dynamic user context
-function generateSystemPrompt(role: string, location: string) {
+function generateSystemPrompt(context: UserChatContext) {
   return `You are PARP AI - a savvy, knowledgeable Kenyan digital advisor. You specialize in AI adoption for public services, freelancing (online writing, coding), and the digital economy in Kenya.
    
    Your Persona:
@@ -102,9 +212,11 @@ function generateSystemPrompt(role: string, location: string) {
    - Match the user's language. If they speak formally, reply formally. If they use Sheng, reply in Sheng.
    
    User Context:
-   - The user's role is: ${role}
-   - The user's location is: ${location}
-   Always personalize your advice based on this role and location when relevant (e.g. mention local services, location-specific issues, or role-specific challenges).
+   - The user's username is: ${context.username}
+   - The user's role is: ${context.role}
+   - The user's location is: ${context.location}
+   - The user's latest adoption rate is: ${context.adoptionRateLabel}
+   Always personalize your advice based on this user context when relevant (e.g. mention local services, location-specific issues, role-specific challenges, or their latest readiness level).
 
   First Interaction (Critical):
   - Your very first response in a chat must create instant wow.
@@ -123,6 +235,7 @@ function generateSystemPrompt(role: string, location: string) {
    CRITICAL INSTRUCTIONS:
    - Keep your responses concise and to the point. Limit standard responses to 1-3 short sentences maximum.
   - Avoid generic corporate tone. Sound human, warm, and confident.
+  - If the user asks for their adoption rate, readiness score, or current score, answer using the latest adoption rate above and do not invent another number.
    - When performing an Organizational AI Use Assessment, you may use bullet points and be slightly longer to fulfill the X/5 formatting requirement.
    - For simple greetings like "hello", just reply with a brief, friendly greeting.
    - If providing an Organizational AI Use Assessment, you MUST include this exact sentence at the very bottom of your response: "This assessment is based on public data and may not reflect internal policies. See our [Privacy Policy](/privacy) for limitations."`
@@ -184,7 +297,7 @@ async function requireUser(req: Request) {
     return { ok: false as const, status: 401, message: 'Invalid session.' }
   }
 
-  return { ok: true as const, token, userId: data.user.id }
+  return { ok: true as const, token, userId: data.user.id, user: data.user as AuthenticatedUser }
 }
 
 function createAuthenticatedSupabaseClient(token: string) {
@@ -459,7 +572,7 @@ async function completeFromConfiguredProvider(opts: {
   }
 }
 
-async function handleParpAiChat(auth: { token?: string; userId?: string }, body: ParpAiChatRequestBody) {
+async function handleParpAiChat(auth: { token?: string; userId?: string; user?: AuthenticatedUser | null }, body: ParpAiChatRequestBody) {
   const sessionId = body.session_id.trim()
   const userMessage = body.user_message.trim()
 
@@ -485,6 +598,7 @@ async function handleParpAiChat(auth: { token?: string; userId?: string }, body:
   }
 
   let sessionHistory: ChatMessage[] = []
+  let userContext: UserChatContext
 
   try {
     const supabase = createAuthenticatedSupabaseClient(auth.token)
@@ -501,6 +615,11 @@ async function handleParpAiChat(auth: { token?: string; userId?: string }, body:
 
     const storedMessages = Array.isArray(data?.messages) ? (data.messages as ChatMessage[]) : []
     sessionHistory = normalizeMessages(storedMessages)
+    userContext = await fetchUserChatContext({
+      token: auth.token,
+      userId: auth.userId,
+      user: auth.user,
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to load conversation history.'
     return new Response(JSON.stringify({ error: message }), {
@@ -509,7 +628,19 @@ async function handleParpAiChat(auth: { token?: string; userId?: string }, body:
     })
   }
 
-  const stitchedMessages = buildLlmMessages(parpAiSystemInstructions, [
+  if (isAdoptionRateQuestion(userMessage)) {
+    const responseBody: ParpAiChatResponseBody = {
+      session_id: sessionId,
+      assistant_message: buildAdoptionRateResponse(userContext),
+      feature: PARP_AI_FEATURE,
+    }
+
+    return new Response(JSON.stringify(responseBody), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const stitchedMessages = buildLlmMessages(generateParpAiSystemInstructions(userContext), [
     ...sessionHistory,
     { role: 'user', content: userMessage },
   ])
@@ -587,23 +718,45 @@ export async function POST(req: Request) {
     return handleParpAiChat(auth, body)
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  let userRole = 'Citizen/User'
-  let userLocation = 'Kenya'
-
-  if (url && anonKey) {
-    const supabase = createClient(url, anonKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
+  let userContext: UserChatContext
+  try {
+    userContext = await fetchUserChatContext({
+      token: auth.token!,
+      userId: auth.userId!,
+      user: auth.user,
     })
-    const { data: profile } = await supabase.from('profiles').select('role, location').eq('id', auth.userId).single()
-    if (profile) {
-      userRole = profile.role || 'Citizen/User'
-      userLocation = profile.location || 'Kenya'
-    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to load user chat context.'
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
-  const generatedPrompt = generateSystemPrompt(userRole, userLocation)
+  const latestUserMessage = normalizeMessages(body.messages).filter((message) => message.role === 'user').at(-1)?.content ?? ''
+
+  if (isAdoptionRateQuestion(latestUserMessage)) {
+    const directResponse = buildAdoptionRateResponse(userContext)
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const encoder = new TextEncoder()
+        controller.enqueue(encoder.encode(sseEncode('open', 'ok')))
+        controller.enqueue(encoder.encode(sseEncode('token', directResponse)))
+        controller.enqueue(encoder.encode(sseEncode('done', 'ok')))
+        controller.close()
+      },
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+      },
+    })
+  }
+
+  const generatedPrompt = generateSystemPrompt(userContext)
   const activeSystemPrompt = body.systemPrompt ? body.systemPrompt : generatedPrompt
 
   const history = normalizeMessages(body.messages)
