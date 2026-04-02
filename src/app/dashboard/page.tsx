@@ -514,7 +514,7 @@ export default function Dashboard() {
                                     {!latestAssessment && (
                                         <Link
                                             href="/assess"
-                                            className="mobile-touch-target mt-2 inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400"
+                                            className="mobile-touch-target mt-2 inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-400"
                                         >
                                             Check My Readiness
                                         </Link>
