@@ -644,7 +644,7 @@ export default function Dashboard() {
                                                     aria-label={`${option.label} (${option.value})`}
                                                     className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
                                                         isSelected
-                                                            ? 'border-white bg-white text-[#2d8a2d]'
+                                                            ? 'border-white bg-white/25 text-white'
                                                             : 'border-white/50 bg-transparent text-white hover:border-white hover:bg-white/20'
                                                     }`}
                                                 >
@@ -662,7 +662,7 @@ export default function Dashboard() {
                                     type="button"
                                     onClick={submitToeQuiz}
                                     disabled={!isToeQuizComplete || isSubmittingToeQuiz}
-                                    className="mobile-touch-target rounded-lg bg-white px-4 py-1.5 text-xs font-bold text-[#2d8a2d] transition hover:bg-[#f7f9fa] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="mobile-touch-target rounded-lg border border-white bg-white/20 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {isSubmittingToeQuiz ? 'Submitting…' : 'Submit Assessment'}
                                 </button>
