@@ -962,7 +962,7 @@ export default function Dashboard() {
                                         disabled={!dashboardChatInput.trim() || isDashboardChatLoading || !parpAiSessionId}
                                         className="mobile-touch-target rounded-lg border border-white bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                                     >
-                                        {isDashboardChatLoading ? 'Sending...' : 'Send to PARP AI'}
+                                        {isDashboardChatLoading ? 'Sending...' : 'Send'}
                                     </button>
                                 </div>
                             </form>
