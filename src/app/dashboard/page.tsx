@@ -1002,7 +1002,7 @@ export default function Dashboard() {
                                         onKeyDown={handleDashboardChatKeyDown}
                                         rows={4}
                                         placeholder="Ask PARP AI about Kenya AI policy, rollout strategy, governance, or adoption risks..."
-                                        className="min-w-0 mobile-touch-target w-full resize-none rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-white/45 focus:outline-none"
+                                        className="min-w-0 mobile-touch-target w-full resize-none rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-center placeholder:text-white/45 focus:border-white/45 focus:outline-none"
                                     />
                                 </label>
                                 <div className="flex flex-wrap items-center justify-between gap-3">
