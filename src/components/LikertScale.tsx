@@ -52,9 +52,9 @@ export function LikertScale<T extends FieldValues>({
               return (
                 <label
                   key={opt.value}
-                  className={`mobile-touch-target flex min-h-12 min-w-12 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-green-400 ${isSelected
-                    ? 'border-white/50 bg-white/10'
-                    : 'border-white/10 bg-black/40 hover:border-white/20'
+                  className={`mobile-touch-target group flex min-h-12 min-w-12 cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors duration-300 ease-out sm:min-w-0 sm:flex-1 sm:px-4 sm:text-sm has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-green-400 ${isSelected
+                    ? 'border-white bg-white text-black'
+                    : 'border-white/10 bg-black/40 text-white hover:border-white hover:bg-white hover:text-black'
                     }`}
                 >
                   <input
@@ -69,10 +69,16 @@ export function LikertScale<T extends FieldValues>({
                     className="sr-only"
                     aria-label={`${opt.label} - Score ${opt.value}`}
                   />
-                  <span className="text-center font-medium text-white" aria-hidden="true">
+                  <span
+                    className={`text-center font-medium transition-colors duration-300 ease-out ${isSelected ? 'text-black' : 'text-white group-hover:text-black'}`}
+                    aria-hidden="true"
+                  >
                     {opt.value}
                   </span>
-                  <span className="ml-1 hidden text-white/80 sm:inline" aria-hidden="true">
+                  <span
+                    className={`ml-1 hidden transition-colors duration-300 ease-out sm:inline ${isSelected ? 'text-black/80' : 'text-white/80 group-hover:text-black/80'}`}
+                    aria-hidden="true"
+                  >
                     — {opt.label}
                   </span>
                 </label>

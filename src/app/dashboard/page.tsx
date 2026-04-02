@@ -639,10 +639,10 @@ export default function Dashboard() {
                                                     type="button"
                                                     onClick={() => handleToeQuizAnswer(option.value)}
                                                     aria-label={`${option.label} (${option.value})`}
-                                                    className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
+                                                    className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-bold transition-colors duration-300 ease-out ${
                                                         isSelected
-                                                            ? 'border-white bg-white/25 text-[#ffffff]'
-                                                            : 'border-white/50 bg-transparent text-[#ffffff] hover:border-white hover:bg-white/20'
+                                                            ? 'border-white bg-white text-black'
+                                                            : 'border-white/50 bg-transparent text-[#ffffff] hover:border-white hover:bg-white hover:text-black'
                                                     }`}
                                                 >
                                                     {option.label}
