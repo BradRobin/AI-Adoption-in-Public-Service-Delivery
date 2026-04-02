@@ -17,6 +17,8 @@ import { ParticleBackground } from '@/components/ParticleBackground'
 import type { Session } from '@supabase/supabase-js'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { TypingTagline } from '@/components/TypingTagline'
+import { TOE_QUESTIONS, type ToeSection } from '@/data/toe-questions'
+import { computeScores, type ToeFormValues } from '@/lib/toe-scoring'
 
 function WidgetFallback({ className = 'h-48' }: { className?: string }) {
     return (
@@ -72,6 +74,28 @@ const BenchmarkCard = dynamic(
 )
 
 const WEEKLY_REASSESSMENT_TOAST_ID = 'weekly-reassessment-complete'
+const TOE_PREVIEW_QUESTION_ID = 'tech_1'
+const SECTION_ORDER: ToeSection[] = ['technological', 'organizational', 'environmental']
+const SECTION_LABELS: Record<ToeSection, string> = {
+    technological: 'Technological Factors',
+    organizational: 'Organizational Factors',
+    environmental: 'Environmental Factors',
+}
+const TOE_QUESTION_SEQUENCE = SECTION_ORDER.flatMap((section, sectionIndex) =>
+    TOE_QUESTIONS[section].map((question, questionIndex) => ({
+        ...question,
+        section,
+        sectionLabel: SECTION_LABELS[section],
+        sequence: sectionIndex * TOE_QUESTIONS[section].length + questionIndex + 1,
+    })),
+)
+const LIKERT_PREVIEW_OPTIONS = [
+    { value: 1, label: 'Strongly Disagree' },
+    { value: 2, label: 'Disagree' },
+    { value: 3, label: 'Neutral' },
+    { value: 4, label: 'Agree' },
+    { value: 5, label: 'Strongly Agree' },
+] as const
 
 /**
  * Main dashboard view for authenticated users.
@@ -96,6 +120,11 @@ export default function Dashboard() {
     const [sessionExpired, setSessionExpired] = useState(false)
     const [redirectTakingLong, setRedirectTakingLong] = useState(false)
     const [isGreetingVisible, setIsGreetingVisible] = useState(true)
+    const [toePreviewAnswer, setToePreviewAnswer] = useState<number | null>(null)
+    const [isToeQuizOpen, setIsToeQuizOpen] = useState(false)
+    const [toeQuizIndex, setToeQuizIndex] = useState(0)
+    const [toeQuizAnswers, setToeQuizAnswers] = useState<Record<string, number>>({})
+    const [isSubmittingToeQuiz, setIsSubmittingToeQuiz] = useState(false)
     const [marketStats, setMarketStats] = useState<{
         ai_adoption_rate: { value: string; source: string }
         policy_update: { value: string; source: string }
@@ -114,6 +143,146 @@ export default function Dashboard() {
     const adoptionRateDisplay = hasValidAdoptionRate
         ? `${animatedAdoptionRate.toFixed(adoptionRateDecimals)}%`
         : marketStats.ai_adoption_rate.value
+    const toePreviewQuestion = TOE_QUESTIONS.technological[0]?.text ?? 'Our IT infrastructure can support AI workloads.'
+
+    const getDraftKey = (userId: string) => `toe_draft_${userId}`
+
+    const saveToeDraft = (answers: Record<string, number>) => {
+        const userId = session?.user?.id
+        if (!userId) {
+            return
+        }
+
+        localStorage.setItem(getDraftKey(userId), JSON.stringify(answers))
+    }
+
+    const getFirstUnansweredIndex = (answers: Record<string, number>) => {
+        const firstUnansweredIndex = TOE_QUESTION_SEQUENCE.findIndex(
+            (question) => typeof answers[question.id] !== 'number',
+        )
+
+        return firstUnansweredIndex === -1 ? TOE_QUESTION_SEQUENCE.length - 1 : firstUnansweredIndex
+    }
+
+    const handleToePreviewAnswer = (value: number) => {
+        setToePreviewAnswer(value)
+
+        let draft: Record<string, unknown> = {}
+        const userId = session?.user?.id
+        if (!userId) return
+        const existingDraft = localStorage.getItem(getDraftKey(userId))
+
+        if (existingDraft) {
+            try {
+                draft = JSON.parse(existingDraft) as Record<string, unknown>
+            } catch {
+                draft = {}
+            }
+        }
+
+        draft[TOE_PREVIEW_QUESTION_ID] = value
+        saveToeDraft(draft as Record<string, number>)
+    }
+
+    const openToeQuiz = () => {
+        const userId = session?.user?.id
+        if (!userId) {
+            return
+        }
+
+        const savedDraft = localStorage.getItem(getDraftKey(userId))
+        let draftAnswers: Record<string, number> = {}
+
+        if (savedDraft) {
+            try {
+                const parsed = JSON.parse(savedDraft) as Record<string, unknown>
+                draftAnswers = Object.entries(parsed).reduce((acc, [key, rawValue]) => {
+                    if (typeof rawValue === 'number' && rawValue >= 1 && rawValue <= 5) {
+                        acc[key] = rawValue
+                    }
+                    return acc
+                }, {} as Record<string, number>)
+            } catch {
+                draftAnswers = {}
+            }
+        }
+
+        setToeQuizAnswers(draftAnswers)
+        setToePreviewAnswer(draftAnswers[TOE_PREVIEW_QUESTION_ID] ?? null)
+        setToeQuizIndex(getFirstUnansweredIndex(draftAnswers))
+        setIsToeQuizOpen(true)
+    }
+
+    const handleToeQuizAnswer = (value: number) => {
+        const activeQuestion = TOE_QUESTION_SEQUENCE[toeQuizIndex]
+        if (!activeQuestion) {
+            return
+        }
+
+        const updatedAnswers = {
+            ...toeQuizAnswers,
+            [activeQuestion.id]: value,
+        }
+
+        setToeQuizAnswers(updatedAnswers)
+        if (activeQuestion.id === TOE_PREVIEW_QUESTION_ID) {
+            setToePreviewAnswer(value)
+        }
+        saveToeDraft(updatedAnswers)
+
+        setToeQuizIndex((previousIndex) =>
+            Math.min(TOE_QUESTION_SEQUENCE.length - 1, previousIndex + 1),
+        )
+    }
+
+    const submitToeQuiz = async () => {
+        const unansweredIndex = TOE_QUESTION_SEQUENCE.findIndex(
+            (question) => typeof toeQuizAnswers[question.id] !== 'number',
+        )
+
+        if (unansweredIndex !== -1) {
+            setToeQuizIndex(unansweredIndex)
+            toast.error('Please answer all TOE questions before submitting.')
+            return
+        }
+
+        const userId = session?.user?.id
+        if (!userId) {
+            return
+        }
+
+        setIsSubmittingToeQuiz(true)
+        const computed = computeScores(toeQuizAnswers as ToeFormValues)
+        const { data, error } = await supabase
+            .from('assessments')
+            .insert({
+                user_id: userId,
+                score: computed.overall,
+                dimension_scores: computed.dimensionScores,
+            })
+            .select('score, dimension_scores, created_at')
+            .single()
+
+        if (error) {
+            toast.error('Could not save your assessment. Please try again.')
+            setIsSubmittingToeQuiz(false)
+            return
+        }
+
+        setLatestAssessment((prev) => ({
+            score: data.score,
+            dimension_scores: data.dimension_scores,
+            created_at: data.created_at,
+            previousScore: prev ? prev.score : null,
+        }))
+        localStorage.removeItem(getDraftKey(userId))
+        setIsToeQuizOpen(false)
+        setToeQuizAnswers({})
+        setToeQuizIndex(0)
+        setToePreviewAnswer(null)
+        setIsSubmittingToeQuiz(false)
+        toast.success('Assessment submitted from dashboard successfully.')
+    }
 
     // Effect: Check for active session on mount and subscribe to auth changes
     useEffect(() => {
@@ -296,6 +465,28 @@ export default function Dashboard() {
     }, [])
 
     useEffect(() => {
+        if (!session?.user?.id) {
+            return
+        }
+
+        const draftKey = `toe_draft_${session.user.id}`
+        const savedDraft = localStorage.getItem(draftKey)
+        if (!savedDraft) {
+            return
+        }
+
+        try {
+            const parsedDraft = JSON.parse(savedDraft) as Record<string, unknown>
+            const savedValue = parsedDraft[TOE_PREVIEW_QUESTION_ID]
+            if (typeof savedValue === 'number' && savedValue >= 1 && savedValue <= 5) {
+                setToePreviewAnswer(savedValue)
+            }
+        } catch {
+            // Ignore malformed stored drafts
+        }
+    }, [session?.user?.id])
+
+    useEffect(() => {
         if (!hasValidAdoptionRate) return
 
         const durationMs = 2000
@@ -394,6 +585,13 @@ export default function Dashboard() {
         return `updated ${diffDays} days ago`;
     }
 
+    const activeToeQuestion = TOE_QUESTION_SEQUENCE[toeQuizIndex]
+    const toeAnsweredCount = TOE_QUESTION_SEQUENCE.reduce(
+        (count, question) => count + (typeof toeQuizAnswers[question.id] === 'number' ? 1 : 0),
+        0,
+    )
+    const isToeQuizComplete = toeAnsweredCount === TOE_QUESTION_SEQUENCE.length
+
     return (
         <div className="relative min-h-screen w-full bg-black font-sans text-white selection:bg-green-500/30">
             <ParticleBackground />
@@ -450,8 +648,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-6 xl:gap-8">
 
                     {/* Action Cards (Chat & Assessment) */}
-                    <Link
-                        href="/assess"
+                    <div
                         className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-300/70 bg-green-950/25 p-8 transition duration-300 shadow-[0_0_44px_rgba(34,197,94,0.6)] hover:border-green-200/95 hover:shadow-[0_0_74px_rgba(34,197,94,0.9)]"
                     >
                         <div className="relative z-10">
@@ -464,9 +661,45 @@ export default function Dashboard() {
                             <p className="text-tier-2 text-sm">
                                 Evaluate your organization&apos;s readiness using the TOE framework. Get detailed scores and insights.
                             </p>
+                            <div className="mt-4 rounded-lg border border-green-300/30 bg-green-500/10 p-3">
+                                <p className="text-xs font-semibold tracking-wide text-green-200">TOE Question Preview</p>
+                                <p className="text-tier-1 mt-1 text-sm">&quot;{toePreviewQuestion}&quot;</p>
+                                <div className="mt-3 grid grid-cols-5 gap-2">
+                                    {LIKERT_PREVIEW_OPTIONS.map((option) => {
+                                        const isSelected = toePreviewAnswer === option.value
+                                        return (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                onClick={() => handleToePreviewAnswer(option.value)}
+                                                aria-label={`${option.label} (${option.value})`}
+                                                className={`mobile-touch-target rounded-md border px-2 py-2 text-xs font-semibold transition-colors ${isSelected
+                                                    ? 'border-green-200 bg-green-400/30 text-white'
+                                                    : 'border-green-300/30 bg-black/30 text-green-100 hover:border-green-200/60 hover:bg-green-400/15'
+                                                    }`}
+                                            >
+                                                {option.value}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                                <p className="mt-2 text-xs text-green-100/80">
+                                    {toePreviewAnswer
+                                        ? `Selected: ${LIKERT_PREVIEW_OPTIONS.find((option) => option.value === toePreviewAnswer)?.label}`
+                                        : 'Select a score from 1 to 5 to save this answer to your assessment draft.'}
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={openToeQuiz}
+                                className="mobile-touch-target mt-4 inline-flex items-center justify-center rounded-lg border border-green-300/70 bg-green-500/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-400/30"
+                            >
+                                Take Full TOE Quiz Here
+                            </button>
                         </div>
                         <div className="absolute inset-0 z-0 bg-green-400/20 opacity-75 blur-2xl transition group-hover:opacity-100"></div>
-                    </Link>
+                    </div>
 
                     <Link
                         href="/chat"
@@ -558,6 +791,102 @@ export default function Dashboard() {
 
                 </div>
             </main>
+
+            {isToeQuizOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-3xl rounded-2xl border border-green-300/30 bg-[#07130b] p-4 shadow-[0_0_60px_rgba(34,197,94,0.35)] sm:p-6">
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <p className="text-xs font-semibold tracking-[0.14em] text-green-200/90">IN-CARD TOE QUIZ</p>
+                                <h2 className="text-xl font-bold text-white sm:text-2xl">Full Assessment</h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsToeQuizOpen(false)}
+                                className="mobile-touch-target rounded-lg border border-white/20 px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        <div className="mt-4 space-y-3">
+                            <progress
+                                value={toeAnsweredCount}
+                                max={TOE_QUESTION_SEQUENCE.length}
+                                className="h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-white/10 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-green-400 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-green-400"
+                            />
+                            <p className="text-sm text-green-100/80">
+                                {toeAnsweredCount} of {TOE_QUESTION_SEQUENCE.length} questions answered
+                            </p>
+                        </div>
+
+                        {activeToeQuestion && (
+                            <section className="mt-5 rounded-xl border border-green-400/25 bg-green-500/10 p-4 sm:p-5">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <span className="rounded-full border border-green-300/30 bg-green-400/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-green-200">
+                                        {activeToeQuestion.sectionLabel}
+                                    </span>
+                                    <span className="text-xs text-green-100/70">
+                                        Question {activeToeQuestion.sequence} of {TOE_QUESTION_SEQUENCE.length}
+                                    </span>
+                                </div>
+                                <p className="mt-4 text-base font-medium text-white sm:text-lg">
+                                    {activeToeQuestion.text}
+                                </p>
+
+                                <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-3">
+                                    {LIKERT_PREVIEW_OPTIONS.map((option) => {
+                                        const isSelected = toeQuizAnswers[activeToeQuestion.id] === option.value
+                                        return (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                onClick={() => handleToeQuizAnswer(option.value)}
+                                                aria-label={`${option.label} (${option.value})`}
+                                                className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-semibold transition-colors sm:text-sm ${isSelected
+                                                    ? 'border-green-200 bg-green-400/35 text-white'
+                                                    : 'border-green-300/30 bg-black/30 text-green-100 hover:border-green-200/70 hover:bg-green-400/15'
+                                                    }`}
+                                            >
+                                                {option.value}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </section>
+                        )}
+
+                        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setToeQuizIndex((prev) => Math.max(0, prev - 1))}
+                                    disabled={toeQuizIndex === 0}
+                                    className="mobile-touch-target rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setToeQuizIndex((prev) => Math.min(TOE_QUESTION_SEQUENCE.length - 1, prev + 1))}
+                                    disabled={toeQuizIndex >= TOE_QUESTION_SEQUENCE.length - 1}
+                                    className="mobile-touch-target rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={submitToeQuiz}
+                                disabled={!isToeQuizComplete || isSubmittingToeQuiz}
+                                className="mobile-touch-target rounded-lg bg-green-500 px-5 py-2 text-sm font-semibold text-black transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {isSubmittingToeQuiz ? 'Submitting...' : 'Submit Assessment'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
