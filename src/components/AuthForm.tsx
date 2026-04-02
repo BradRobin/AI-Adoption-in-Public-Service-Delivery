@@ -301,7 +301,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
             maxLength={50}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+            className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-black/60 focus:border-white/40"
             placeholder="you@example.com"
             autoComplete="email"
             required
@@ -323,7 +323,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                 maxLength={50}
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+                className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-black/60 focus:border-white/40"
                 placeholder="Your username"
                 autoComplete="username"
                 required
@@ -343,7 +343,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                 maxLength={50}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+                className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-black/60 focus:border-white/40"
                 placeholder="Choose a strong password"
                 autoComplete="new-password"
                 required
@@ -470,7 +470,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
               maxLength={50}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+              className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-black/60 focus:border-white/40"
               placeholder="Your password"
               autoComplete="current-password"
               required
@@ -575,7 +575,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   value={forgotEmail}
                   maxLength={50}
                   onChange={(event) => setForgotEmail(event.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-white/30 focus:border-white/40"
+                  className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2 text-sm text-white outline-none ring-0 transition-colors placeholder:text-black/60 focus:border-white/40"
                   placeholder="you@example.com"
                   autoComplete="email"
                   required

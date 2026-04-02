@@ -166,7 +166,7 @@ export function CountySelect({
         aria-label={value || placeholder}
         className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-left text-sm text-white outline-none transition-colors hover:border-white/20 focus:border-white/40"
       >
-        <span className={value ? 'text-white' : 'text-white/30'}>
+        <span className={value ? 'text-white' : 'text-black/60'}>
           {value || placeholder}
         </span>
         <div className="flex items-center gap-1">
@@ -200,7 +200,7 @@ export function CountySelect({
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               placeholder="Search counties..."
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"
+              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-black/60"
               aria-label="Search counties"
             />
           </div>
