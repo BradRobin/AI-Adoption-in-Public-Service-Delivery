@@ -656,26 +656,8 @@ export default function Dashboard() {
                                 </section>
                             )}
 
-                            {/* Navigation + Submit */}
-                            <div className="mt-4 flex items-center justify-between gap-2">
-                                <div className="flex gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setToeQuizIndex((prev) => Math.max(0, prev - 1))}
-                                        disabled={toeQuizIndex === 0}
-                                        className="mobile-touch-target rounded-lg border border-white bg-transparent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#2d8a2d] disabled:cursor-not-allowed disabled:opacity-40"
-                                    >
-                                        Previous
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setToeQuizIndex((prev) => Math.min(TOE_QUESTION_SEQUENCE.length - 1, prev + 1))}
-                                        disabled={toeQuizIndex >= TOE_QUESTION_SEQUENCE.length - 1}
-                                        className="mobile-touch-target rounded-lg border border-white bg-transparent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#2d8a2d] disabled:cursor-not-allowed disabled:opacity-40"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
+                            {/* Submit */}
+                            <div className="mt-4 flex items-center justify-end gap-2">
                                 <button
                                     type="button"
                                     onClick={submitToeQuiz}
