@@ -452,7 +452,7 @@ export default function Dashboard() {
                     {/* Action Cards (Chat & Assessment) */}
                     <Link
                         href="/assess"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(0,102,0,0.30)] hover:border-green-500/60 hover:shadow-[0_0_48px_rgba(0,102,0,0.55)]"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-green-300/70 bg-green-950/25 p-8 transition duration-300 shadow-[0_0_44px_rgba(34,197,94,0.6)] hover:border-green-200/95 hover:shadow-[0_0_74px_rgba(34,197,94,0.9)]"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-black transition-colors">
@@ -465,12 +465,12 @@ export default function Dashboard() {
                                 Evaluate your organization&apos;s readiness using the TOE framework. Get detailed scores and insights.
                             </p>
                         </div>
-                        <div className="absolute inset-0 z-0 bg-green-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                        <div className="absolute inset-0 z-0 bg-green-400/20 opacity-75 blur-2xl transition group-hover:opacity-100"></div>
                     </Link>
 
                     <Link
                         href="/chat"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-500/30 bg-black/20 p-8 transition shadow-[0_0_32px_rgba(187,0,0,0.30)] hover:border-red-500/60 hover:shadow-[0_0_48px_rgba(187,0,0,0.55)]"
+                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-300/70 bg-red-950/25 p-8 transition duration-300 shadow-[0_0_44px_rgba(239,68,68,0.6)] hover:border-red-200/95 hover:shadow-[0_0_74px_rgba(239,68,68,0.9)]"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-500/20 text-red-400 group-hover:bg-red-500 group-hover:text-black transition-colors">
@@ -483,7 +483,7 @@ export default function Dashboard() {
                                 Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
                             </p>
                         </div>
-                        <div className="absolute inset-0 z-0 bg-red-500/5 opacity-0 transition group-hover:opacity-100"></div>
+                        <div className="absolute inset-0 z-0 bg-red-400/20 opacity-75 blur-2xl transition group-hover:opacity-100"></div>
                     </Link>
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
