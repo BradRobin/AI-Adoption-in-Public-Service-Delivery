@@ -1068,15 +1068,18 @@ export default function Dashboard() {
                                     <h3 className="text-xl font-bold text-white">Chat with PARP AI</h3>
                                 </div>
                                 <div className="flex max-w-full flex-wrap items-center gap-2">
-                                    <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
-                                        Session {parpAiSessionId ? parpAiSessionId.slice(0, 8) : '...'}
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V7.875a4.5 4.5 0 10-9 0V10.5m-.75 0h10.5A1.5 1.5 0 0118.75 12v6A1.5 1.5 0 0117.25 19.5H6.75A1.5 1.5 0 015.25 18v-6a1.5 1.5 0 011.5-1.5z" />
+                                        </svg>
+                                        Secure Session
                                     </span>
                                     <button
                                         type="button"
                                         onClick={startNewParpAiSession}
                                         className="mobile-touch-target rounded-lg border border-white/35 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 hover:text-white"
                                     >
-                                        New Session
+                                        New Chat
                                     </button>
                                 </div>
                             </div>
@@ -1130,9 +1133,9 @@ export default function Dashboard() {
                                         value={dashboardChatInput}
                                         onChange={(event) => setDashboardChatInput(event.target.value)}
                                         onKeyDown={handleDashboardChatKeyDown}
-                                        rows={4}
+                                        rows={3}
                                         placeholder="Ask PARP AI about Kenya AI policy, rollout strategy, governance, or adoption risks..."
-                                        className="min-w-0 mobile-touch-target w-full resize-none rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-center placeholder:text-white/45 focus:border-white/45 focus:outline-none"
+                                        className="min-w-0 mobile-touch-target h-24 w-full resize-none rounded-xl border border-white/20 bg-black/20 px-4 py-4 text-center text-sm leading-6 text-white placeholder:text-center placeholder:text-white/45 focus:border-white/45 focus:outline-none"
                                     />
                                 </label>
                                 <div className="flex flex-wrap items-center justify-between gap-3">
