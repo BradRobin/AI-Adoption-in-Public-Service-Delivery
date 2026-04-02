@@ -342,6 +342,18 @@ export default function Dashboard() {
         }
     }
 
+    const deleteDashboardConversation = async (conversationId: string, userId: string) => {
+        const { error } = await supabase
+            .from('conversations')
+            .delete()
+            .eq('id', conversationId)
+            .eq('user_id', userId)
+
+        if (error) {
+            throw error
+        }
+    }
+
     const startNewParpAiSession = () => {
         const userId = session?.user?.id
         if (!userId) {
@@ -758,39 +770,31 @@ export default function Dashboard() {
         }
 
         const storageKey = getParpAiStorageKey(session.user.id)
-        const existingSessionId = localStorage.getItem(storageKey)
-        const nextSessionId = existingSessionId || crypto.randomUUID()
-
-        if (!existingSessionId) {
-            localStorage.setItem(storageKey, nextSessionId)
-        }
+        const previousSessionId = localStorage.getItem(storageKey)
+        const nextSessionId = crypto.randomUUID()
+        localStorage.setItem(storageKey, nextSessionId)
 
         let isCancelled = false
 
-        const loadDashboardConversation = async () => {
-            const { data, error } = await supabase
-                .from('conversations')
-                .select('id, user_id, title, messages, created_at, updated_at')
-                .eq('id', nextSessionId)
-                .eq('user_id', session.user.id)
-                .maybeSingle()
+        const resetDashboardConversation = async () => {
+            if (previousSessionId) {
+                try {
+                    await deleteDashboardConversation(previousSessionId, session.user.id)
+                } catch {
+                    // Best-effort cleanup for secure dashboard chat refreshes.
+                }
+            }
 
             if (isCancelled) {
                 return
             }
 
-            if (error) {
-                toast.error('Could not load your dashboard chat history.')
-                setDashboardChatMessages([])
-                setParpAiSessionId(nextSessionId)
-                return
-            }
-
             setParpAiSessionId(nextSessionId)
-            setDashboardChatMessages(Array.isArray(data?.messages) ? data.messages : [])
+            setDashboardChatMessages([])
+            setDashboardChatInput('')
         }
 
-        void loadDashboardConversation()
+        void resetDashboardConversation()
 
         return () => {
             isCancelled = true
