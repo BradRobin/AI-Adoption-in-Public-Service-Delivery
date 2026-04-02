@@ -120,10 +120,140 @@ type DashboardChatResponse = {
     feature: typeof PARP_AI_DASHBOARD_FEATURE
 }
 
+type DashboardFormattedBlock =
+    | { type: 'paragraph'; content: string }
+    | { type: 'list'; ordered: boolean; items: string[] }
+
 type InlineAssessmentPreview = {
     score: number
     dimension_scores: AssessmentDimensionScores
     created_at?: string
+}
+
+function formatDashboardAssistantMessage(content: string): DashboardFormattedBlock[] {
+    const normalized = content
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\*\*([^*]+)\*\*/g, '\n\n$1\n')
+        .replace(/\n?\s*\*\s+(?=[A-Z0-9])/g, '\n• ')
+        .replace(/\n?\s*•\s+/g, '\n• ')
+        .replace(/([.!?])\s+(?=Step\s+\d+:)/gi, '$1\n\n')
+        .replace(/\s+(?=Step\s+\d+:)/gi, '\n\n')
+        .replace(/\s+(?=\d+\.\s+[A-Z])/g, '\n\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+
+    const lines = normalized
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+
+    const blocks: DashboardFormattedBlock[] = []
+    let paragraphLines: string[] = []
+    let listBlock: { ordered: boolean; items: string[] } | null = null
+
+    const flushParagraph = () => {
+        if (paragraphLines.length === 0) {
+            return
+        }
+
+        blocks.push({
+            type: 'paragraph',
+            content: paragraphLines.join(' '),
+        })
+        paragraphLines = []
+    }
+
+    const flushList = () => {
+        if (!listBlock || listBlock.items.length === 0) {
+            listBlock = null
+            return
+        }
+
+        blocks.push({
+            type: 'list',
+            ordered: listBlock.ordered,
+            items: listBlock.items,
+        })
+        listBlock = null
+    }
+
+    for (const line of lines) {
+        const bulletMatch = line.match(/^[•-]\s+(.*)$/)
+        const numberedMatch = line.match(/^(Step\s+\d+:.*|\d+\.\s+.*)$/i)
+
+        if (bulletMatch) {
+            flushParagraph()
+            if (!listBlock || listBlock.ordered) {
+                flushList()
+                listBlock = { ordered: false, items: [] }
+            }
+            listBlock.items.push(bulletMatch[1].trim())
+            continue
+        }
+
+        if (numberedMatch) {
+            flushParagraph()
+            if (!listBlock || !listBlock.ordered) {
+                flushList()
+                listBlock = { ordered: true, items: [] }
+            }
+            listBlock.items.push(numberedMatch[1].trim())
+            continue
+        }
+
+        flushList()
+        paragraphLines.push(line)
+    }
+
+    flushList()
+    flushParagraph()
+
+    return blocks.length > 0 ? blocks : [{ type: 'paragraph', content }]
+}
+
+function renderDashboardMessageContent(message: DashboardChatMessage) {
+    if (message.role !== 'assistant') {
+        return <div className="whitespace-pre-wrap wrap-break-word">{message.content}</div>
+    }
+
+    const blocks = formatDashboardAssistantMessage(message.content)
+
+    return (
+        <div className="space-y-3">
+            {blocks.map((block, index) => {
+                if (block.type === 'list') {
+                    if (block.ordered) {
+                        return (
+                            <ol key={index} className="space-y-2 pl-4">
+                                {block.items.map((item, itemIndex) => (
+                                    <li key={`${index}-${itemIndex}`} className="wrap-break-word leading-6">
+                                        {item}
+                                    </li>
+                                ))}
+                            </ol>
+                        )
+                    }
+
+                    return (
+                        <ul key={index} className="space-y-2 pl-4">
+                            {block.items.map((item, itemIndex) => (
+                                <li key={`${index}-${itemIndex}`} className="list-disc wrap-break-word leading-6">
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    )
+                }
+
+                return (
+                    <p key={index} className="wrap-break-word whitespace-pre-wrap leading-7">
+                        {block.content}
+                    </p>
+                )
+            })}
+        </div>
+    )
 }
 
 /**
@@ -980,7 +1110,7 @@ export default function Dashboard() {
                                                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
                                                     {message.role === 'assistant' ? 'PARP AI' : 'You'}
                                                 </p>
-                                                <div className="whitespace-pre-wrap wrap-break-word">{message.content}</div>
+                                                {renderDashboardMessageContent(message)}
                                             </article>
                                         ))}
                                         {isDashboardChatLoading && (
