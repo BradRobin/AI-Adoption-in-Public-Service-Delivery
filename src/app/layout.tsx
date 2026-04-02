@@ -1,6 +1,6 @@
 // Basic Next.js font and metadata imports
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Source_Sans_3 } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 import { PrivacyConsentProvider } from "@/components/PrivacyBanner";
@@ -9,8 +9,8 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ClientOverlays } from "@/components/ClientOverlays";
 
-const sourceSansPro = Source_Sans_3({
-  variable: "--font-source-sans-pro",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
 });
@@ -50,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${sourceSansPro.variable} ${geistMono.variable} text-tier-system antialiased`}
+        className={`${inter.variable} ${geistMono.variable} text-tier-system antialiased`}
       >
         {/* Flash-of-wrong-theme prevention: runs before React hydration */}
         <script

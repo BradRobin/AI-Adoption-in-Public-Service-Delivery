@@ -594,7 +594,7 @@ export default function Dashboard() {
 
                     {/* Take Assessment — inline full quiz */}
                     <div
-                        className="group relative overflow-hidden rounded-xl border-2 border-white bg-[#2d8a2d] p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_4px_24px_rgba(0,0,0,0.12)] transition duration-300 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28),0_6px_32px_rgba(0,0,0,0.18)] sm:col-span-2 lg:col-span-2"
+                        className="group relative overflow-hidden rounded-xl bg-[#2d8a2d] p-6 shadow-[0_6px_24px_rgba(45,138,45,0.22)] transition duration-300 hover:shadow-[0_8px_32px_rgba(45,138,45,0.28)] sm:col-span-2 lg:col-span-2"
                     >
                         <div className="relative z-10">
                             {/* Header */}
@@ -695,7 +695,7 @@ export default function Dashboard() {
 
                     <Link
                         href="/chat"
-                        className="group relative overflow-hidden rounded-xl border-2 border-white bg-[#a01010] p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_4px_24px_rgba(0,0,0,0.12)] transition duration-300 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28),0_6px_32px_rgba(0,0,0,0.18)] mobile-touch-target"
+                        className="group relative overflow-hidden rounded-xl bg-[#a01010] p-6 shadow-[0_6px_24px_rgba(160,16,16,0.22)] transition duration-300 hover:shadow-[0_8px_32px_rgba(160,16,16,0.28)] mobile-touch-target"
                     >
                         <div className="relative z-10">
                             <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">
