@@ -304,6 +304,7 @@ export default function ChatPage() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const thinkingTimeRef = useRef(0)
+  const hasResolvedConversationQueryRef = useRef(false)
 
   const handleStarterPromptClick = () => {
     setInput(HERO_EXAMPLE_PROMPT.prompt)
@@ -437,6 +438,27 @@ export default function ChatPage() {
 
     container.scrollTop = container.scrollHeight
   }, [messages.length, isThinking])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || hasResolvedConversationQueryRef.current) {
+      return
+    }
+
+    const conversationId = new URLSearchParams(window.location.search).get('conversation')
+    if (!conversationId) {
+      hasResolvedConversationQueryRef.current = true
+      return
+    }
+
+    const matchedConversation = conversations.find((conversation) => conversation.id === conversationId)
+    if (!matchedConversation) {
+      return
+    }
+
+    setActiveConversationId(matchedConversation.id)
+    setMessages(matchedConversation.messages || [])
+    hasResolvedConversationQueryRef.current = true
+  }, [conversations])
 
   const handleSpeak = (text: string) => {
     // Reveal the 3D Avatar Player overlay and feed it the AI response text
@@ -834,11 +856,11 @@ export default function ChatPage() {
           </button>
         </div>
 
-        <div className="relative flex min-h-[500px] max-h-[calc(100dvh-5.5rem)] flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur md:max-h-[calc(100vh-6rem)] md:flex-row">
+        <div className="relative flex min-h-125 max-h-[calc(100dvh-5.5rem)] flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur md:max-h-[calc(100vh-6rem)] md:flex-row">
 
           {/* History Sidebar */}
           <div className={`
-            absolute md:static inset-y-0 left-0 z-30 w-[260px] md:w-[300px] 
+            absolute md:static inset-y-0 left-0 z-30 w-65 md:w-75 
             border-r border-white/10 bg-black/90 md:bg-black/40 backdrop-blur-md 
             transform transition-transform duration-300 ease-in-out flex flex-col
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -940,7 +962,7 @@ export default function ChatPage() {
               className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
             >
               {messages.length === 0 && !isThinking && (
-                <div className="mt-6 rounded-2xl border border-green-400/25 bg-gradient-to-br from-green-500/10 via-black/50 to-blue-500/10 px-4 py-4 text-xs text-white/80 shadow-[0_18px_40px_-26px_rgba(74,222,128,0.9)] md:px-5 md:py-5 md:text-sm">
+                <div className="mt-6 rounded-2xl border border-green-400/25 bg-linear-to-br from-green-500/10 via-black/50 to-blue-500/10 px-4 py-4 text-xs text-white/80 shadow-[0_18px_40px_-26px_rgba(74,222,128,0.9)] md:px-5 md:py-5 md:text-sm">
                   <p className="text-base font-semibold text-white md:text-lg">
                     Karibu sana. Tuanze na quick win leo.
                   </p>
@@ -1039,7 +1061,7 @@ export default function ChatPage() {
                     }
                   }}
                   placeholder="Ask in Sheng or English (score, gigs, services)"
-                  className="max-h-28 min-h-[48px] flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+                  className="max-h-28 min-h-12 flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
                 />
                 <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
                   {/* Avatar Toggle */}
@@ -1058,7 +1080,7 @@ export default function ChatPage() {
                   type="submit"
                   disabled={isThinking || input.trim().length === 0}
                   aria-label={isThinking ? `Thinking for ${formatThinkingTime(thinkingTime)}` : 'Send message'}
-                  className="mobile-touch-target inline-flex h-12 min-w-[96px] items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-[96px] md:px-5 md:text-base"
+                  className="mobile-touch-target inline-flex h-12 min-w-24 items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-24 md:px-5 md:text-base"
                 >
                   {isThinking && (
                     <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />

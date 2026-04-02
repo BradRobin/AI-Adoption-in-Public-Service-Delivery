@@ -46,15 +46,7 @@ type ParpAiChatResponseBody = {
   feature: ParpAiFeature
 }
 
-type SessionStoreEntry = {
-  messages: ChatMessage[]
-  updatedAt: number
-}
-
 const PARP_AI_FEATURE: ParpAiFeature = 'chat_with_parp_ai'
-const PARP_AI_MAX_TURNS = 12
-const PARP_AI_SESSION_TTL_MS = 1000 * 60 * 60 * 6
-const PARP_AI_MAX_ACTIVE_SESSIONS = 200
 
 const parpAiSystemInstructions = `You are PARP AI operating inside the Chat with PARP AI dashboard card for the PARP Platform.
 
@@ -89,68 +81,11 @@ function isParpAiChatRequestBody(body: unknown): body is ParpAiChatRequestBody {
   )
 }
 
-function getParpAiSessionStore() {
-  const globalState = globalThis as typeof globalThis & {
-    __parpAiSessions?: Map<string, SessionStoreEntry>
-  }
-
-  if (!globalState.__parpAiSessions) {
-    globalState.__parpAiSessions = new Map()
-  }
-
-  return globalState.__parpAiSessions
-}
-
-function pruneParpAiSessionStore(store: Map<string, SessionStoreEntry>) {
-  const now = Date.now()
-
-  for (const [sessionId, entry] of store.entries()) {
-    if (now - entry.updatedAt > PARP_AI_SESSION_TTL_MS) {
-      store.delete(sessionId)
-    }
-  }
-
-  if (store.size <= PARP_AI_MAX_ACTIVE_SESSIONS) {
-    return
-  }
-
-  const oldestSessions = [...store.entries()]
-    .sort((left, right) => left[1].updatedAt - right[1].updatedAt)
-    .slice(0, store.size - PARP_AI_MAX_ACTIVE_SESSIONS)
-
-  for (const [sessionId] of oldestSessions) {
-    store.delete(sessionId)
-  }
-}
-
 function buildLlmMessages(systemPrompt: string, history: ChatMessage[]) {
   return [
     { role: 'system' as const, content: systemPrompt },
     ...history.map((message) => ({ role: message.role, content: message.content })),
   ] satisfies LlmMessage[]
-}
-
-function getParpAiSessionHistory(sessionId: string) {
-  const store = getParpAiSessionStore()
-  pruneParpAiSessionStore(store)
-  return store.get(sessionId)?.messages ?? []
-}
-
-function rememberParpAiSessionTurn(sessionId: string, userMessage: string, assistantMessage: string) {
-  const store = getParpAiSessionStore()
-  const existing = store.get(sessionId)?.messages ?? []
-  const updatedMessages = normalizeMessages([
-    ...existing,
-    { role: 'user', content: userMessage },
-    { role: 'assistant', content: assistantMessage },
-  ]).slice(-PARP_AI_MAX_TURNS * 2)
-
-  store.set(sessionId, {
-    messages: updatedMessages,
-    updatedAt: Date.now(),
-  })
-
-  pruneParpAiSessionStore(store)
 }
 
 /**
@@ -250,6 +185,24 @@ async function requireUser(req: Request) {
   }
 
   return { ok: true as const, token, userId: data.user.id }
+}
+
+function createAuthenticatedSupabaseClient(token: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !anonKey) {
+    throw new Error('Supabase environment variables are not configured on the server.')
+  }
+
+  return createClient(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  })
 }
 
 /**
@@ -506,7 +459,7 @@ async function completeFromConfiguredProvider(opts: {
   }
 }
 
-async function handleParpAiChat(body: ParpAiChatRequestBody) {
+async function handleParpAiChat(auth: { token?: string; userId?: string }, body: ParpAiChatRequestBody) {
   const sessionId = body.session_id.trim()
   const userMessage = body.user_message.trim()
 
@@ -524,7 +477,38 @@ async function handleParpAiChat(body: ParpAiChatRequestBody) {
     })
   }
 
-  const sessionHistory = getParpAiSessionHistory(sessionId)
+  if (!auth.token || !auth.userId) {
+    return new Response(JSON.stringify({ error: 'Invalid session.' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  let sessionHistory: ChatMessage[] = []
+
+  try {
+    const supabase = createAuthenticatedSupabaseClient(auth.token)
+    const { data, error } = await supabase
+      .from('conversations')
+      .select('messages')
+      .eq('id', sessionId)
+      .eq('user_id', auth.userId)
+      .maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    const storedMessages = Array.isArray(data?.messages) ? (data.messages as ChatMessage[]) : []
+    sessionHistory = normalizeMessages(storedMessages)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to load conversation history.'
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const stitchedMessages = buildLlmMessages(parpAiSystemInstructions, [
     ...sessionHistory,
     { role: 'user', content: userMessage },
@@ -547,12 +531,6 @@ async function handleParpAiChat(body: ParpAiChatRequestBody) {
       openAiModel,
       messages: stitchedMessages,
     })
-
-    rememberParpAiSessionTurn(
-      sessionId,
-      userMessage,
-      assistantMessage || 'I could not generate a response just now. Please try again.',
-    )
 
     const responseBody: ParpAiChatResponseBody = {
       session_id: sessionId,
@@ -606,7 +584,7 @@ export async function POST(req: Request) {
   }
 
   if (isParpAiChatRequestBody(body)) {
-    return handleParpAiChat(body)
+    return handleParpAiChat(auth, body)
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL

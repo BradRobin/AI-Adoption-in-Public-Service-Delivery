@@ -177,6 +177,41 @@ export default function Dashboard() {
 
     const getParpAiStorageKey = (userId: string) => `${PARP_AI_SESSION_STORAGE_KEY_PREFIX}${userId}`
 
+    const buildDashboardConversationTitle = (messages: DashboardChatMessage[]) => {
+        const firstUserMessage = messages.find((message) => message.role === 'user')?.content.trim()
+
+        if (!firstUserMessage) {
+            return 'New Chat'
+        }
+
+        const compact = firstUserMessage.replace(/\s+/g, ' ')
+        return compact.length > 60 ? `${compact.slice(0, 57).trim()}...` : compact
+    }
+
+    const persistDashboardConversation = async (conversationId: string, messages: DashboardChatMessage[]) => {
+        if (!session?.user?.id) {
+            return
+        }
+
+        const title = buildDashboardConversationTitle(messages)
+        const { error } = await supabase
+            .from('conversations')
+            .upsert(
+                {
+                    id: conversationId,
+                    user_id: session.user.id,
+                    title,
+                    messages,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: 'id' },
+            )
+
+        if (error) {
+            throw error
+        }
+    }
+
     const startNewParpAiSession = () => {
         const userId = session?.user?.id
         if (!userId) {
@@ -306,7 +341,9 @@ export default function Dashboard() {
             content: userMessage,
         }
 
-        setDashboardChatMessages((previous) => [...previous, userEntry])
+        const nextMessages = [...dashboardChatMessages, userEntry]
+
+        setDashboardChatMessages(nextMessages)
         setDashboardChatInput('')
         setIsDashboardChatLoading(true)
 
@@ -337,25 +374,20 @@ export default function Dashboard() {
                 throw new Error('Invalid response format returned by the PARP AI backend.')
             }
 
-            setDashboardChatMessages((previous) => [
-                ...previous,
-                {
-                    id: crypto.randomUUID(),
-                    role: 'assistant',
-                    content: payload.assistant_message,
-                },
-            ])
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown error.'
+            const assistantEntry: DashboardChatMessage = {
+                id: crypto.randomUUID(),
+                role: 'assistant',
+                content: payload.assistant_message,
+            }
+
+            const finalMessages = [...nextMessages, assistantEntry]
+
+            await persistDashboardConversation(payload.session_id, finalMessages)
+
+            setDashboardChatMessages(finalMessages)
+        } catch {
             toast.error('PARP AI is unavailable right now. Please try again.')
-            setDashboardChatMessages((previous) => [
-                ...previous,
-                {
-                    id: crypto.randomUUID(),
-                    role: 'assistant',
-                    content: `Sorry, I could not complete that request. ${message}`,
-                },
-            ])
+            setDashboardChatMessages((previous) => previous.filter((entry) => entry.id !== userEntry.id))
         } finally {
             setIsDashboardChatLoading(false)
         }
@@ -586,7 +618,36 @@ export default function Dashboard() {
             localStorage.setItem(storageKey, nextSessionId)
         }
 
-        setParpAiSessionId(nextSessionId)
+        let isCancelled = false
+
+        const loadDashboardConversation = async () => {
+            const { data, error } = await supabase
+                .from('conversations')
+                .select('id, user_id, title, messages, created_at, updated_at')
+                .eq('id', nextSessionId)
+                .eq('user_id', session.user.id)
+                .maybeSingle()
+
+            if (isCancelled) {
+                return
+            }
+
+            if (error) {
+                toast.error('Could not load your dashboard chat history.')
+                setDashboardChatMessages([])
+                setParpAiSessionId(nextSessionId)
+                return
+            }
+
+            setParpAiSessionId(nextSessionId)
+            setDashboardChatMessages(Array.isArray(data?.messages) ? data.messages : [])
+        }
+
+        void loadDashboardConversation()
+
+        return () => {
+            isCancelled = true
+        }
     }, [session?.user?.id])
 
     useEffect(() => {
@@ -946,7 +1007,7 @@ export default function Dashboard() {
                                 </label>
                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                     <Link
-                                        href="/chat"
+                                        href={parpAiSessionId ? `/chat?conversation=${parpAiSessionId}` : '/chat'}
                                         className="text-xs font-semibold text-white/75 underline decoration-white/30 underline-offset-4 transition hover:text-white"
                                     >
                                         Open full chat workspace
