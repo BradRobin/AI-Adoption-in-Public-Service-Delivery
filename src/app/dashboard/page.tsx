@@ -875,9 +875,6 @@ export default function Dashboard() {
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-bold text-white">Chat with PARP AI</h3>
-                                    <p className="mt-2 max-w-md text-sm font-medium text-[#f7f9fa]/80">
-                                        Ask about AI adoption, implementation, regulation, and governance in Kenya. Replies are rendered directly in this dashboard card.
-                                    </p>
                                 </div>
                                 <div className="flex max-w-full flex-wrap items-center gap-2">
                                     <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
@@ -896,9 +893,6 @@ export default function Dashboard() {
                             <div className="mt-4 flex-1 space-y-4 rounded-xl border border-white/15 bg-black/15 p-4">
                                 {dashboardChatMessages.length === 0 ? (
                                     <div className="space-y-4 text-sm text-white/80">
-                                        <p className="leading-relaxed">
-                                            Start a Kenya-specific advisory chat. PARP AI keeps context within this session and responds with practical implementation guidance.
-                                        </p>
                                         <div className="flex max-w-full flex-wrap gap-2">
                                             {DASHBOARD_CHAT_STARTERS.map((starter) => (
                                                 <button
