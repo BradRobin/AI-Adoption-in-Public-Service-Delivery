@@ -599,13 +599,13 @@ export default function Dashboard() {
                         <div className="relative z-10">
                             {/* Header */}
                             <div className="mb-4 flex items-center gap-3">
-                                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
+                                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-[#ffffff]">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold leading-tight text-white">Take Assessment</h3>
+                                    <h3 className="text-lg font-bold leading-tight text-[#ffffff]">Take Assessment</h3>
                                     <p className="text-xs font-medium text-[#f7f9fa]/80">TOE Framework · {toeAnsweredCount}/{TOE_QUESTION_SEQUENCE.length} answered</p>
                                 </div>
                             </div>
@@ -620,15 +620,12 @@ export default function Dashboard() {
                             {/* Question card */}
                             {activeToeQuestion && (
                                 <section className="mt-4 rounded-xl border border-white/25 bg-white/10 p-4">
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <span className="rounded-full border border-white/40 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="rounded-full border border-white/40 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#ffffff]">
                                             {activeToeQuestion.sectionLabel}
                                         </span>
-                                        <span className="text-xs font-medium text-[#f7f9fa]/75">
-                                            Q {activeToeQuestion.sequence} / {TOE_QUESTION_SEQUENCE.length}
-                                        </span>
                                     </div>
-                                    <p className="mt-3 text-sm font-semibold text-white sm:text-base">
+                                    <p className="mt-3 text-[17px] font-bold leading-snug text-[rgb(255,255,255)] sm:text-lg lg:text-xl">
                                         {activeToeQuestion.text}
                                     </p>
 
@@ -644,8 +641,8 @@ export default function Dashboard() {
                                                     aria-label={`${option.label} (${option.value})`}
                                                     className={`mobile-touch-target rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
                                                         isSelected
-                                                            ? 'border-white bg-white/25 text-white'
-                                                            : 'border-white/50 bg-transparent text-white hover:border-white hover:bg-white/20'
+                                                            ? 'border-white bg-white/25 text-[#ffffff]'
+                                                            : 'border-white/50 bg-transparent text-[#ffffff] hover:border-white hover:bg-white/20'
                                                     }`}
                                                 >
                                                     {option.label}
@@ -662,7 +659,7 @@ export default function Dashboard() {
                                     type="button"
                                     onClick={submitToeQuiz}
                                     disabled={!isToeQuizComplete || isSubmittingToeQuiz}
-                                    className="mobile-touch-target rounded-lg border border-white bg-white/20 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="mobile-touch-target rounded-lg border border-white bg-white/20 px-4 py-1.5 text-xs font-bold text-[#ffffff] transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {isSubmittingToeQuiz ? 'Submitting…' : 'Submit Assessment'}
                                 </button>
