@@ -96,6 +96,18 @@ const LIKERT_PREVIEW_OPTIONS = [
     { value: 5, label: 'Strongly Agree' },
 ] as const
 
+type AssessmentDimensionScores = {
+    technological: number
+    organizational: number
+    environmental: number
+}
+
+type InlineAssessmentPreview = {
+    score: number
+    dimension_scores: AssessmentDimensionScores
+    created_at?: string
+}
+
 /**
  * Main dashboard view for authenticated users.
  * Aggregates various insights including market stats, organizational pulse check,
@@ -108,11 +120,7 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(true)
     const [latestAssessment, setLatestAssessment] = useState<{
         score: number
-        dimension_scores: {
-            technological: number
-            organizational: number
-            environmental: number
-        }
+        dimension_scores: AssessmentDimensionScores
         created_at?: string
         previousScore?: number | null
     } | null>(null)
@@ -122,6 +130,8 @@ export default function Dashboard() {
     const [toeQuizIndex, setToeQuizIndex] = useState(0)
     const [toeQuizAnswers, setToeQuizAnswers] = useState<Record<string, number>>({})
     const [isSubmittingToeQuiz, setIsSubmittingToeQuiz] = useState(false)
+    const [toeSubmissionPhase, setToeSubmissionPhase] = useState<'idle' | 'processing' | 'success'>('idle')
+    const [inlineAssessmentPreview, setInlineAssessmentPreview] = useState<InlineAssessmentPreview | null>(null)
     const [marketStats, setMarketStats] = useState<{
         ai_adoption_rate: { value: string; source: string }
         policy_update: { value: string; source: string }
@@ -166,6 +176,10 @@ export default function Dashboard() {
             return
         }
 
+        if (toeSubmissionPhase === 'success') {
+            setToeSubmissionPhase('idle')
+        }
+
         const updatedAnswers = {
             ...toeQuizAnswers,
             [activeQuestion.id]: value,
@@ -195,7 +209,10 @@ export default function Dashboard() {
             return
         }
 
+        const startedAt = Date.now()
+        const minimumProcessingMs = 1400
         setIsSubmittingToeQuiz(true)
+        setToeSubmissionPhase('processing')
         const computed = computeScores(toeQuizAnswers as ToeFormValues)
         const { data, error } = await supabase
             .from('assessments')
@@ -207,12 +224,23 @@ export default function Dashboard() {
             .select('score, dimension_scores, created_at')
             .single()
 
+        const elapsed = Date.now() - startedAt
+        if (elapsed < minimumProcessingMs) {
+            await new Promise((resolve) => setTimeout(resolve, minimumProcessingMs - elapsed))
+        }
+
         if (error) {
             toast.error('Could not save your assessment. Please try again.')
             setIsSubmittingToeQuiz(false)
+            setToeSubmissionPhase('idle')
             return
         }
 
+        setInlineAssessmentPreview({
+            score: data.score,
+            dimension_scores: data.dimension_scores,
+            created_at: data.created_at,
+        })
         setLatestAssessment((prev) => ({
             score: data.score,
             dimension_scores: data.dimension_scores,
@@ -223,6 +251,7 @@ export default function Dashboard() {
         setToeQuizAnswers({})
         setToeQuizIndex(0)
         setIsSubmittingToeQuiz(false)
+        setToeSubmissionPhase('success')
         toast.success('Assessment submitted from dashboard successfully.')
     }
 
@@ -659,11 +688,51 @@ export default function Dashboard() {
                                     type="button"
                                     onClick={submitToeQuiz}
                                     disabled={!isToeQuizComplete || isSubmittingToeQuiz}
-                                    className="mobile-touch-target rounded-lg border border-white bg-white/20 px-4 py-1.5 text-xs font-bold text-[#ffffff] transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className={`mobile-touch-target relative inline-flex items-center gap-2 overflow-hidden rounded-lg border px-4 py-2 text-xs font-bold transition-all duration-300 ${isSubmittingToeQuiz
+                                        ? 'border-emerald-300/80 bg-emerald-400/25 text-emerald-50 shadow-[0_0_20px_rgba(74,222,128,0.55)]'
+                                        : 'border-emerald-200 bg-emerald-500 text-white shadow-[0_0_16px_rgba(34,197,94,0.55)] hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_0_26px_rgba(74,222,128,0.72)]'
+                                        } disabled:cursor-not-allowed disabled:opacity-50`}
                                 >
-                                    {isSubmittingToeQuiz ? 'Submitting…' : 'Submit Assessment'}
+                                    {isSubmittingToeQuiz && (
+                                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
+                                    )}
+                                    <span>{isSubmittingToeQuiz ? 'Processing Results…' : 'Submit Assessment'}</span>
                                 </button>
                             </div>
+
+                            {toeSubmissionPhase === 'processing' && (
+                                <div className="mt-3 rounded-lg border border-emerald-200/50 bg-emerald-300/20 px-3 py-2">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-50">Analyzing your responses</p>
+                                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25" aria-hidden="true">
+                                        <div className="h-full w-1/2 animate-pulse rounded-full bg-white" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {inlineAssessmentPreview && toeSubmissionPhase === 'success' && (
+                                <section className="mt-4 rounded-xl border border-white/35 bg-white/15 p-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-100">Latest Result Preview</p>
+                                        <p className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-[#2d8a2d]">
+                                            Overall {inlineAssessmentPreview.score}%
+                                        </p>
+                                    </div>
+                                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                        <div className="rounded-lg border border-white/30 bg-black/15 px-3 py-2">
+                                            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75">Technological</p>
+                                            <p className="mt-1 text-base font-bold text-white">{inlineAssessmentPreview.dimension_scores.technological}%</p>
+                                        </div>
+                                        <div className="rounded-lg border border-white/30 bg-black/15 px-3 py-2">
+                                            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75">Organizational</p>
+                                            <p className="mt-1 text-base font-bold text-white">{inlineAssessmentPreview.dimension_scores.organizational}%</p>
+                                        </div>
+                                        <div className="rounded-lg border border-white/30 bg-black/15 px-3 py-2">
+                                            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75">Environmental</p>
+                                            <p className="mt-1 text-base font-bold text-white">{inlineAssessmentPreview.dimension_scores.environmental}%</p>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
                         </div>
                     </div>
 
