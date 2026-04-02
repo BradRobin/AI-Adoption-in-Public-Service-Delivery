@@ -594,40 +594,45 @@ export default function Dashboard() {
 
                     {/* Take Assessment — inline full quiz */}
                     <div
-                        className="glass-surface group relative overflow-hidden rounded-xl border border-green-300/70 bg-green-950/25 p-6 transition duration-300 shadow-[0_0_44px_rgba(34,197,94,0.6)] hover:border-green-200/95 hover:shadow-[0_0_74px_rgba(34,197,94,0.9)] sm:col-span-2 lg:col-span-2"
+                        className="group relative overflow-hidden rounded-xl border-2 border-white bg-[#2d8a2d] p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_4px_24px_rgba(0,0,0,0.12)] transition duration-300 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28),0_6px_32px_rgba(0,0,0,0.18)] sm:col-span-2 lg:col-span-2"
                     >
                         <div className="relative z-10">
-                            <div className="mb-3 flex items-center gap-3">
-                                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-500/20 text-green-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            {/* Header */}
+                            <div className="mb-4 flex items-center gap-3">
+                                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="text-tier-1 text-lg font-bold leading-tight">Take Assessment</h3>
-                                    <p className="text-tier-2 text-xs">TOE Framework · {toeAnsweredCount}/{TOE_QUESTION_SEQUENCE.length} answered</p>
+                                    <h3 className="text-lg font-bold leading-tight text-white">Take Assessment</h3>
+                                    <p className="text-xs font-medium text-[#f7f9fa]/80">TOE Framework · {toeAnsweredCount}/{TOE_QUESTION_SEQUENCE.length} answered</p>
                                 </div>
                             </div>
 
+                            {/* Progress bar */}
                             <progress
                                 value={toeAnsweredCount}
                                 max={TOE_QUESTION_SEQUENCE.length}
-                                className="h-1.5 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-white/10 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-green-400 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-green-400"
+                                className="h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-white/25 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-white"
                             />
 
+                            {/* Question card */}
                             {activeToeQuestion && (
-                                <section className="mt-4 rounded-xl border border-green-400/25 bg-green-500/10 p-4">
+                                <section className="mt-4 rounded-xl border border-white/25 bg-white/10 p-4">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <span className="rounded-full border border-green-300/30 bg-green-400/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-green-200">
+                                        <span className="rounded-full border border-white/40 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
                                             {activeToeQuestion.sectionLabel}
                                         </span>
-                                        <span className="text-xs text-green-100/70">
+                                        <span className="text-xs font-medium text-[#f7f9fa]/75">
                                             Q {activeToeQuestion.sequence} / {TOE_QUESTION_SEQUENCE.length}
                                         </span>
                                     </div>
-                                    <p className="mt-3 text-sm font-medium text-white sm:text-base">
+                                    <p className="mt-3 text-sm font-semibold text-white sm:text-base">
                                         {activeToeQuestion.text}
                                     </p>
+
+                                    {/* Likert scale */}
                                     <div className="mt-4 grid grid-cols-5 gap-2">
                                         {LIKERT_PREVIEW_OPTIONS.map((option) => {
                                             const isSelected = toeQuizAnswers[activeToeQuestion.id] === option.value
@@ -637,10 +642,10 @@ export default function Dashboard() {
                                                     type="button"
                                                     onClick={() => handleToeQuizAnswer(option.value)}
                                                     aria-label={`${option.label} (${option.value})`}
-                                                    className={`mobile-touch-target rounded-lg border py-2 text-xs font-semibold transition-colors ${
+                                                    className={`mobile-touch-target rounded-lg border py-2 text-xs font-bold transition-colors ${
                                                         isSelected
-                                                            ? 'border-green-200 bg-green-400/35 text-white'
-                                                            : 'border-green-300/30 bg-black/30 text-green-100 hover:border-green-200/70 hover:bg-green-400/15'
+                                                            ? 'border-white bg-white text-[#2d8a2d]'
+                                                            : 'border-white/50 bg-transparent text-white hover:border-white hover:bg-white/20'
                                                     }`}
                                                 >
                                                     {option.value}
@@ -648,7 +653,7 @@ export default function Dashboard() {
                                             )
                                         })}
                                     </div>
-                                    <p className="mt-2 text-right text-xs text-green-100/60">
+                                    <p className="mt-2 text-right text-xs font-medium text-[#f7f9fa]/70">
                                         {toeQuizAnswers[activeToeQuestion.id]
                                             ? LIKERT_PREVIEW_OPTIONS.find((o) => o.value === toeQuizAnswers[activeToeQuestion.id])?.label
                                             : '1 = Strongly Disagree · 5 = Strongly Agree'}
@@ -656,13 +661,14 @@ export default function Dashboard() {
                                 </section>
                             )}
 
+                            {/* Navigation + Submit */}
                             <div className="mt-4 flex items-center justify-between gap-2">
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => setToeQuizIndex((prev) => Math.max(0, prev - 1))}
                                         disabled={toeQuizIndex === 0}
-                                        className="mobile-touch-target rounded-lg border border-white/20 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                        className="mobile-touch-target rounded-lg border border-white bg-transparent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#2d8a2d] disabled:cursor-not-allowed disabled:opacity-40"
                                     >
                                         Previous
                                     </button>
@@ -670,7 +676,7 @@ export default function Dashboard() {
                                         type="button"
                                         onClick={() => setToeQuizIndex((prev) => Math.min(TOE_QUESTION_SEQUENCE.length - 1, prev + 1))}
                                         disabled={toeQuizIndex >= TOE_QUESTION_SEQUENCE.length - 1}
-                                        className="mobile-touch-target rounded-lg border border-white/20 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                        className="mobile-touch-target rounded-lg border border-white bg-transparent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white hover:text-[#2d8a2d] disabled:cursor-not-allowed disabled:opacity-40"
                                     >
                                         Next
                                     </button>
@@ -679,31 +685,32 @@ export default function Dashboard() {
                                     type="button"
                                     onClick={submitToeQuiz}
                                     disabled={!isToeQuizComplete || isSubmittingToeQuiz}
-                                    className="mobile-touch-target rounded-lg bg-green-500 px-4 py-1.5 text-xs font-semibold text-black transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="mobile-touch-target rounded-lg bg-white px-4 py-1.5 text-xs font-bold text-[#2d8a2d] transition hover:bg-[#f7f9fa] disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {isSubmittingToeQuiz ? 'Submitting…' : 'Submit Assessment'}
                                 </button>
                             </div>
                         </div>
-                        <div className="absolute inset-0 z-0 bg-green-400/20 opacity-75 blur-2xl transition group-hover:opacity-100"></div>
                     </div>
 
                     <Link
                         href="/chat"
-                        className="glass-surface mobile-touch-target group relative overflow-hidden rounded-xl border border-red-300/70 bg-red-950/25 p-8 transition duration-300 shadow-[0_0_44px_rgba(239,68,68,0.6)] hover:border-red-200/95 hover:shadow-[0_0_74px_rgba(239,68,68,0.9)]"
+                        className="group relative overflow-hidden rounded-xl border-2 border-white bg-[#a01010] p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_4px_24px_rgba(0,0,0,0.12)] transition duration-300 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28),0_6px_32px_rgba(0,0,0,0.18)] mobile-touch-target"
                     >
                         <div className="relative z-10">
-                            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-500/20 text-red-400 group-hover:bg-red-500 group-hover:text-black transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                                 </svg>
                             </div>
-                            <h3 className="text-tier-1 mb-2 text-xl font-bold">Chat with AI</h3>
-                            <p className="text-tier-2 text-sm">
+                            <h3 className="mb-2 text-xl font-bold text-white">Chat with AI</h3>
+                            <p className="text-sm font-medium text-[#f7f9fa]/80">
                                 Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
                             </p>
+                            <span className="mt-6 inline-flex items-center gap-1.5 rounded-lg border border-white bg-transparent px-4 py-2 text-xs font-semibold text-white transition group-hover:bg-white group-hover:text-[#a01010]">
+                                Open Chat →
+                            </span>
                         </div>
-                        <div className="absolute inset-0 z-0 bg-red-400/20 opacity-75 blur-2xl transition group-hover:opacity-100"></div>
                     </Link>
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
