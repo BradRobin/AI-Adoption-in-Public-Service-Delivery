@@ -44,7 +44,7 @@ export function CountySelect({
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const sortedCounties = useMemo(
     () => [...KENYAN_COUNTIES].sort((a, b) => a.localeCompare(b)),
@@ -163,7 +163,6 @@ export function CountySelect({
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
         aria-haspopup="listbox"
-        aria-expanded={isOpen}
         aria-label={value || placeholder}
         className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-left text-sm text-white outline-none transition-colors hover:border-white/20 focus:border-white/40"
       >
@@ -190,10 +189,10 @@ export function CountySelect({
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-black/95 shadow-xl backdrop-blur-md">
+        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-white/15 bg-[#101010]/98 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
           {/* Search Input */}
-          <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2">
-            <Search size={14} className="text-white/40" />
+          <div className="flex items-center gap-2 border-b border-white/10 bg-white/3 px-3 py-3">
+            <Search size={14} className="text-white/45" />
             <input
               ref={inputRef}
               type="text"
@@ -201,43 +200,39 @@ export function CountySelect({
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               placeholder="Search counties..."
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"
               aria-label="Search counties"
             />
           </div>
 
           {/* County List */}
-          <ul
+          <div
             ref={listRef}
-            role="listbox"
-            aria-label="Kenyan counties"
-            className="max-h-48 overflow-y-auto py-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20"
+            className="max-h-52 overflow-y-auto py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {filteredCounties.length === 0 ? (
-              <li className="px-3 py-2 text-center text-sm text-white/40">
+              <div className="px-3 py-3 text-center text-sm text-white/45">
                 No counties found
-              </li>
+              </div>
             ) : (
               filteredCounties.map((county, index) => (
-                <li
+                <div
                   key={county}
-                  role="option"
-                  aria-selected={value === county}
                   onClick={() => handleSelect(county)}
                   onMouseEnter={() => setHighlightedIndex(index)}
-                  className={`cursor-pointer px-3 py-2 text-sm transition-colors ${
+                  className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm transition-colors ${
                     index === highlightedIndex
-                      ? 'bg-green-500/20 text-green-400'
+                      ? 'bg-green-500/22 text-green-300'
                       : value === county
                         ? 'bg-white/10 text-white'
-                        : 'text-white/80 hover:bg-white/5'
+                        : 'text-white/78 hover:bg-white/6 hover:text-white'
                   }`}
                 >
                   {county}
-                </li>
+                </div>
               ))
             )}
-          </ul>
+          </div>
         </div>
       )}
     </div>
