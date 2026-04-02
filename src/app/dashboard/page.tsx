@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -95,11 +95,29 @@ const LIKERT_PREVIEW_OPTIONS = [
     { value: 4, label: 'Agree' },
     { value: 5, label: 'Strongly Agree' },
 ] as const
+const PARP_AI_DASHBOARD_FEATURE = 'chat_with_parp_ai'
+const PARP_AI_SESSION_STORAGE_KEY_PREFIX = 'parp_ai_dashboard_session_'
+const DASHBOARD_CHAT_STARTERS = [
+    'How should a Kenyan county government structure its first AI pilot?',
+    'Give me a Kenya-specific AI governance checklist for a public agency.',
+] as const
 
 type AssessmentDimensionScores = {
     technological: number
     organizational: number
     environmental: number
+}
+
+type DashboardChatMessage = {
+    id: string
+    role: 'user' | 'assistant'
+    content: string
+}
+
+type DashboardChatResponse = {
+    session_id: string
+    assistant_message: string
+    feature: typeof PARP_AI_DASHBOARD_FEATURE
 }
 
 type InlineAssessmentPreview = {
@@ -140,6 +158,10 @@ export default function Dashboard() {
         policy_update: { value: 'Loading...', source: '' },
     })
     const [animatedAdoptionRate, setAnimatedAdoptionRate] = useState(0)
+    const [parpAiSessionId, setParpAiSessionId] = useState('')
+    const [dashboardChatInput, setDashboardChatInput] = useState('')
+    const [dashboardChatMessages, setDashboardChatMessages] = useState<DashboardChatMessage[]>([])
+    const [isDashboardChatLoading, setIsDashboardChatLoading] = useState(false)
 
     const parsedAdoptionRate = Number.parseFloat(marketStats.ai_adoption_rate.value)
     const hasValidAdoptionRate = Number.isFinite(parsedAdoptionRate)
@@ -152,6 +174,21 @@ export default function Dashboard() {
         : marketStats.ai_adoption_rate.value
 
     const getDraftKey = (userId: string) => `toe_draft_${userId}`
+
+    const getParpAiStorageKey = (userId: string) => `${PARP_AI_SESSION_STORAGE_KEY_PREFIX}${userId}`
+
+    const startNewParpAiSession = () => {
+        const userId = session?.user?.id
+        if (!userId) {
+            return
+        }
+
+        const nextSessionId = crypto.randomUUID()
+        localStorage.setItem(getParpAiStorageKey(userId), nextSessionId)
+        setParpAiSessionId(nextSessionId)
+        setDashboardChatMessages([])
+        setDashboardChatInput('')
+    }
 
     const saveToeDraft = (answers: Record<string, number>) => {
         const userId = session?.user?.id
@@ -253,6 +290,82 @@ export default function Dashboard() {
         setIsSubmittingToeQuiz(false)
         setToeSubmissionPhase('success')
         toast.success('Assessment submitted from dashboard successfully.')
+    }
+
+    const handleDashboardChatSubmit = async (event?: FormEvent<HTMLFormElement>) => {
+        event?.preventDefault()
+
+        const userMessage = dashboardChatInput.trim()
+        if (!userMessage || !session || !parpAiSessionId || isDashboardChatLoading) {
+            return
+        }
+
+        const userEntry: DashboardChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'user',
+            content: userMessage,
+        }
+
+        setDashboardChatMessages((previous) => [...previous, userEntry])
+        setDashboardChatInput('')
+        setIsDashboardChatLoading(true)
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                    session_id: parpAiSessionId,
+                    user_message: userMessage,
+                    feature: PARP_AI_DASHBOARD_FEATURE,
+                }),
+            })
+
+            const payload = (await response.json().catch(() => null)) as
+                | DashboardChatResponse
+                | { error?: string }
+                | null
+
+            if (!response.ok) {
+                throw new Error(payload && 'error' in payload ? payload.error || 'Request failed.' : 'Request failed.')
+            }
+
+            if (!payload || !('assistant_message' in payload) || payload.feature !== PARP_AI_DASHBOARD_FEATURE) {
+                throw new Error('Invalid response format returned by the PARP AI backend.')
+            }
+
+            setDashboardChatMessages((previous) => [
+                ...previous,
+                {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    content: payload.assistant_message,
+                },
+            ])
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown error.'
+            toast.error('PARP AI is unavailable right now. Please try again.')
+            setDashboardChatMessages((previous) => [
+                ...previous,
+                {
+                    id: crypto.randomUUID(),
+                    role: 'assistant',
+                    content: `Sorry, I could not complete that request. ${message}`,
+                },
+            ])
+        } finally {
+            setIsDashboardChatLoading(false)
+        }
+    }
+
+    const handleDashboardChatKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault()
+            void handleDashboardChatSubmit()
+        }
     }
 
     // Effect: Check for active session on mount and subscribe to auth changes
@@ -458,6 +571,22 @@ export default function Dashboard() {
         } catch {
             // Ignore malformed stored drafts
         }
+    }, [session?.user?.id])
+
+    useEffect(() => {
+        if (!session?.user?.id) {
+            return
+        }
+
+        const storageKey = getParpAiStorageKey(session.user.id)
+        const existingSessionId = localStorage.getItem(storageKey)
+        const nextSessionId = existingSessionId || crypto.randomUUID()
+
+        if (!existingSessionId) {
+            localStorage.setItem(storageKey, nextSessionId)
+        }
+
+        setParpAiSessionId(nextSessionId)
     }, [session?.user?.id])
 
     useEffect(() => {
@@ -736,25 +865,109 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <Link
-                        href="/chat"
-                        className="group relative overflow-hidden rounded-xl bg-[#a01010] p-6 shadow-[0_6px_24px_rgba(160,16,16,0.22)] transition duration-300 hover:shadow-[0_8px_32px_rgba(160,16,16,0.28)] mobile-touch-target"
-                    >
-                        <div className="relative z-10">
-                            <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                                </svg>
+                    <section className="relative min-w-0 overflow-hidden rounded-xl bg-[#a01010] p-6 shadow-[0_6px_24px_rgba(160,16,16,0.22)]">
+                        <div className="relative z-10 flex h-full min-h-112 flex-col">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white">Chat with PARP AI</h3>
+                                    <p className="mt-2 max-w-md text-sm font-medium text-[#f7f9fa]/80">
+                                        Ask about AI adoption, implementation, regulation, and governance in Kenya. Replies are rendered directly in this dashboard card.
+                                    </p>
+                                </div>
+                                <div className="flex max-w-full flex-wrap items-center gap-2">
+                                    <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+                                        Session {parpAiSessionId ? parpAiSessionId.slice(0, 8) : '...'}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={startNewParpAiSession}
+                                        className="mobile-touch-target rounded-lg border border-white/35 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white hover:text-[#a01010]"
+                                    >
+                                        New Session
+                                    </button>
+                                </div>
                             </div>
-                            <h3 className="mb-2 text-xl font-bold text-white">Chat with AI</h3>
-                            <p className="text-sm font-medium text-[#f7f9fa]/80">
-                                Get instant answers about AI adoption, regulations, and implementation strategies in Kenya.
-                            </p>
-                            <span className="mt-6 inline-flex items-center gap-1.5 rounded-lg border border-white bg-transparent px-4 py-2 text-xs font-semibold text-white transition group-hover:bg-white group-hover:text-[#a01010]">
-                                Open Chat →
-                            </span>
+
+                            <div className="mt-4 flex-1 space-y-4 rounded-xl border border-white/15 bg-black/15 p-4">
+                                {dashboardChatMessages.length === 0 ? (
+                                    <div className="space-y-4 text-sm text-white/80">
+                                        <p className="leading-relaxed">
+                                            Start a Kenya-specific advisory chat. PARP AI keeps context within this session and responds with practical implementation guidance.
+                                        </p>
+                                        <div className="flex max-w-full flex-wrap gap-2">
+                                            {DASHBOARD_CHAT_STARTERS.map((starter) => (
+                                                <button
+                                                    key={starter}
+                                                    type="button"
+                                                    onClick={() => setDashboardChatInput(starter)}
+                                                    className="rounded-full border border-white/30 bg-white/10 px-3 py-2 text-left text-xs font-medium text-white transition hover:bg-white hover:text-[#a01010]"
+                                                >
+                                                    {starter}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+                                        {dashboardChatMessages.map((message) => (
+                                            <article
+                                                key={message.id}
+                                                className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${message.role === 'assistant'
+                                                    ? 'border border-white/10 bg-white/10 text-white'
+                                                    : 'ml-auto max-w-[92%] border border-white/20 bg-black/25 text-white/95'
+                                                    }`}
+                                            >
+                                                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+                                                    {message.role === 'assistant' ? 'PARP AI' : 'You'}
+                                                </p>
+                                                <div className="whitespace-pre-wrap wrap-break-word">{message.content}</div>
+                                            </article>
+                                        ))}
+                                        {isDashboardChatLoading && (
+                                            <div className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white/80">
+                                                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">PARP AI</p>
+                                                Thinking...
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <form onSubmit={handleDashboardChatSubmit} className="mt-4 space-y-3">
+                                <label className="block">
+                                    <span className="sr-only">Ask PARP AI</span>
+                                    <textarea
+                                        value={dashboardChatInput}
+                                        onChange={(event) => setDashboardChatInput(event.target.value)}
+                                        onKeyDown={handleDashboardChatKeyDown}
+                                        rows={4}
+                                        placeholder="Ask PARP AI about Kenya AI policy, rollout strategy, governance, or adoption risks..."
+                                        className="min-w-0 mobile-touch-target w-full resize-none rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:border-white/45 focus:outline-none"
+                                    />
+                                </label>
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <Link
+                                        href="/chat"
+                                        className="text-xs font-semibold text-white/75 underline decoration-white/30 underline-offset-4 transition hover:text-white"
+                                    >
+                                        Open full chat workspace
+                                    </Link>
+                                    <button
+                                        type="submit"
+                                        disabled={!dashboardChatInput.trim() || isDashboardChatLoading || !parpAiSessionId}
+                                        className="mobile-touch-target rounded-lg border border-white bg-white px-4 py-2 text-xs font-semibold text-[#a01010] transition hover:bg-transparent hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {isDashboardChatLoading ? 'Sending...' : 'Send to PARP AI'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </Link>
+                    </section>
 
                     {/* Market Stats / Adoption Insight (Always Visible) */}
                     <div className="col-span-1 min-w-0 md:col-span-2 lg:col-span-3">

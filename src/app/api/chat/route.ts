@@ -15,6 +15,11 @@ type ChatMessage = {
   content: string
 }
 
+type LlmMessage = {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
 /**
  * Defines the expected JSON payload for the chat endpoint.
  */
@@ -25,6 +30,127 @@ type ChatRequestBody = {
   provider?: string
   /** Optional custom system prompt override */
   systemPrompt?: string
+}
+
+type ParpAiFeature = 'chat_with_parp_ai'
+
+type ParpAiChatRequestBody = {
+  session_id: string
+  user_message: string
+  feature: ParpAiFeature
+}
+
+type ParpAiChatResponseBody = {
+  session_id: string
+  assistant_message: string
+  feature: ParpAiFeature
+}
+
+type SessionStoreEntry = {
+  messages: ChatMessage[]
+  updatedAt: number
+}
+
+const PARP_AI_FEATURE: ParpAiFeature = 'chat_with_parp_ai'
+const PARP_AI_MAX_TURNS = 12
+const PARP_AI_SESSION_TTL_MS = 1000 * 60 * 60 * 6
+const PARP_AI_MAX_ACTIVE_SESSIONS = 200
+
+const parpAiSystemInstructions = `You are PARP AI operating inside the Chat with PARP AI dashboard card for the PARP Platform.
+
+Mode requirements:
+- Answer questions about AI adoption, AI governance, implementation strategy, procurement, regulation, risk management, and rollout planning in Kenya.
+- Provide Kenya-specific, practical guidance that a public sector, nonprofit, or private sector team can act on.
+- Maintain a professional, advisory tone.
+- Ask one focused follow-up question when missing context would materially improve the advice.
+
+Response requirements:
+- Return clean, markdown-safe output suitable for direct dashboard rendering.
+- Prefer short sections and bullets when they make the answer easier to act on.
+- Give actionable next steps, likely stakeholders, implementation risks, and sequencing guidance when relevant.
+- Be explicit when you are uncertain.
+
+Safety and policy requirements:
+- Do not provide legal advice.
+- Do not invent Kenyan laws, regulations, standards, regulators, circulars, or government programs.
+- If the user needs legal interpretation or compliance confirmation, say that you are not providing legal advice and recommend checking the latest official Kenyan legal or regulatory source.
+- Stay in Chat with PARP AI mode unless the backend changes the feature.`
+
+function isParpAiChatRequestBody(body: unknown): body is ParpAiChatRequestBody {
+  if (!body || typeof body !== 'object') {
+    return false
+  }
+
+  const candidate = body as Partial<ParpAiChatRequestBody>
+  return (
+    candidate.feature === PARP_AI_FEATURE &&
+    typeof candidate.session_id === 'string' &&
+    typeof candidate.user_message === 'string'
+  )
+}
+
+function getParpAiSessionStore() {
+  const globalState = globalThis as typeof globalThis & {
+    __parpAiSessions?: Map<string, SessionStoreEntry>
+  }
+
+  if (!globalState.__parpAiSessions) {
+    globalState.__parpAiSessions = new Map()
+  }
+
+  return globalState.__parpAiSessions
+}
+
+function pruneParpAiSessionStore(store: Map<string, SessionStoreEntry>) {
+  const now = Date.now()
+
+  for (const [sessionId, entry] of store.entries()) {
+    if (now - entry.updatedAt > PARP_AI_SESSION_TTL_MS) {
+      store.delete(sessionId)
+    }
+  }
+
+  if (store.size <= PARP_AI_MAX_ACTIVE_SESSIONS) {
+    return
+  }
+
+  const oldestSessions = [...store.entries()]
+    .sort((left, right) => left[1].updatedAt - right[1].updatedAt)
+    .slice(0, store.size - PARP_AI_MAX_ACTIVE_SESSIONS)
+
+  for (const [sessionId] of oldestSessions) {
+    store.delete(sessionId)
+  }
+}
+
+function buildLlmMessages(systemPrompt: string, history: ChatMessage[]) {
+  return [
+    { role: 'system' as const, content: systemPrompt },
+    ...history.map((message) => ({ role: message.role, content: message.content })),
+  ] satisfies LlmMessage[]
+}
+
+function getParpAiSessionHistory(sessionId: string) {
+  const store = getParpAiSessionStore()
+  pruneParpAiSessionStore(store)
+  return store.get(sessionId)?.messages ?? []
+}
+
+function rememberParpAiSessionTurn(sessionId: string, userMessage: string, assistantMessage: string) {
+  const store = getParpAiSessionStore()
+  const existing = store.get(sessionId)?.messages ?? []
+  const updatedMessages = normalizeMessages([
+    ...existing,
+    { role: 'user', content: userMessage },
+    { role: 'assistant', content: assistantMessage },
+  ]).slice(-PARP_AI_MAX_TURNS * 2)
+
+  store.set(sessionId, {
+    messages: updatedMessages,
+    updatedAt: Date.now(),
+  })
+
+  pruneParpAiSessionStore(store)
 }
 
 /**
@@ -216,12 +342,13 @@ async function streamFromOllama(opts: {
  * @returns {Promise<void>} Resolves when the stream reaches completion.
  */
 async function streamFromOpenAI(opts: {
+  baseUrl: string
   apiKey: string
   model: string
-  messages: { role: 'system' | 'user' | 'assistant'; content: string }[]
+  messages: LlmMessage[]
   onToken: (token: string) => void
 }) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch(`${opts.baseUrl.replace(/\/$/, '')}/chat/completions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${opts.apiKey}`,
@@ -275,6 +402,176 @@ async function streamFromOpenAI(opts: {
   }
 }
 
+async function completeFromOllama(opts: {
+  baseUrl: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const res = await fetch(`${opts.baseUrl.replace(/\/$/, '')}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      stream: false,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`Ollama error (${res.status}): ${text || res.statusText}`)
+  }
+
+  const json = (await res.json()) as {
+    message?: { content?: string }
+  }
+  return json.message?.content?.trim() ?? ''
+}
+
+async function completeFromOpenAI(opts: {
+  apiKey: string
+  baseUrl: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const res = await fetch(`${opts.baseUrl.replace(/\/$/, '')}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      temperature: 0.3,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`OpenAI error (${res.status}): ${text || res.statusText}`)
+  }
+
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>
+  }
+  return json.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
+async function completeFromConfiguredProvider(opts: {
+  provider: string
+  ollamaBaseUrl: string
+  ollamaModel: string
+  openAiBaseUrl: string
+  openAiKey: string
+  openAiModel: string
+  messages: LlmMessage[]
+}) {
+  const tryOllama = async () =>
+    completeFromOllama({
+      baseUrl: opts.ollamaBaseUrl,
+      model: opts.ollamaModel,
+      messages: opts.messages,
+    })
+
+  const tryOpenAICompatible = async () => {
+    if (!opts.openAiKey) {
+      throw new Error('OPENAI_API_KEY is not set.')
+    }
+
+    return completeFromOpenAI({
+      apiKey: opts.openAiKey,
+      baseUrl: opts.openAiBaseUrl,
+      model: opts.openAiModel,
+      messages: opts.messages,
+    })
+  }
+
+  if (opts.provider === 'openai' || opts.provider === 'groq') {
+    return tryOpenAICompatible()
+  }
+
+  if (opts.provider === 'ollama') {
+    return tryOllama()
+  }
+
+  if (opts.provider === 'anthropic') {
+    throw new Error('Configured provider "anthropic" is not supported by this route yet.')
+  }
+
+  try {
+    return await tryOllama()
+  } catch {
+    return tryOpenAICompatible()
+  }
+}
+
+async function handleParpAiChat(body: ParpAiChatRequestBody) {
+  const sessionId = body.session_id.trim()
+  const userMessage = body.user_message.trim()
+
+  if (!sessionId) {
+    return new Response(JSON.stringify({ error: 'session_id is required.' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  if (!userMessage) {
+    return new Response(JSON.stringify({ error: 'user_message is required.' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const sessionHistory = getParpAiSessionHistory(sessionId)
+  const stitchedMessages = buildLlmMessages(parpAiSystemInstructions, [
+    ...sessionHistory,
+    { role: 'user', content: userMessage },
+  ])
+
+  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
+  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
+  const ollamaModel = process.env.PARP_AI_OLLAMA_MODEL ?? process.env.OLLAMA_MODEL ?? 'gemma2:2b'
+  const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
+  const openAiKey = process.env.PARP_AI_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY ?? ''
+  const openAiModel = process.env.PARP_AI_OPENAI_MODEL ?? process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
+
+  try {
+    const assistantMessage = await completeFromConfiguredProvider({
+      provider,
+      ollamaBaseUrl,
+      ollamaModel,
+      openAiBaseUrl,
+      openAiKey,
+      openAiModel,
+      messages: stitchedMessages,
+    })
+
+    rememberParpAiSessionTurn(
+      sessionId,
+      userMessage,
+      assistantMessage || 'I could not generate a response just now. Please try again.',
+    )
+
+    const responseBody: ParpAiChatResponseBody = {
+      session_id: sessionId,
+      assistant_message: assistantMessage || 'I could not generate a response just now. Please try again.',
+      feature: PARP_AI_FEATURE,
+    }
+
+    return new Response(JSON.stringify(responseBody), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error.'
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
+
 /**
  * Hint to Next.js that this API route benefits from Node.js runtime bindings.
  */
@@ -298,14 +595,18 @@ export async function POST(req: Request) {
     })
   }
 
-  let body: ChatRequestBody
+  let body: ChatRequestBody | ParpAiChatRequestBody
   try {
-    body = (await req.json()) as ChatRequestBody
+    body = (await req.json()) as ChatRequestBody | ParpAiChatRequestBody
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body.' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     })
+  }
+
+  if (isParpAiChatRequestBody(body)) {
+    return handleParpAiChat(body)
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -328,15 +629,13 @@ export async function POST(req: Request) {
   const activeSystemPrompt = body.systemPrompt ? body.systemPrompt : generatedPrompt
 
   const history = normalizeMessages(body.messages)
-  const stitched = [
-    { role: 'system' as const, content: activeSystemPrompt },
-    ...history.map((m) => ({ role: m.role, content: m.content })),
-  ]
+  const stitched = buildLlmMessages(activeSystemPrompt, history)
 
   // Retrieve configuration from environment variables
   const provider = (body.provider || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
+  const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
   const openAiKey = process.env.OPENAI_API_KEY ?? ''
   const openAiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
 
@@ -363,6 +662,7 @@ export async function POST(req: Request) {
       const tryOpenAI = async () => {
         if (!openAiKey) throw new Error('OPENAI_API_KEY is not set.')
         await streamFromOpenAI({
+          baseUrl: openAiBaseUrl,
           apiKey: openAiKey,
           model: openAiModel,
           messages: stitched,
