@@ -478,6 +478,8 @@ export default function Dashboard() {
         setIsDashboardChatLoading(true)
 
         try {
+            await persistDashboardConversation(parpAiSessionId, nextMessages)
+
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
@@ -517,7 +519,22 @@ export default function Dashboard() {
             setDashboardChatMessages(finalMessages)
         } catch {
             toast.error('PARP AI is unavailable right now. Please try again.')
-            setDashboardChatMessages((previous) => previous.filter((entry) => entry.id !== userEntry.id))
+
+            const fallbackAssistantEntry: DashboardChatMessage = {
+                id: crypto.randomUUID(),
+                role: 'assistant',
+                content: 'I could not process that request right now. Please try again in a moment.',
+            }
+
+            const failedMessages = [...nextMessages, fallbackAssistantEntry]
+
+            try {
+                await persistDashboardConversation(parpAiSessionId, failedMessages)
+            } catch {
+                // Keep the visible thread even if persistence fails.
+            }
+
+            setDashboardChatMessages(failedMessages)
         } finally {
             setIsDashboardChatLoading(false)
         }
