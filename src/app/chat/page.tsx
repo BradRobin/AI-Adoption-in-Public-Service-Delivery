@@ -16,6 +16,7 @@ import Link from 'next/link'
 import type { Session } from '@supabase/supabase-js'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
+import { AppPageSkeleton } from '@/components/AppPageSkeleton'
 import { supabase } from '@/lib/supabase/client'
 import { usePrivacyConsent } from '@/components/PrivacyBanner'
 import { NavigationMenu } from '@/components/NavigationMenu'
@@ -789,25 +790,7 @@ export default function ChatPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
-        <ParticleBackground />
-        <div className="relative z-10 flex w-full max-w-md flex-col gap-4 px-4">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            <p className="text-sm text-white/80 md:text-base">Checking session...</p>
-          </div>
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-xl backdrop-blur">
-            <div className="h-4 w-32 animate-pulse rounded-full bg-white/10" />
-            <div className="space-y-2">
-              <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />
-              <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/10" />
-              <div className="h-3 w-4/6 animate-pulse rounded-full bg-white/10" />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <AppPageSkeleton variant="workspace" message="Checking session..." />
   }
 
   if (!session) {

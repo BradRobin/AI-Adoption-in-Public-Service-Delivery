@@ -15,6 +15,7 @@ import type { Session } from '@supabase/supabase-js'
 import toast from '@/lib/toast'
 
 import { ParticleBackground } from '@/components/ParticleBackground'
+import { AppPageSkeleton } from '@/components/AppPageSkeleton'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { TypingTagline } from '@/components/TypingTagline'
 import { CountySelect } from '@/components/CountySelect'
@@ -134,18 +135,7 @@ export default function ProfilePage() {
     }
 
     if (isLoading) {
-        return (
-            <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
-                <ParticleBackground />
-                <div className="relative z-10 flex w-full max-w-md flex-col gap-4 px-4">
-                    {/* Loader */}
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        <p className="text-sm text-white/80">Loading profile...</p>
-                    </div>
-                </div>
-            </div>
-        )
+        return <AppPageSkeleton variant="form" message="Loading profile..." />
     }
 
     if (!session) return null

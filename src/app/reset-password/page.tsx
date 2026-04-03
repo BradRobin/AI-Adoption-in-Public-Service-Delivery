@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ParticleBackground } from '@/components/ParticleBackground'
+import { AppPageSkeleton } from '@/components/AppPageSkeleton'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
 
@@ -22,19 +23,7 @@ function analyzePassword(password: string) {
 }
 
 function ResetPasswordFallback() {
-  return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans">
-      <ParticleBackground />
-      <main
-        id="main-content"
-        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8"
-      >
-        <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-115">
-          <p className="text-center text-sm text-white/80">Loading reset form...</p>
-        </div>
-      </main>
-    </div>
-  )
+  return <AppPageSkeleton variant="auth" message="Loading reset form..." />
 }
 
 function ResetPasswordContent() {

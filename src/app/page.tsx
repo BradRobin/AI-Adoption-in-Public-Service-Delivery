@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 import { ParticleBackground } from '@/components/ParticleBackground'
 import { TypingTagline } from '@/components/TypingTagline'
+import { AppPageSkeleton } from '@/components/AppPageSkeleton'
 import type { Session } from '@supabase/supabase-js'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { PlayCircle } from 'lucide-react'
@@ -124,26 +125,12 @@ export default function LandingPage() {
 
   // Show loading spinner while checking auth state to prevent flash of content
   if (isLoading) {
-    return (
-      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
-        <ParticleBackground />
-        <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-        </div>
-      </div>
-    )
+    return <AppPageSkeleton variant="hero" message="Checking your session..." />
   }
 
   // If session exists (and redirect is happening), show nothing or a spinner
   if (session) {
-    return (
-      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
-        <ParticleBackground />
-        <div className="relative z-10 flex flex-col items-center gap-4">
-          <p className="text-white/80">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    )
+    return <AppPageSkeleton variant="hero" message="Redirecting to dashboard..." />
   }
 
   return (
