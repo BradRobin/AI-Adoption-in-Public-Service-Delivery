@@ -111,7 +111,7 @@ export function NavigationMenu() {
         setIsOpen(false)
         await supabase.auth.signOut()
         toast.success('You have been safely signed out.')
-        router.replace('/login')
+        router.replace('/login?signed_out=1')
     }
 
     const handleClose = () => setIsOpen(false)
@@ -150,7 +150,7 @@ export function NavigationMenu() {
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: '100%', opacity: 0 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 bottom-0 z-50 flex w-[280px] flex-col border-l border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-md"
+                        className="fixed top-0 right-0 bottom-0 z-50 flex w-70 flex-col border-l border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-md"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-white/10 p-5">

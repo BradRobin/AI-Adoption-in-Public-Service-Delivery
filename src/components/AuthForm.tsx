@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
@@ -57,6 +57,8 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
   const [forgotMessage, setForgotMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSendingReset, setIsSendingReset] = useState(false)
+  const [isLoggingInTransition, setIsLoggingInTransition] = useState(false)
+  const [shouldPulseLoginToggle, setShouldPulseLoginToggle] = useState(false)
 
   const { score, hasMinLength, hasLetter, hasNumberOrSymbol } = useMemo(
     () => analyzePassword(password),
@@ -67,6 +69,28 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
     score <= 1 ? 'bg-red-500' : score === 2 ? 'bg-yellow-400' : 'bg-green-500'
   const passwordStrengthLabel =
     score <= 1 ? 'Weak' : score === 2 ? 'Medium' : 'Strong'
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const signedOut = new URLSearchParams(window.location.search).get('signed_out') === '1'
+    if (!signedOut) {
+      return
+    }
+
+    setMode('login')
+    setShouldPulseLoginToggle(true)
+
+    const timer = window.setTimeout(() => {
+      setShouldPulseLoginToggle(false)
+    }, 1800)
+
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [])
 
   const handleModeChange = (nextMode: AuthMode) => {
     setMode(nextMode)
@@ -230,6 +254,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
         return
       }
 
+      setIsLoggingInTransition(true)
       onLoginSuccess?.()
     } catch (err) {
       await supabase.auth.signOut()
@@ -245,20 +270,51 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
           ? 'Unable to reach the server. Check your connection.'
           : 'Invalid email or password. Please try again.',
       )
+      setIsLoggingInTransition(false)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-[420px] max-h-[90vh]">
-      <div className="mb-6 flex min-h-[150px] flex-col items-center justify-start gap-3">
+    <div className="relative flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-105 max-h-[90vh]">
+      {isLoggingInTransition && (
+        <div className="absolute inset-0 z-20 flex flex-col justify-between rounded-xl border border-white/10 bg-black/88 p-6 backdrop-blur-md">
+          <div className="space-y-3">
+            <div className="h-10 w-32 animate-pulse rounded-full bg-green-500/25" />
+            <div className="h-7 w-48 animate-pulse rounded-full bg-white/10" />
+            <div className="h-4 w-40 animate-pulse rounded-full bg-white/8" />
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="space-y-3">
+                <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+                <div className="h-3 w-full animate-pulse rounded-full bg-white/8" />
+                <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/8" />
+                <div className="h-3 w-4/6 animate-pulse rounded-full bg-white/8" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+              <div className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-sm text-white/80">
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border border-green-400/40 border-t-green-300" />
+            Opening your dashboard...
+          </div>
+        </div>
+      )}
+
+      <div className="mb-6 flex min-h-37.5 flex-col items-center justify-start gap-3">
         <div className="flex justify-center gap-3">
           <button
             type="button"
             onClick={() => handleModeChange('login')}
-            className={`h-10 rounded-full px-5 text-sm font-medium transition-colors ${mode === 'login'
-              ? 'bg-green-500 text-white'
+            className={`h-10 rounded-full px-5 text-sm font-medium transition-all ${mode === 'login'
+              ? `bg-green-500 text-white ${shouldPulseLoginToggle ? 'scale-105 shadow-[0_0_0_8px_rgba(34,197,94,0.12)] animate-pulse' : ''}`
               : 'bg-transparent text-white/70 hover:bg-white/10'
               }`}
           >
