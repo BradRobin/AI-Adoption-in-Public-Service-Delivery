@@ -32,7 +32,6 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true)
 
     const [location, setLocation] = useState('')
-    const [role, setRole] = useState('')
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -53,12 +52,11 @@ export default function ProfilePage() {
 
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('role, location')
+                .select('location')
                 .eq('id', currentSession.user.id)
                 .single()
 
             if (profile) {
-                setRole(profile.role || 'user')
                 setLocation(profile.location || '')
             } else if (error) {
                 console.error('Error fetching profile:', error)
@@ -215,12 +213,6 @@ export default function ProfilePage() {
                                 placeholder="Select your county"
                             />
                             <p className="mt-1 text-xs text-white/40">Helps personalize AI responses to your region.</p>
-                        </div>
-
-                        <div className="pt-2 border-t border-white/10">
-                            <label htmlFor="role" className="mb-1 block text-sm font-medium text-white/80">Role</label>
-                            <input id="role" type="text" disabled value={role} className="w-full rounded-lg border border-white/5 bg-white/5 px-3 py-2 text-sm text-white/40 cursor-not-allowed uppercase" />
-                            <p className="mt-1 text-xs text-white/40">Roles are managed by administrators.</p>
                         </div>
 
                         <button
