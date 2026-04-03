@@ -292,6 +292,7 @@ export default function Dashboard() {
     const [dashboardChatInput, setDashboardChatInput] = useState('')
     const [dashboardChatMessages, setDashboardChatMessages] = useState<DashboardChatMessage[]>([])
     const [isDashboardChatLoading, setIsDashboardChatLoading] = useState(false)
+    const [showDashboardSkeleton, setShowDashboardSkeleton] = useState(true)
 
     const parsedAdoptionRate = Number.parseFloat(marketStats.ai_adoption_rate.value)
     const hasValidAdoptionRate = Number.isFinite(parsedAdoptionRate)
@@ -561,6 +562,16 @@ export default function Dashboard() {
 
     // Effect: Check for active session on mount and subscribe to auth changes
     useEffect(() => {
+        const timer = window.setTimeout(() => {
+            setShowDashboardSkeleton(false)
+        }, 650)
+
+        return () => {
+            window.clearTimeout(timer)
+        }
+    }, [])
+
+    useEffect(() => {
         const checkSession = async () => {
             try {
                 const {
@@ -825,13 +836,21 @@ export default function Dashboard() {
         }
     }, [hasValidAdoptionRate, parsedAdoptionRate])
 
-    if (isLoading && !redirectTakingLong) {
+    if ((isLoading || showDashboardSkeleton) && !redirectTakingLong) {
         return (
             <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black font-sans">
                 <ParticleBackground />
-                <div className="relative z-10 flex flex-col items-center gap-4">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    <p className="text-white/80">Loading your dashboard...</p>
+                <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 md:px-6">
+                    <div className="space-y-3 text-center">
+                        <div className="mx-auto h-10 w-44 animate-pulse rounded-full bg-white/10" />
+                        <div className="mx-auto h-5 w-64 animate-pulse rounded-full bg-white/8" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="h-80 animate-pulse rounded-2xl border border-white/10 bg-white/6" />
+                        <div className="h-80 animate-pulse rounded-2xl border border-white/10 bg-white/6" />
+                        <div className="h-80 animate-pulse rounded-2xl border border-white/10 bg-white/6" />
+                    </div>
+                    <div className="h-52 animate-pulse rounded-2xl border border-white/10 bg-white/6" />
                 </div>
             </div>
         )

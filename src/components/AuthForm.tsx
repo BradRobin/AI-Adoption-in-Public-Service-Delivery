@@ -279,30 +279,30 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
   return (
     <div className="relative flex w-full max-w-md flex-col rounded-xl bg-black/70 p-6 shadow-lg backdrop-blur min-h-105 max-h-[90vh]">
       {isLoggingInTransition && (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between rounded-xl border border-white/10 bg-black/88 p-6 backdrop-blur-md">
+        <div className="absolute inset-0 z-20 flex flex-col justify-between rounded-xl border border-white/15 bg-zinc-950/72 p-6 backdrop-blur-sm">
           <div className="space-y-3">
-            <div className="h-10 w-32 animate-pulse rounded-full bg-green-500/25" />
-            <div className="h-7 w-48 animate-pulse rounded-full bg-white/10" />
-            <div className="h-4 w-40 animate-pulse rounded-full bg-white/8" />
+            <div className="h-10 w-32 animate-pulse rounded-full bg-green-400/35" />
+            <div className="h-7 w-48 animate-pulse rounded-full bg-white/16" />
+            <div className="h-4 w-40 animate-pulse rounded-full bg-white/12" />
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl border border-white/12 bg-white/8 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
               <div className="space-y-3">
-                <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-                <div className="h-3 w-full animate-pulse rounded-full bg-white/8" />
-                <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/8" />
-                <div className="h-3 w-4/6 animate-pulse rounded-full bg-white/8" />
+                <div className="h-4 w-28 animate-pulse rounded-full bg-white/18" />
+                <div className="h-3 w-full animate-pulse rounded-full bg-white/14" />
+                <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/14" />
+                <div className="h-3 w-4/6 animate-pulse rounded-full bg-white/14" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
-              <div className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+              <div className="h-24 animate-pulse rounded-2xl border border-white/12 bg-white/8 shadow-[0_8px_24px_rgba(0,0,0,0.14)]" />
+              <div className="h-24 animate-pulse rounded-2xl border border-white/12 bg-white/8 shadow-[0_8px_24px_rgba(0,0,0,0.14)]" />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-white/80">
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border border-green-400/40 border-t-green-300" />
+          <div className="flex items-center gap-3 text-sm font-medium text-white/90">
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border border-green-300/50 border-t-green-200" />
             Opening your dashboard...
           </div>
         </div>
