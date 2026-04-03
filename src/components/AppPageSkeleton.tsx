@@ -7,6 +7,23 @@ type AppPageSkeletonProps = {
   message?: string
 }
 
+function SkeletonStatusBadge({ message }: Pick<AppPageSkeletonProps, 'message'>) {
+  if (!message) {
+    return null
+  }
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="skeleton-status-badge mt-2 inline-flex max-w-full items-center gap-3 rounded-full border border-white/12 px-4 py-2 text-left shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+    >
+      <span className="skeleton-status-dot shrink-0 rounded-full bg-green-400" aria-hidden="true" />
+      <p className="truncate text-sm font-medium tracking-[0.02em] text-white/78">{message}</p>
+    </div>
+  )
+}
+
 function AuthSkeletonCard() {
   return (
     <div className="flex w-full max-w-md flex-col rounded-xl border border-white/10 bg-black/70 p-6 shadow-lg backdrop-blur min-h-105">
@@ -102,7 +119,7 @@ function HeroSkeletonLayout({ message }: Pick<AppPageSkeletonProps, 'message'>) 
           <div className="h-12 w-48 animate-pulse rounded-full bg-green-500/20" />
         </div>
       </div>
-      {message && <p className="text-sm text-white/70">{message}</p>}
+      <SkeletonStatusBadge message={message} />
     </div>
   )
 }
@@ -119,7 +136,7 @@ function FormSkeletonLayout({ message }: Pick<AppPageSkeletonProps, 'message'>) 
           <div className="h-48 w-full animate-pulse rounded-2xl bg-white/6" />
         </div>
       </div>
-      {message && <p className="text-sm text-white/70">{message}</p>}
+      <SkeletonStatusBadge message={message} />
     </div>
   )
 }
