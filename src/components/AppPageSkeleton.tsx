@@ -85,7 +85,7 @@ function WorkspaceSkeletonLayout() {
   )
 }
 
-function HeroSkeletonLayout(message?: string) {
+function HeroSkeletonLayout({ message }: Pick<AppPageSkeletonProps, 'message'>) {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 px-4 text-center">
       <div className="space-y-4">
@@ -107,7 +107,7 @@ function HeroSkeletonLayout(message?: string) {
   )
 }
 
-function FormSkeletonLayout(message?: string) {
+function FormSkeletonLayout({ message }: Pick<AppPageSkeletonProps, 'message'>) {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4">
       <div className="h-10 w-52 animate-pulse rounded-full bg-white/10" />
