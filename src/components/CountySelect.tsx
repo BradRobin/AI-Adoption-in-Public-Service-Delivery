@@ -200,7 +200,7 @@ export function CountySelect({
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               placeholder="Search counties..."
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-black/60"
+              className="flex-1 bg-transparent text-[rgb(255,255,255)] text-sm outline-none placeholder:text-black/60"
               aria-label="Search counties"
             />
           </div>
