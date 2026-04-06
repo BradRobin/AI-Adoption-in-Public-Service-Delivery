@@ -40,6 +40,15 @@ function isMissingColumnError(error: unknown, columnName: string) {
     return candidate.code === '42703' || new RegExp(`\\b${columnName}\\b`, 'i').test(haystack)
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+    if (!error || typeof error !== 'object') {
+        return fallback
+    }
+
+    const candidate = error as { message?: string; details?: string; hint?: string }
+    return candidate.message || candidate.details || candidate.hint || fallback
+}
+
 async function fetchProfileDetails(userId: string) {
     const primaryResult = await supabase
         .from('profiles')
@@ -222,12 +231,16 @@ export default function ProfilePage() {
         })
 
         if (authError) {
-            toast.error(authError.message || 'Failed to update account details.')
+            const authMessage = authError.message || 'Failed to update account details.'
+            toast.error(authMessage)
             console.error(authError)
-            setStatusMessage(authError.message || 'Failed to update account details.')
+            setStatusMessage(authMessage)
             setStatusTone('error')
         } else if (!profileResult.ok) {
-            const fallbackMessage = 'Failed to save your profile details. Please try again.'
+            const fallbackMessage = getErrorMessage(
+                profileResult.error,
+                'Failed to save your profile details. Please try again.',
+            )
             toast.error(fallbackMessage)
             console.error(profileResult.error)
             setStatusMessage(fallbackMessage)
