@@ -247,7 +247,7 @@ export default function LandingPage() {
             <motion.div whileHover={prefersReducedMotion ? undefined : { y: -2 }}>
               <Link
                 href="#demo"
-                className="group relative flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-full border border-red-400/60 bg-red-500/5 px-8 text-base font-semibold text-red-200 transition hover:border-red-300 hover:bg-red-500/10 hover:text-red-100 sm:min-w-55 sm:w-auto"
+                className="group relative flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-full border border-red-400/60 bg-red-500/5 px-8 text-base font-semibold text-black transition hover:border-red-300 hover:bg-red-500/10 hover:text-black sm:min-w-55 sm:w-auto"
               >
                 <PlayCircle size={18} />
                 <span>Watch 45-Second Demo</span>
