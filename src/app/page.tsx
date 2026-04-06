@@ -212,7 +212,7 @@ export default function LandingPage() {
               <motion.div whileHover={prefersReducedMotion ? undefined : { y: -2 }}>
                 <Link
                   href="/signup"
-                  className="cta-pulse-hover relative flex h-13 w-full min-w-0 items-center justify-center overflow-hidden rounded-full border border-green-300/40 bg-green-500 px-8 text-base font-bold text-black transition sm:min-w-55 sm:w-auto"
+                  className="landing-primary-cta cta-pulse-hover relative flex h-13 w-full min-w-0 items-center justify-center overflow-hidden rounded-full border border-green-300/40 bg-green-500 px-8 text-base font-bold text-white transition sm:min-w-55 sm:w-auto"
                   aria-describedby="hero-score-preview"
                 >
                   <span className="relative z-10">Get My Score Free →</span>

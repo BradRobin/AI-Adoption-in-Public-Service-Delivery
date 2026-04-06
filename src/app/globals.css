@@ -476,6 +476,12 @@ html.high-contrast .text-green-400 {
     color: #ffffff !important;
   }
 
+  html.light-mode .landing-primary-cta,
+  html.light-mode .landing-primary-cta:hover,
+  html.light-mode .landing-primary-cta:focus-visible {
+    color: #ffffff !important;
+  }
+
   html.light-mode .parp-ai-card,
   html.light-mode .parp-ai-card h1,
   html.light-mode .parp-ai-card h2,
