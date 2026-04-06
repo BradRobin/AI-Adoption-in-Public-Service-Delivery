@@ -175,7 +175,7 @@ export default function AvatarAdvisor({
                             if (isPlaying) window.speechSynthesis.cancel()
                             setIsMuted(!isMuted)
                         }}
-                        className="rounded-full p-1.5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                        className="rounded-full bg-white p-1.5 text-black transition-colors hover:bg-white/90 hover:text-black"
                         title={isMuted ? "Unmute" : "Mute"}
                     >
                         {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -183,7 +183,7 @@ export default function AvatarAdvisor({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="rounded-full p-1.5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                            className="rounded-full bg-white p-1.5 text-black transition-colors hover:bg-white/90 hover:text-black"
                             title="Close Advisor"
                         >
                             <X size={14} />
