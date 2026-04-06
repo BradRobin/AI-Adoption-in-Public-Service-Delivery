@@ -190,7 +190,7 @@ export default function ProfilePage() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Your preferred display name"
-                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-white/20"
+                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-black/45"
                             />
                         </div>
 
@@ -214,7 +214,7 @@ export default function ProfilePage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Leave blank to keep current password"
-                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-white/20"
+                                className="w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/40 placeholder:text-black/45"
                             />
                         </div>
 
