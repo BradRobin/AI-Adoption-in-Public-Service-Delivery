@@ -553,7 +553,7 @@ export default function ChatPage() {
         .eq('id', currentConversationId)
     }
 
-    const currentProvider = 'ollama'
+    const currentProvider = 'auto'
     let fullResponse = ''
 
     try {

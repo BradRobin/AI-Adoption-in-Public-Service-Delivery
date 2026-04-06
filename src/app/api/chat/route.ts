@@ -151,6 +151,17 @@ function formatAdoptionRateLabel(adoptionRate: number | null) {
   return adoptionRate === null ? 'No recorded assessment yet' : `${adoptionRate}%`
 }
 
+function isMissingColumnError(error: unknown, columnName: string) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const candidate = error as { code?: string; message?: string; details?: string; hint?: string }
+  const haystack = [candidate.message, candidate.details, candidate.hint].filter(Boolean).join(' ')
+
+  return candidate.code === '42703' || new RegExp(`\b${columnName}\b`, 'i').test(haystack)
+}
+
 function isAdoptionRateQuestion(message: string) {
   return /(what(?:'s| is)?\s+my\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score)|my\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score)|current\s+(?:ai\s+)?(?:adoption|readiness)\s+(?:rate|score))/i.test(
     message,
@@ -172,31 +183,63 @@ async function fetchUserChatContext(opts: {
 }) {
   const supabase = createAuthenticatedSupabaseClient(opts.token)
 
-  const [{ data: profile, error: profileError }, { data: latestAssessment, error: assessmentError }] = await Promise.all([
-    supabase.from('profiles').select('role, location').eq('id', opts.userId).maybeSingle(),
-    supabase
+  let role = 'Citizen/User'
+  let location = normalizeProfileLocation(undefined, opts.user)
+  let adoptionRate: number | null = null
+
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role, location')
+      .eq('id', opts.userId)
+      .maybeSingle()
+
+    if (profileError) {
+      if (isMissingColumnError(profileError, 'location')) {
+        const { data: fallbackProfile, error: fallbackProfileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', opts.userId)
+          .maybeSingle()
+
+        if (fallbackProfileError) {
+          console.error('Chat context profile fallback failed:', fallbackProfileError)
+        } else {
+          role = fallbackProfile?.role?.trim() || role
+        }
+      } else {
+        console.error('Chat context profile lookup failed:', profileError)
+      }
+    } else {
+      role = profile?.role?.trim() || role
+      location = normalizeProfileLocation(profile?.location, opts.user)
+    }
+  } catch (error) {
+    console.error('Unexpected chat context profile error:', error)
+  }
+
+  try {
+    const { data: latestAssessment, error: assessmentError } = await supabase
       .from('assessments')
       .select('score')
       .eq('user_id', opts.userId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle(),
-  ])
+      .maybeSingle()
 
-  if (profileError) {
-    throw profileError
+    if (assessmentError) {
+      console.error('Chat context assessment lookup failed:', assessmentError)
+    } else if (typeof latestAssessment?.score === 'number') {
+      adoptionRate = latestAssessment.score
+    }
+  } catch (error) {
+    console.error('Unexpected chat context assessment error:', error)
   }
-
-  if (assessmentError) {
-    throw assessmentError
-  }
-
-  const adoptionRate = typeof latestAssessment?.score === 'number' ? latestAssessment.score : null
 
   return {
     username: formatUsername(opts.user),
-    role: profile?.role?.trim() || 'Citizen/User',
-    location: normalizeProfileLocation(profile?.location, opts.user),
+    role,
+    location,
     adoptionRate,
     adoptionRateLabel: formatAdoptionRateLabel(adoptionRate),
   } satisfies UserChatContext
@@ -645,7 +688,7 @@ async function handleParpAiChat(auth: { token?: string; userId?: string; user?: 
     { role: 'user', content: userMessage },
   ])
 
-  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
+  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'auto').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.PARP_AI_OLLAMA_MODEL ?? process.env.OLLAMA_MODEL ?? 'gemma2:2b'
   const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
@@ -763,7 +806,7 @@ export async function POST(req: Request) {
   const stitched = buildLlmMessages(activeSystemPrompt, history)
 
   // Retrieve configuration from environment variables
-  const provider = (body.provider || process.env.LLM_PROVIDER || 'ollama').toLowerCase()
+  const provider = (body.provider || process.env.LLM_PROVIDER || 'auto').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
   const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
