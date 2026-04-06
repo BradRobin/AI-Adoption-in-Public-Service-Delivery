@@ -545,6 +545,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   )
                 })}
               </div>
+              <p className="mt-1 text-xs text-white/40">
                 Used only to keep responses appropriately personalized. You can choose rather not say.
               </p>
             </fieldset>
