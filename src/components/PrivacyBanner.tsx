@@ -239,7 +239,7 @@ export default function PrivacyBanner() {
                 <button
                   type="button"
                   onClick={handleAcceptAll}
-                  className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-500 sm:w-32"
+                  className="privacy-accept-cta w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-500 sm:w-32"
                 >
                   Accept All
                 </button>

@@ -482,6 +482,12 @@ html.high-contrast .text-green-400 {
     color: #ffffff !important;
   }
 
+  html.light-mode .privacy-accept-cta,
+  html.light-mode .privacy-accept-cta:hover,
+  html.light-mode .privacy-accept-cta:focus-visible {
+    color: #ffffff !important;
+  }
+
   html.light-mode .parp-ai-card,
   html.light-mode .parp-ai-card h1,
   html.light-mode .parp-ai-card h2,
