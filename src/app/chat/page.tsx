@@ -1044,7 +1044,7 @@ export default function ChatPage() {
                     }
                   }}
                   placeholder="Ask in Sheng or English (score, gigs, services)"
-                  className="max-h-28 min-h-12 flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
+                  className="max-h-28 min-h-12 flex-1 resize-none rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-black/45 focus:border-white/40 md:text-base [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
                 />
                 <div className="flex items-center gap-2 px-1 pb-1 sm:pb-0">
                   {/* Avatar Toggle */}
