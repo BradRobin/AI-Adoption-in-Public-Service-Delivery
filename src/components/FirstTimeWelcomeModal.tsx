@@ -74,7 +74,7 @@ function StepOneScore({ score }: { score: number }) {
       <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-[0_20px_70px_-35px_rgba(74,222,128,0.45)]">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/55">Instant Benchmark</p>
-          <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300">
+          <span className="rounded-full border border-green-500/30 bg-green-500/12 px-2 py-0.5 text-[10px] font-semibold text-green-700">
             LIVE PREVIEW
           </span>
         </div>
@@ -101,13 +101,13 @@ function StepOneScore({ score }: { score: number }) {
             </div>
             <div>
               <p className="text-sm text-black/65">Kenya public-sector average</p>
-              <p className="text-xl font-bold text-blue-300">{KENYA_AVERAGE_SCORE}%</p>
+              <p className="text-xl font-bold text-blue-600">{KENYA_AVERAGE_SCORE}%</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-5">
+      <div className="rounded-2xl border border-white/12 bg-white/4 p-5">
         <div className="mb-3 flex items-center gap-2 text-sm text-green-300">
           <TrendingUp className="h-4 w-4" />
           <span className="font-semibold">Fast Insight</span>
