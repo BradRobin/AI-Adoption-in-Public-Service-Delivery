@@ -2,7 +2,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
-import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 import { PrivacyConsentProvider } from "@/components/PrivacyBanner";
 import { TopScrollBlur } from "@/components/TopScrollBlur";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
@@ -60,7 +59,6 @@ export default function RootLayout({
           }}
         />
         <ThemeProvider>
-        <AccessibilityProvider>
           <PrivacyConsentProvider>
             <TopScrollBlur />
 
@@ -77,7 +75,6 @@ export default function RootLayout({
 
             <ClientOverlays />
           </PrivacyConsentProvider>
-        </AccessibilityProvider>
         </ThemeProvider>
       </body>
     </html>

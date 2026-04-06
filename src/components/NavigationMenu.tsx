@@ -25,7 +25,6 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import toast from '@/lib/toast'
-import { useAccessibility } from './AccessibilityProvider'
 import { NotificationsBell } from './NotificationsBell'
 
 const PREFETCH_ROUTES = [
@@ -89,7 +88,6 @@ function MenuItem({ href, icon: Icon, label, onClick, variant = 'default' }: Men
 export function NavigationMenu() {
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
-    const { highContrast, toggleHighContrast } = useAccessibility()
 
     useEffect(() => {
         for (const route of PREFETCH_ROUTES) {
@@ -166,20 +164,6 @@ export function NavigationMenu() {
 
                         {/* Navigation Links */}
                         <nav aria-label="Main Navigation" className="flex-1 overflow-y-auto p-4 space-y-1">
-                            {/* Accessibility Toggles */}
-                            <button
-                                onClick={toggleHighContrast}
-                                className={`mobile-touch-target mb-4 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${highContrast
-                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                        : 'text-white/80 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span className="font-medium text-sm">High Contrast Mode</span>
-                                <div className={`w-10 h-6 rounded-full p-1 transition-colors ${highContrast ? 'bg-green-500' : 'bg-white/20'}`}>
-                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${highContrast ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </div>
-                            </button>
-
                             <div onClick={handleClose}><MenuItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" /></div>
                             <div onClick={handleClose}><MenuItem href="/chat" icon={MessageSquare} label="Chat Assistant" /></div>
                             <div onClick={handleClose}><MenuItem href="/assess" icon={ClipboardCheck} label="Self Assessment" /></div>

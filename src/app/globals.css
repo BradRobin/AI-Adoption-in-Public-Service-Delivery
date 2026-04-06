@@ -314,52 +314,6 @@ canvas {
   height: 0;
 }
 
-/* High Contrast Mode Overrides */
-html.high-contrast {
-  --background: #000000 !important;
-  --foreground: #ffffff !important;
-}
-
-html.high-contrast * {
-  /* Enforce stronger contrast ratios and remove translucency where critical */
-  border-color: #ffffff !important;
-}
-
-html.high-contrast .bg-white\/5,
-html.high-contrast .bg-white\/10 {
-  background-color: transparent !important;
-  border: 2px solid #ffffff !important;
-}
-
-html.high-contrast .text-white\/30,
-html.high-contrast .text-white\/40,
-html.high-contrast .text-white\/50,
-html.high-contrast .text-white\/60,
-html.high-contrast .text-white\/70,
-html.high-contrast .text-white\/80 {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-}
-
-html.high-contrast .text-zinc-500,
-html.high-contrast .text-zinc-300 {
-  color: #ffffff !important;
-}
-
-html.high-contrast .text-tier-1,
-html.high-contrast .text-tier-2,
-html.high-contrast .text-tier-3 {
-  color: #ffffff !important;
-}
-
-html.high-contrast .bg-green-500,
-html.high-contrast .text-green-400 {
-  /* Use a more accessible high-contrast green or just outline */
-  background-color: #00ff00 !important;
-  color: #000000 !important;
-  font-weight: bold !important;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
