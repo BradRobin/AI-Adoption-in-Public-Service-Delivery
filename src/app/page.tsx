@@ -325,14 +325,14 @@ export default function LandingPage() {
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <a
                   href={DEMO_VIDEO_SRC}
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-100 transition hover:border-blue-200 hover:bg-blue-500/25"
+                  className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-black transition hover:border-blue-200 hover:bg-blue-500/25"
                 >
                   <PlayCircle size={14} />
                   Open Full Reel
                 </a>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center rounded-full border border-green-300/30 bg-green-500/15 px-4 py-2 text-xs font-semibold text-green-200 transition hover:border-green-200 hover:bg-green-500/25"
+                  className="inline-flex items-center rounded-full border border-green-300/30 bg-green-500/15 px-4 py-2 text-xs font-semibold text-black transition hover:border-green-200 hover:bg-green-500/25"
                 >
                   Start My Assessment
                 </Link>
