@@ -29,6 +29,97 @@ const GENDER_OPTIONS: Array<{ value: GenderOption; label: string }> = [
     { value: 'rather_not_say', label: 'Rather not say' },
 ]
 
+function isMissingColumnError(error: unknown, columnName: string) {
+    if (!error || typeof error !== 'object') {
+        return false
+    }
+
+    const candidate = error as { code?: string; message?: string; details?: string; hint?: string }
+    const haystack = [candidate.message, candidate.details, candidate.hint].filter(Boolean).join(' ')
+
+    return candidate.code === '42703' || new RegExp(`\\b${columnName}\\b`, 'i').test(haystack)
+}
+
+async function fetchProfileDetails(userId: string) {
+    const primaryResult = await supabase
+        .from('profiles')
+        .select('location, gender')
+        .eq('id', userId)
+        .maybeSingle()
+
+    if (!primaryResult.error) {
+        return {
+            location: primaryResult.data?.location || '',
+            gender: (primaryResult.data?.gender as GenderOption | null) || 'rather_not_say',
+        }
+    }
+
+    if (!isMissingColumnError(primaryResult.error, 'gender')) {
+        throw primaryResult.error
+    }
+
+    const fallbackResult = await supabase
+        .from('profiles')
+        .select('location')
+        .eq('id', userId)
+        .maybeSingle()
+
+    if (fallbackResult.error) {
+        throw fallbackResult.error
+    }
+
+    return {
+        location: fallbackResult.data?.location || '',
+        gender: 'rather_not_say' as GenderOption,
+    }
+}
+
+async function persistProfileDetails(opts: {
+    userId: string
+    email: string
+    location: string
+    gender: GenderOption
+}) {
+    const normalizedLocation = opts.location.trim()
+
+    const primaryResult = await supabase
+        .from('profiles')
+        .upsert(
+            {
+                id: opts.userId,
+                email: opts.email,
+                location: normalizedLocation,
+                gender: opts.gender,
+            },
+            { onConflict: 'id' },
+        )
+
+    if (!primaryResult.error) {
+        return { ok: true as const, degraded: false as const }
+    }
+
+    if (!isMissingColumnError(primaryResult.error, 'gender')) {
+        return { ok: false as const, degraded: false as const, error: primaryResult.error }
+    }
+
+    const fallbackResult = await supabase
+        .from('profiles')
+        .upsert(
+            {
+                id: opts.userId,
+                email: opts.email,
+                location: normalizedLocation,
+            },
+            { onConflict: 'id' },
+        )
+
+    if (fallbackResult.error) {
+        return { ok: false as const, degraded: false as const, error: fallbackResult.error }
+    }
+
+    return { ok: true as const, degraded: true as const }
+}
+
 /**
  * ProfilePage Component
  * Provides a form interface for users to view and update their account settings.
@@ -45,6 +136,8 @@ export default function ProfilePage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [isSaving, setIsSaving] = useState(false)
+    const [statusMessage, setStatusMessage] = useState<string | null>(null)
+    const [statusTone, setStatusTone] = useState<'success' | 'error'>('success')
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -60,16 +153,11 @@ export default function ProfilePage() {
             setUsername((currentSession.user.user_metadata?.username as string) || '')
             setGender(((currentSession.user.user_metadata?.gender as GenderOption | undefined) ?? 'rather_not_say'))
 
-            const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('location, gender')
-                .eq('id', currentSession.user.id)
-                .single()
-
-            if (profile) {
-                setLocation(profile.location || '')
-                setGender((profile.gender as GenderOption | null) || 'rather_not_say')
-            } else if (error) {
+            try {
+                const profile = await fetchProfileDetails(currentSession.user.id)
+                setLocation(profile.location)
+                setGender(profile.gender)
+            } catch (error) {
                 console.error('Error fetching profile:', error)
             }
 
@@ -90,12 +178,18 @@ export default function ProfilePage() {
         if (!session) return
 
         setIsSaving(true)
+        setStatusMessage(null)
+        setStatusTone('success')
+
+        const normalizedEmail = email.trim()
+        const normalizedUsername = username.trim()
+        const normalizedLocation = location.trim()
 
         let hasAuthChanges = false
         const authUpdates: any = {}
 
-        if (email !== session.user.email) {
-            authUpdates.email = email
+        if (normalizedEmail !== (session.user.email || '')) {
+            authUpdates.email = normalizedEmail
             hasAuthChanges = true
         }
 
@@ -106,9 +200,11 @@ export default function ProfilePage() {
 
         const currentMetadata = session.user.user_metadata || {}
         const currentGender = (currentMetadata.gender as GenderOption | undefined) ?? 'rather_not_say'
+        const currentLocation = (currentMetadata.location as string | undefined) || ''
+        const currentUsername = (currentMetadata.username as string | undefined) || ''
 
-        if (username !== (currentMetadata.username || '') || gender !== currentGender || location !== ((currentMetadata.location as string | undefined) || '')) {
-            authUpdates.data = { ...currentMetadata, username, gender, location }
+        if (normalizedUsername !== currentUsername || gender !== currentGender || normalizedLocation !== currentLocation) {
+            authUpdates.data = { ...currentMetadata, username: normalizedUsername, gender, location: normalizedLocation }
             hasAuthChanges = true
         }
 
@@ -118,29 +214,57 @@ export default function ProfilePage() {
             authError = error
         }
 
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ location: location.trim(), gender })
-            .eq('id', session.user.id)
+        const profileResult = await persistProfileDetails({
+            userId: session.user.id,
+            email: normalizedEmail,
+            location: normalizedLocation,
+            gender,
+        })
 
-        if (profileError) {
-            toast.error('Failed to update profile location.')
-            console.error(profileError)
-        } else if (authError) {
+        if (authError) {
             toast.error(authError.message || 'Failed to update account details.')
             console.error(authError)
+            setStatusMessage(authError.message || 'Failed to update account details.')
+            setStatusTone('error')
+        } else if (!profileResult.ok) {
+            const fallbackMessage = 'Failed to save your profile details. Please try again.'
+            toast.error(fallbackMessage)
+            console.error(profileResult.error)
+            setStatusMessage(fallbackMessage)
+            setStatusTone('error')
         } else {
-            if (authUpdates.email) {
-                toast.success('Profile updated! Please check your new email to confirm the change.')
-            } else {
-                toast.success('Profile updated successfully!')
-            }
-            setPassword('') // Clear password field after save
-        }
+            const successMessage = authUpdates.email
+                ? 'Profile updated. Please check your new email to confirm the change.'
+                : 'Profile updated successfully!'
 
-        // Refresh session to get updated metadata locally
-        if (hasAuthChanges && !authError) {
-            await supabase.auth.getSession()
+            const degradedMessage = profileResult.degraded
+                ? ' Gender is stored in your account metadata and will continue to personalize chat replies.'
+                : ''
+
+            const finalMessage = `${successMessage}${degradedMessage}`
+
+            toast.success(finalMessage)
+            setStatusMessage(finalMessage)
+            setStatusTone('success')
+
+            if (authUpdates.email) {
+                toast.success('Confirmation email sent for your updated address.')
+            }
+
+            setUsername(normalizedUsername)
+            setEmail(normalizedEmail)
+            setLocation(normalizedLocation)
+            setPassword('')
+
+            const { data: refreshedSession } = await supabase.auth.getSession()
+            if (refreshedSession.session) {
+                setSession(refreshedSession.session)
+                setUsername((refreshedSession.session.user.user_metadata?.username as string) || normalizedUsername)
+                setGender(((refreshedSession.session.user.user_metadata?.gender as GenderOption | undefined) ?? gender))
+                setLocation(((refreshedSession.session.user.user_metadata?.location as string | undefined) ?? normalizedLocation))
+            } else {
+                setGender(gender)
+            }
         }
 
         setIsSaving(false)
@@ -179,6 +303,11 @@ export default function ProfilePage() {
                     <header className="mb-6 text-center">
                         <h1 className="text-2xl font-semibold text-white">Your Profile</h1>
                         <p className="mt-1 text-sm text-white/70">Update your details for personalized AI responses.</p>
+                        {statusMessage && (
+                            <p className={`mt-3 text-sm ${statusTone === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                                {statusMessage}
+                            </p>
+                        )}
                     </header>
 
                     <form onSubmit={handleSave} className="flex flex-col gap-5">
