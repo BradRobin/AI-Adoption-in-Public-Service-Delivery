@@ -70,21 +70,21 @@ export function ToeResults({
             <XAxis
               type="number"
               domain={[0, 5]}
-              tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }}
-              tickLine={{ stroke: 'rgba(255,255,255,0.2)' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}
+              tick={{ fill: 'rgba(0,0,0,0.6)', fontSize: 12 }}
+              tickLine={{ stroke: 'rgba(0,0,0,0.18)' }}
+              axisLine={{ stroke: 'rgba(0,0,0,0.18)' }}
             />
             <YAxis
               type="category"
               dataKey="name"
               width={96}
-              tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 12 }}
+              tick={{ fill: 'rgba(0,0,0,0.72)', fontSize: 12 }}
               tickLine={false}
-              axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}
+              axisLine={{ stroke: 'rgba(0,0,0,0.18)' }}
             />
             <Bar
               dataKey="value"
-              fill="rgba(255,255,255,0.4)"
+              fill="rgba(0,0,0,0.18)"
               radius={[0, 4, 4, 0]}
             />
           </BarChart>
