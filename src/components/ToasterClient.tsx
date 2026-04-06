@@ -30,14 +30,14 @@ function getToastIcon(notification: NotificationItem) {
 
 function getToastStyles(notification: NotificationItem) {
   if (notification.type === 'success') {
-    return 'border-green-400/20 bg-zinc-950/96'
+    return 'border-green-400/25 bg-white/96'
   }
 
   if (notification.type === 'error') {
-    return 'border-red-400/20 bg-zinc-950/96'
+    return 'border-red-400/25 bg-white/96'
   }
 
-  return 'border-white/15 bg-zinc-950/96'
+  return 'border-black/10 bg-white/96'
 }
 
 export function ToasterClient() {
@@ -79,7 +79,7 @@ export function ToasterClient() {
   }
 
   return (
-    <div className="pointer-events-none fixed right-4 top-4 z-[90] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 sm:right-6 sm:top-6">
+    <div className="pointer-events-none fixed right-4 top-4 z-90 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3 sm:right-6 sm:top-6">
       {visibleToasts.map((notification) => (
         <div
           key={notification.id}
@@ -90,14 +90,14 @@ export function ToasterClient() {
           <div className="flex items-start gap-3">
             {getToastIcon(notification)}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-black">
                 {notification.type === 'success'
                   ? 'Success'
                   : notification.type === 'error'
                     ? 'Error'
                     : 'Notification'}
               </p>
-              <p className="mt-1 text-sm text-white/80">{notification.message}</p>
+              <p className="mt-1 text-sm text-black/75">{notification.message}</p>
             </div>
             <button
               type="button"
@@ -105,7 +105,7 @@ export function ToasterClient() {
                 setMountedIds((previousIds) => previousIds.filter((id) => id !== notification.id))
                 removeNotification(notification.id)
               }}
-              className="rounded-full p-1 text-white/65 transition hover:bg-white/10 hover:text-white"
+              className="rounded-full p-1 text-black/55 transition hover:bg-black/6 hover:text-black"
               aria-label="Dismiss notification"
             >
               <span aria-hidden="true">x</span>
