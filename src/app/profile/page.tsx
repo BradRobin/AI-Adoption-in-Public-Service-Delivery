@@ -218,7 +218,7 @@ export default function ProfilePage() {
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="mobile-touch-target mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg bg-green-500 text-sm font-medium text-black transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
+                            className="mobile-touch-target mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg bg-green-500 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-500/60"
                         >
                             {isSaving ? 'Saving Changes...' : 'Save Profile'}
                         </button>

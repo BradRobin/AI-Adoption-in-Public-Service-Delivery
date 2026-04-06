@@ -164,10 +164,10 @@ export default function AdminReAuth() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full rounded-lg bg-green-500 px-4 py-3 font-semibold text-black transition hover:bg-green-400 disabled:opacity-50 flex justify-center items-center h-12"
+                                    className="flex h-12 w-full items-center justify-center rounded-lg bg-green-500 px-4 py-3 font-semibold text-white transition hover:bg-green-400 disabled:opacity-50"
                                 >
                                     {isLoading ? (
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                     ) : (
                                         'Authorize'
                                     )}

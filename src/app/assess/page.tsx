@@ -448,7 +448,7 @@ export default function AssessPage() {
                     <button
                       type="submit"
                       disabled={!isValid || isSaving}
-                      className="mobile-touch-target w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                      className="mobile-touch-target w-full rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
                     >
                       Submit Assessment
                     </button>

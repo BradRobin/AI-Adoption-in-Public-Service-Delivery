@@ -358,7 +358,7 @@ export function ServiceAssistantModal({ isOpen, onClose, serviceId, serviceTitle
                             <button
                                 type="submit"
                                 disabled={!input.trim() || isThinking}
-                                className="flex items-center justify-center rounded-xl bg-green-500 px-4 text-black transition hover:bg-green-400 disabled:opacity-50"
+                                className="flex items-center justify-center rounded-xl bg-green-500 px-4 text-white transition hover:bg-green-400 disabled:opacity-50"
                             >
                                 <Send size={18} />
                             </button>

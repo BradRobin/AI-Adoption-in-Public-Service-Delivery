@@ -470,6 +470,15 @@ html.high-contrast .text-green-400 {
     color: #ffffff !important;
   }
 
+  html.light-mode .bg-green-400.text-white,
+  html.light-mode .bg-green-500.text-white,
+  html.light-mode .bg-green-600.text-white,
+  html.light-mode .bg-green-700.text-white,
+  html.light-mode .bg-green-800.text-white,
+  html.light-mode .bg-green-900.text-white {
+    color: #ffffff !important;
+  }
+
   html.light-mode .guided-start-cta,
   html.light-mode .guided-start-cta:hover,
   html.light-mode .guided-start-cta:focus-visible {

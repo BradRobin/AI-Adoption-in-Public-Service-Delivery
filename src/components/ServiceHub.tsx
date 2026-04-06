@@ -329,7 +329,7 @@ export function ServiceHub({ demoMode = false, onDemoAssist }: ServiceHubProps) 
                                     }
                                     setSelectedService({ id: service.id, title: service.title })
                                 }}
-                                className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-400 transition-colors hover:bg-green-500 hover:text-black"
+                                className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-400 transition-colors hover:bg-green-500 hover:text-white"
                             >
                                 <Bot size={14} />
                                 <span>{demoMode ? 'Ask Demo Bot' : 'AI Assist'}</span>

@@ -37,7 +37,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
             <button
               type="button"
               onClick={reset}
-              className="flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-black transition-colors hover:bg-green-600"
+              className="flex h-10 min-w-[140px] items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors hover:bg-green-600"
             >
               Try again
             </button>

@@ -851,7 +851,7 @@ export default function ChatPage() {
             <div className="p-4 border-b border-white/10 hidden md:block">
               <button
                 onClick={handleNewChat}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 hover:bg-green-400 text-black px-4 py-3 text-sm font-medium transition"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-green-400"
               >
                 <Plus size={18} />
                 <span>New Chat</span>
@@ -973,7 +973,7 @@ export default function ChatPage() {
                   >
                     <div
                       className={`text-sm md:text-base ${message.role === 'user'
-                        ? 'max-w-[80%] rounded-2xl rounded-br-sm border border-green-400/30 bg-green-500 px-4 py-3 text-black'
+                        ? 'max-w-[80%] rounded-2xl rounded-br-sm border border-green-400/30 bg-green-500 px-4 py-3 text-white'
                         : 'max-w-full px-0 py-0 text-white'
                         }`}
                     >
@@ -1063,10 +1063,10 @@ export default function ChatPage() {
                   type="submit"
                   disabled={isThinking || input.trim().length === 0}
                   aria-label={isThinking ? `Thinking for ${formatThinkingTime(thinkingTime)}` : 'Send message'}
-                  className="mobile-touch-target inline-flex h-12 min-w-24 items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-black transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-24 md:px-5 md:text-base"
+                  className="mobile-touch-target inline-flex h-12 min-w-24 items-center justify-center rounded-xl bg-green-500 px-4 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:bg-green-500/60 md:h-11 md:min-w-24 md:px-5 md:text-base"
                 >
                   {isThinking && (
-                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-black border-t-transparent" aria-hidden="true" />
+                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border border-white border-t-transparent" aria-hidden="true" />
                   )}
                   {isThinking ? `${formatThinkingTime(thinkingTime)}` : 'Send'}
                 </button>

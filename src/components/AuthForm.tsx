@@ -456,7 +456,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasMinLength
-                        ? 'border-green-400 bg-green-500 text-black'
+                        ? 'border-green-400 bg-green-500 text-white'
                         : 'border-white/40 text-transparent'
                         }`}
                     >
@@ -467,7 +467,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasLetter
-                        ? 'border-green-400 bg-green-500 text-black'
+                        ? 'border-green-400 bg-green-500 text-white'
                         : 'border-white/40 text-transparent'
                         }`}
                     >
@@ -478,7 +478,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-flex h-4 w-4 items-center justify-center rounded-[3px] border text-[10px] ${hasNumberOrSymbol
-                        ? 'border-green-400 bg-green-500 text-black'
+                        ? 'border-green-400 bg-green-500 text-white'
                         : 'border-white/40 text-transparent'
                         }`}
                     >

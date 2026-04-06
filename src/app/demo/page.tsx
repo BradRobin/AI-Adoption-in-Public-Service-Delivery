@@ -182,7 +182,7 @@ export default function DemoPage() {
 
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-green-400"
+            className="inline-flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-400"
           >
             I’m impressed — Sign Up Now
           </Link>
@@ -203,7 +203,7 @@ export default function DemoPage() {
             </div>
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-500 hover:text-black"
+              className="inline-flex items-center justify-center rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-500 hover:text-white"
             >
               Start Full Access
             </Link>
@@ -268,7 +268,7 @@ export default function DemoPage() {
                 type="button"
                 onClick={() => handleSuggestion(suggestion)}
                 disabled={isThinking}
-                className="rounded-full border border-green-500/25 bg-green-500/10 px-3 py-1.5 text-xs text-green-200 transition hover:bg-green-500 hover:text-black disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full border border-green-500/25 bg-green-500/10 px-3 py-1.5 text-xs text-green-200 transition hover:bg-green-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {suggestion}
               </button>
@@ -310,7 +310,7 @@ export default function DemoPage() {
             <button
               type="submit"
               disabled={!canSend}
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-green-500 px-4 text-sm font-semibold text-black transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-green-500 px-4 text-sm font-semibold text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Send
             </button>
