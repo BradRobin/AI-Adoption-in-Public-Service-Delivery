@@ -284,7 +284,7 @@ export default function LandingPage() {
       </main>
 
       <section id="demo" className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-10">
-        <div className="rounded-2xl border border-white/12 bg-linear-to-br from-blue-500/10 via-black/45 to-green-500/10 p-6 text-left backdrop-blur-sm sm:p-8">
+        <div className="glass-surface rounded-2xl border border-white/12 bg-linear-to-br from-blue-500/12 via-white/6 to-green-500/12 p-6 text-left sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200/80">45-Second Demo</p>
           <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">See how your score is generated</h2>
           <p className="mt-2 max-w-2xl text-sm text-white/70 sm:text-base">
@@ -292,9 +292,9 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
-            <div className="overflow-hidden rounded-xl border border-white/15 bg-black/70 shadow-[0_24px_54px_rgb(0_0_0/0.45)]">
+            <div className="glass-surface overflow-hidden rounded-xl border border-white/15 bg-white/6 shadow-[0_24px_54px_rgb(0_0_0/0.32)]">
               <video
-                className="aspect-video h-auto w-full bg-black"
+                className="aspect-video h-auto w-full bg-transparent"
                 controls
                 preload="metadata"
                 playsInline
@@ -305,7 +305,7 @@ export default function LandingPage() {
               </video>
             </div>
 
-            <div className="rounded-xl border border-white/12 bg-black/35 p-5">
+            <div className="glass-surface rounded-xl border border-white/12 bg-white/6 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">What you&apos;ll see</p>
               <ul className="mt-3 space-y-2 text-sm text-white/80">
                 <li className="flex items-start gap-2">
@@ -343,7 +343,7 @@ export default function LandingPage() {
       </section>
 
       {/* Supported Services Carousel */}
-      <section className="relative z-10 w-full border-t border-white/10 bg-black/55 py-3 backdrop-blur-sm">
+      <section className="relative z-10 w-full py-3">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
             Supported Public Services
