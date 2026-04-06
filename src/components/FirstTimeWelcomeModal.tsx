@@ -67,12 +67,13 @@ function persistDismissed() {
 function StepOneScore({ score }: { score: number }) {
   const ringDegrees = Math.max(0, Math.min(100, score)) * 3.6
   const diff = score - KENYA_AVERAGE_SCORE
+  const ringTrackColor = 'rgb(0 0 0 / 0.08)'
 
   return (
     <div className="grid gap-4 md:grid-cols-[1.15fr_1fr]">
-      <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-zinc-800/90 p-5 shadow-[0_20px_70px_-35px_rgba(74,222,128,0.8)]">
+      <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-[0_20px_70px_-35px_rgba(74,222,128,0.45)]">
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Instant Benchmark</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/55">Instant Benchmark</p>
           <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300">
             LIVE PREVIEW
           </span>
@@ -85,21 +86,21 @@ function StepOneScore({ score }: { score: number }) {
             transition={{ duration: 0.4, ease: 'easeOut' }}
             className="relative grid h-32 w-32 place-items-center rounded-full"
             style={{
-              background: `conic-gradient(rgb(74 222 128) ${ringDegrees}deg, rgb(255 255 255 / 0.12) 0deg)`,
+              background: `conic-gradient(rgb(74 222 128) ${ringDegrees}deg, ${ringTrackColor} 0deg)`,
             }}
           >
-            <div className="grid h-24 w-24 place-items-center rounded-full bg-zinc-950">
-              <span className="text-2xl font-black text-white">{score}%</span>
+            <div className="grid h-24 w-24 place-items-center rounded-full bg-white shadow-inner shadow-black/8">
+              <span className="text-2xl font-black text-black">{score}%</span>
             </div>
           </motion.div>
 
           <div className="w-full space-y-3">
             <div>
-              <p className="text-sm text-white/65">Your projected readiness</p>
-              <p className="text-xl font-bold text-white">{score}%</p>
+              <p className="text-sm text-black/65">Your projected readiness</p>
+              <p className="text-xl font-bold text-black">{score}%</p>
             </div>
             <div>
-              <p className="text-sm text-white/65">Kenya public-sector average</p>
+              <p className="text-sm text-black/65">Kenya public-sector average</p>
               <p className="text-xl font-bold text-blue-300">{KENYA_AVERAGE_SCORE}%</p>
             </div>
           </div>
