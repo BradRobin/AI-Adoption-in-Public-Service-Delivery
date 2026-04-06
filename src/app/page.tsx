@@ -40,14 +40,14 @@ function ScorePreviewCard() {
         Your projected score: <strong className="text-green-300">72%</strong>
       </p>
       <p className="mb-3 text-xs text-white/60">
-        Kenya average: <strong className="text-blue-300">64%</strong>
+        Kenya average: <strong className="text-red-300">64%</strong>
       </p>
       <div className="space-y-2">
         <div className="h-2 overflow-hidden rounded-full bg-white/10">
           <div className="h-full w-[72%] rounded-full bg-green-400" />
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full w-[64%] rounded-full bg-blue-400" />
+          <div className="h-full w-[64%] rounded-full bg-red-400" />
         </div>
       </div>
     </div>
@@ -247,7 +247,7 @@ export default function LandingPage() {
             <motion.div whileHover={prefersReducedMotion ? undefined : { y: -2 }}>
               <Link
                 href="#demo"
-                className="group relative flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-full border border-blue-400/60 bg-blue-500/5 px-8 text-base font-semibold text-blue-200 transition hover:border-blue-300 hover:bg-blue-500/10 hover:text-blue-100 sm:min-w-55 sm:w-auto"
+                className="group relative flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-full border border-red-400/60 bg-red-500/5 px-8 text-base font-semibold text-red-200 transition hover:border-red-300 hover:bg-red-500/10 hover:text-red-100 sm:min-w-55 sm:w-auto"
               >
                 <PlayCircle size={18} />
                 <span>Watch 45-Second Demo</span>
@@ -268,7 +268,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-sm">
-              <h3 className="mb-2 font-semibold text-blue-400">Actionable Output</h3>
+              <h3 className="mb-2 font-semibold text-red-400">Actionable Output</h3>
               <p className="text-sm text-gray-300">
                 Receive a practical score with immediate guidance, not generic AI advice.
               </p>
@@ -284,8 +284,8 @@ export default function LandingPage() {
       </main>
 
       <section id="demo" className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-10">
-        <div className="glass-surface rounded-2xl border border-white/12 bg-linear-to-br from-blue-500/12 via-white/6 to-green-500/12 p-6 text-left sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200/80">45-Second Demo</p>
+        <div className="glass-surface rounded-2xl border border-white/12 bg-linear-to-br from-red-500/12 via-white/6 to-green-500/12 p-6 text-left sm:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-200/80">45-Second Demo</p>
           <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">See how your score is generated</h2>
           <p className="mt-2 max-w-2xl text-sm text-white/70 sm:text-base">
             A quick walkthrough of PARP&apos;s readiness assessment flow, benchmark comparison, and next-step recommendations.
@@ -313,7 +313,7 @@ export default function LandingPage() {
                   Instant score generation flow from sign-up to results.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-400" />
                   Side-by-side benchmark against Kenya average.
                 </li>
                 <li className="flex items-start gap-2">
@@ -325,7 +325,7 @@ export default function LandingPage() {
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <a
                   href={DEMO_VIDEO_SRC}
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-black transition hover:border-blue-200 hover:bg-blue-500/25"
+                  className="inline-flex items-center gap-2 rounded-full border border-red-300/30 bg-red-500/15 px-4 py-2 text-xs font-semibold text-black transition hover:border-red-200 hover:bg-red-500/25"
                 >
                   <PlayCircle size={14} />
                   Open Full Reel
