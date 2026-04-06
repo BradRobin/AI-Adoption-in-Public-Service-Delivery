@@ -124,13 +124,13 @@ function StepOneScore({ score }: { score: number }) {
 
 function StepTwoChatPreview() {
   return (
-    <div className="rounded-2xl border border-white/12 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-5">
+    <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-[0_20px_60px_-36px_rgba(59,130,246,0.22)]">
       <div className="mb-4 flex items-center justify-between">
-        <p className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Bot className="h-4 w-4 text-green-300" />
+        <p className="flex items-center gap-2 text-sm font-semibold text-black/85">
+          <Bot className="h-4 w-4 text-green-600" />
           PARP Kenyan AI Advisor
         </p>
-        <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-green-300">
+        <span className="rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-green-700">
           LIVE PREVIEW
         </span>
       </div>
@@ -140,7 +140,7 @@ function StepTwoChatPreview() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-white/10 bg-white/10 px-3 py-2 text-sm text-white/90"
+          className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-black/8 bg-black/4 px-3 py-2 text-sm text-black/75"
         >
           Sasa boss, nipatie quick readiness score, gigs na service shortcut za leo.
         </motion.div>
@@ -149,7 +149,7 @@ function StepTwoChatPreview() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="max-w-[88%] rounded-2xl rounded-bl-md border border-green-400/20 bg-green-500/10 px-3 py-2 text-sm text-white/90"
+          className="max-w-[88%] rounded-2xl rounded-bl-md border border-green-500/20 bg-green-500/8 px-3 py-2 text-sm text-black/80"
         >
           Karibu sana. Nakuonyesha score estimate, gigs 2 unaweza start wiki hii, na huduma gani upate faster kulingana na location yako. Twende Sheng ama English?
         </motion.div>
@@ -158,11 +158,11 @@ function StepTwoChatPreview() {
           initial={{ opacity: 0 }}
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/65"
+          className="inline-flex items-center gap-1 rounded-full border border-black/8 bg-black/4 px-3 py-1 text-xs text-black/55"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-green-300" />
-          <span className="h-1.5 w-1.5 rounded-full bg-green-300" />
-          <span className="h-1.5 w-1.5 rounded-full bg-green-300" />
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
           <span className="ml-1">Advisor is typing...</span>
         </motion.div>
       </div>
