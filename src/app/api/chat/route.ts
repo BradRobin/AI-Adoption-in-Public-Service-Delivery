@@ -13,6 +13,7 @@ type AuthenticatedUser = {
   user_metadata?: {
     username?: string
     location?: string
+    gender?: string
     [key: string]: unknown
   }
 }
@@ -60,6 +61,7 @@ type UserChatContext = {
   username: string
   role: string
   location: string
+  gender: string
   adoptionRate: number | null
   adoptionRateLabel: string
 }
@@ -73,6 +75,7 @@ Live user context:
 - Username: ${context.username}
 - Role: ${context.role}
 - Location: ${context.location}
+- Gender preference: ${context.gender}
 - Latest adoption rate: ${context.adoptionRateLabel}
 
 Mode requirements:
@@ -86,6 +89,7 @@ Response requirements:
 - Prefer short sections and bullets when they make the answer easier to act on.
 - Give actionable next steps, likely stakeholders, implementation risks, and sequencing guidance when relevant.
 - Use the live user context when relevant.
+- Respect the user's gender preference when it is helpful. If the preference is "Rather not say", avoid gendered assumptions.
 - If the user asks for their adoption rate, readiness score, or current score, use the live adoption rate above and do not invent another number.
 - Be explicit when you are uncertain.
 
@@ -147,6 +151,21 @@ function normalizeProfileLocation(location: string | null | undefined, user: Aut
   return 'Kenya'
 }
 
+function normalizeProfileGender(gender: string | null | undefined, user: AuthenticatedUser | undefined | null) {
+  const rawGender = gender ?? (typeof user?.user_metadata?.gender === 'string' ? user.user_metadata.gender : null)
+  const normalized = rawGender?.trim().toLowerCase()
+
+  if (normalized === 'male') {
+    return 'Male'
+  }
+
+  if (normalized === 'female') {
+    return 'Female'
+  }
+
+  return 'Rather not say'
+}
+
 function formatAdoptionRateLabel(adoptionRate: number | null) {
   return adoptionRate === null ? 'No recorded assessment yet' : `${adoptionRate}%`
 }
@@ -185,34 +204,47 @@ async function fetchUserChatContext(opts: {
 
   let role = 'Citizen/User'
   let location = normalizeProfileLocation(undefined, opts.user)
+  let gender = normalizeProfileGender(undefined, opts.user)
   let adoptionRate: number | null = null
 
   try {
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role, location')
-      .eq('id', opts.userId)
-      .maybeSingle()
+    let profile:
+      | {
+          role?: string | null
+          location?: string | null
+          gender?: string | null
+        }
+      | null = null
+    let profileError: unknown = null
+
+    const profileQueries = ['role, location, gender', 'role, location', 'role, gender', 'role']
+
+    for (const selectClause of profileQueries) {
+      const result = await supabase.from('profiles').select(selectClause).eq('id', opts.userId).maybeSingle()
+
+      if (!result.error) {
+        profile = result.data as typeof profile
+        profileError = null
+        break
+      }
+
+      if (isMissingColumnError(result.error, 'gender') || isMissingColumnError(result.error, 'location')) {
+        profileError = result.error
+        continue
+      }
+
+      profileError = result.error
+      break
+    }
 
     if (profileError) {
-      if (isMissingColumnError(profileError, 'location')) {
-        const { data: fallbackProfile, error: fallbackProfileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', opts.userId)
-          .maybeSingle()
+      console.error('Chat context profile lookup failed:', profileError)
+    }
 
-        if (fallbackProfileError) {
-          console.error('Chat context profile fallback failed:', fallbackProfileError)
-        } else {
-          role = fallbackProfile?.role?.trim() || role
-        }
-      } else {
-        console.error('Chat context profile lookup failed:', profileError)
-      }
-    } else {
+    if (profile) {
       role = profile?.role?.trim() || role
       location = normalizeProfileLocation(profile?.location, opts.user)
+      gender = normalizeProfileGender(profile?.gender, opts.user)
     }
   } catch (error) {
     console.error('Unexpected chat context profile error:', error)
@@ -240,6 +272,7 @@ async function fetchUserChatContext(opts: {
     username: formatUsername(opts.user),
     role,
     location,
+    gender,
     adoptionRate,
     adoptionRateLabel: formatAdoptionRateLabel(adoptionRate),
   } satisfies UserChatContext
@@ -258,8 +291,10 @@ function generateSystemPrompt(context: UserChatContext) {
    - The user's username is: ${context.username}
    - The user's role is: ${context.role}
    - The user's location is: ${context.location}
+  - The user's gender preference is: ${context.gender}
    - The user's latest adoption rate is: ${context.adoptionRateLabel}
    Always personalize your advice based on this user context when relevant (e.g. mention local services, location-specific issues, role-specific challenges, or their latest readiness level).
+  Respect the user's gender preference only when it genuinely improves the response. If the preference is Rather not say, avoid gendered assumptions.
 
   First Interaction (Critical):
   - Your very first response in a chat must create instant wow.

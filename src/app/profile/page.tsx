@@ -21,6 +21,14 @@ import { TypingTagline } from '@/components/TypingTagline'
 import { CountySelect } from '@/components/CountySelect'
 import { supabase } from '@/lib/supabase/client'
 
+type GenderOption = 'male' | 'female' | 'rather_not_say'
+
+const GENDER_OPTIONS: Array<{ value: GenderOption; label: string }> = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'rather_not_say', label: 'Rather not say' },
+]
+
 /**
  * ProfilePage Component
  * Provides a form interface for users to view and update their account settings.
@@ -32,6 +40,7 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true)
 
     const [location, setLocation] = useState('')
+    const [gender, setGender] = useState<GenderOption>('rather_not_say')
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -49,15 +58,17 @@ export default function ProfilePage() {
             setSession(currentSession)
             setEmail(currentSession.user.email || '')
             setUsername((currentSession.user.user_metadata?.username as string) || '')
+            setGender(((currentSession.user.user_metadata?.gender as GenderOption | undefined) ?? 'rather_not_say'))
 
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('location')
+                .select('location, gender')
                 .eq('id', currentSession.user.id)
                 .single()
 
             if (profile) {
                 setLocation(profile.location || '')
+                setGender((profile.gender as GenderOption | null) || 'rather_not_say')
             } else if (error) {
                 console.error('Error fetching profile:', error)
             }
@@ -93,8 +104,11 @@ export default function ProfilePage() {
             hasAuthChanges = true
         }
 
-        if (username !== (session.user.user_metadata?.username || '')) {
-            authUpdates.data = { username }
+        const currentMetadata = session.user.user_metadata || {}
+        const currentGender = (currentMetadata.gender as GenderOption | undefined) ?? 'rather_not_say'
+
+        if (username !== (currentMetadata.username || '') || gender !== currentGender || location !== ((currentMetadata.location as string | undefined) || '')) {
+            authUpdates.data = { ...currentMetadata, username, gender, location }
             hasAuthChanges = true
         }
 
@@ -106,7 +120,7 @@ export default function ProfilePage() {
 
         const { error: profileError } = await supabase
             .from('profiles')
-            .update({ location: location.trim() })
+            .update({ location: location.trim(), gender })
             .eq('id', session.user.id)
 
         if (profileError) {
@@ -214,6 +228,31 @@ export default function ProfilePage() {
                             />
                             <p className="mt-1 text-xs text-white/40">Helps personalize AI responses to your region.</p>
                         </div>
+
+                        <fieldset>
+                            <legend className="mb-1 block text-sm font-medium text-white/80">Gender</legend>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                {GENDER_OPTIONS.map((option) => {
+                                    const isSelected = gender === option.value
+
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => setGender(option.value)}
+                                            className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                                                isSelected
+                                                    ? 'border-green-400 bg-green-500 text-white'
+                                                    : 'border-white/10 bg-black/50 text-white/80 hover:border-white/25 hover:bg-black/40'
+                                            }`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                            <p className="mt-1 text-xs text-white/40">Used to keep chatbot replies appropriately personalized.</p>
+                        </fieldset>
 
                         <button
                             type="submit"

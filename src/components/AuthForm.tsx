@@ -14,11 +14,18 @@ import toast from '@/lib/toast'
 import { CountySelect } from '@/components/CountySelect'
 
 type AuthMode = 'login' | 'signup'
+type GenderOption = 'male' | 'female' | 'rather_not_say'
 
 type AuthFormProps = {
   initialMode?: AuthMode
   onLoginSuccess?: () => void
 }
+
+const GENDER_OPTIONS: Array<{ value: GenderOption; label: string }> = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'rather_not_say', label: 'Rather not say' },
+]
 
 /**
  * Analyzes password strength based on length, letters, and numbers/symbols.
@@ -50,6 +57,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
   const [password, setPassword] = useState('')
   const [forgotEmail, setForgotEmail] = useState('')
   const [location, setLocation] = useState('')
+  const [gender, setGender] = useState<GenderOption>('rather_not_say')
   const [showPassword, setShowPassword] = useState(false)
   const [showForgotPrompt, setShowForgotPrompt] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -186,10 +194,12 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
       const signupUsername = trimmedUsername
       const signupPassword = password
       const signupLocation = location
+      const signupGender = gender
       setEmail('')
       setUsername('')
       setPassword('')
       setLocation('')
+      setGender('rather_not_say')
 
       try {
         setIsSubmitting(true)
@@ -197,7 +207,7 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
           email: signupEmail,
           password: signupPassword,
           options: {
-            data: { username: signupUsername, location: signupLocation },
+            data: { username: signupUsername, location: signupLocation, gender: signupGender },
             emailRedirectTo:
               typeof window !== 'undefined'
                 ? `${window.location.origin}/login`
@@ -212,10 +222,13 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
         }
 
         // Update the profile with location if user was created
-        if (signUpData.user && signupLocation) {
+        if (signUpData.user) {
           await supabase
             .from('profiles')
-            .update({ location: signupLocation })
+            .update({
+              location: signupLocation,
+              gender: signupGender,
+            })
             .eq('id', signUpData.user.id)
         }
 
@@ -509,6 +522,32 @@ export function AuthForm({ initialMode = 'login', onLoginSuccess }: AuthFormProp
                 Helps personalize AI responses to your region.
               </p>
             </div>
+
+            <fieldset>
+              <legend className="mb-1 block text-sm font-medium text-white/80">Gender</legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {GENDER_OPTIONS.map((option) => {
+                  const isSelected = gender === option.value
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setGender(option.value)}
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'border-green-400 bg-green-500 text-white'
+                          : 'border-white/10 bg-black/60 text-white/80 hover:border-white/25 hover:bg-black/50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+                Used only to keep responses appropriately personalized. You can choose rather not say.
+              </p>
+            </fieldset>
           </>
         )}
 
