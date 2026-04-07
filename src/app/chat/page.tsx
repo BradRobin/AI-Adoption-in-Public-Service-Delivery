@@ -147,7 +147,7 @@ const TITLE_TOKEN_LABELS: Record<string, string> = {
 const SUGGESTED_PROMPTS = [
   {
     label: 'Estimate my AI readiness',
-    prompt: 'Niko kaunti officer Nairobi. Nipatie quick AI readiness score estimate based on my current setup.',
+    prompt: 'Nipatie quick AI readiness score estimate based on my current setup.',
   },
   {
     label: 'Find the fastest public service route',
@@ -960,10 +960,10 @@ export default function ChatPage() {
                       key={suggestion.label}
                       type="button"
                       onClick={() => handleSuggestedPromptClick(suggestion.prompt)}
-                      className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-left text-sm text-black transition hover:bg-green-500/10 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300 md:px-5 md:py-4 md:text-base"
+                      className="flex w-full items-center justify-between gap-3 rounded-2xl bg-transparent px-4 py-3 text-left text-sm text-black transition hover:bg-transparent hover:text-black focus-visible:outline-none focus-visible:ring-0 md:px-5 md:py-4 md:text-base"
                     >
                       <span className="pr-2 font-medium leading-relaxed">{suggestion.label}</span>
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-200">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-transparent text-black">
                         <ChevronRight size={18} />
                       </span>
                     </button>
