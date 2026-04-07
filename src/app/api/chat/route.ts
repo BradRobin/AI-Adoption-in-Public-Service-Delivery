@@ -66,6 +66,12 @@ type UserChatContext = {
   adoptionRateLabel: string
 }
 
+type UserProfileContext = {
+  role?: string | null
+  location?: string | null
+  gender?: string | null
+}
+
 const PARP_AI_FEATURE: ParpAiFeature = 'chat_with_parp_ai'
 
 function generateParpAiSystemInstructions(context: UserChatContext) {
@@ -208,13 +214,7 @@ async function fetchUserChatContext(opts: {
   let adoptionRate: number | null = null
 
   try {
-    let profile:
-      | {
-          role?: string | null
-          location?: string | null
-          gender?: string | null
-        }
-      | null = null
+    let profile: UserProfileContext | null = null
     let profileError: unknown = null
 
     const profileQueries = ['role, location, gender', 'role, location', 'role, gender', 'role']
@@ -223,7 +223,7 @@ async function fetchUserChatContext(opts: {
       const result = await supabase.from('profiles').select(selectClause).eq('id', opts.userId).maybeSingle()
 
       if (!result.error) {
-        profile = result.data as typeof profile
+        profile = result.data as UserProfileContext | null
         profileError = null
         break
       }
@@ -242,9 +242,9 @@ async function fetchUserChatContext(opts: {
     }
 
     if (profile) {
-      role = profile?.role?.trim() || role
-      location = normalizeProfileLocation(profile?.location, opts.user)
-      gender = normalizeProfileGender(profile?.gender, opts.user)
+      role = profile.role?.trim() || role
+      location = normalizeProfileLocation(profile.location, opts.user)
+      gender = normalizeProfileGender(profile.gender, opts.user)
     }
   } catch (error) {
     console.error('Unexpected chat context profile error:', error)
