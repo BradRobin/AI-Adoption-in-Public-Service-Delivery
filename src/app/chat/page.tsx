@@ -21,7 +21,7 @@ import { supabase } from '@/lib/supabase/client'
 import { usePrivacyConsent } from '@/components/PrivacyBanner'
 import { NavigationMenu } from '@/components/NavigationMenu'
 import { TypingTagline } from '@/components/TypingTagline'
-import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, Menu } from 'lucide-react'
+import { Video, VideoOff, ThumbsUp, ThumbsDown, Copy, Volume2, Plus, MessageSquare, Trash2, Edit2, Check, Menu, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const AvatarAdvisor = dynamic(() => import('@/components/AvatarAdvisor'), {
@@ -144,11 +144,20 @@ const TITLE_TOKEN_LABELS: Record<string, string> = {
   transformation: 'Transformation',
 }
 
-const HERO_EXAMPLE_PROMPT = {
-  label: 'Try example question',
-  prompt:
-    'Niko kaunti officer Nairobi. Nipatie quick AI readiness score estimate, 2 online gigs naweza anza this week, na public services naweza speed up leo.',
-}
+const SUGGESTED_PROMPTS = [
+  {
+    label: 'Estimate my AI readiness',
+    prompt: 'Niko kaunti officer Nairobi. Nipatie quick AI readiness score estimate based on my current setup.',
+  },
+  {
+    label: 'Find the fastest public service route',
+    prompt: 'Nisaidie identify public services naweza speed up leo and the fastest steps to complete them in Kenya.',
+  },
+  {
+    label: 'Suggest practical online gigs',
+    prompt: 'Nipatie 3 practical online gigs naweza anza this week plus the first steps and tools needed.',
+  },
+] as const
 
 function renderWithPrivacyLink(text: string): React.ReactNode {
   const pattern = /(Privacy Policy|Privacy)/gi
@@ -307,11 +316,11 @@ export default function ChatPage() {
   const thinkingTimeRef = useRef(0)
   const hasResolvedConversationQueryRef = useRef(false)
 
-  const handleStarterPromptClick = () => {
-    setInput(HERO_EXAMPLE_PROMPT.prompt)
+  const handleSuggestedPromptClick = (prompt: string) => {
+    setInput(prompt)
     window.requestAnimationFrame(() => {
       inputRef.current?.focus()
-      const length = HERO_EXAMPLE_PROMPT.prompt.length
+      const length = prompt.length
       inputRef.current?.setSelectionRange(length, length)
     })
   }
@@ -945,20 +954,20 @@ export default function ChatPage() {
               className="flex-1 space-y-3 overflow-y-auto px-4 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30"
             >
               {messages.length === 0 && !isThinking && (
-                <div className="mt-6 rounded-2xl border border-green-400/25 bg-linear-to-br from-green-500/10 via-black/50 to-blue-500/10 px-4 py-4 text-xs text-white/80 shadow-[0_18px_40px_-26px_rgba(74,222,128,0.9)] md:px-5 md:py-5 md:text-sm">
-                  <p className="text-base font-semibold text-white md:text-lg">
-                    Karibu sana. Tuanze na quick win leo.
-                  </p>
-                  <p className="mt-2 leading-relaxed text-white/80">
-                    I can instantly help you estimate your AI readiness score, suggest practical online gigs, and guide you through public services faster. Uliza kwa Sheng ama English, vile unafeel.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleStarterPromptClick}
-                    className="mt-3 inline-flex items-center rounded-full border border-green-300/35 bg-green-500/15 px-3 py-1.5 text-xs font-semibold text-green-200 transition hover:bg-green-500/25 hover:text-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300 md:text-sm"
-                  >
-                    {HERO_EXAMPLE_PROMPT.label}
-                  </button>
+                <div className="mt-6 space-y-3">
+                  {SUGGESTED_PROMPTS.map((suggestion) => (
+                    <button
+                      key={suggestion.label}
+                      type="button"
+                      onClick={() => handleSuggestedPromptClick(suggestion.prompt)}
+                      className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-left text-sm text-black transition hover:bg-green-500/10 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300 md:px-5 md:py-4 md:text-base"
+                    >
+                      <span className="pr-2 font-medium leading-relaxed">{suggestion.label}</span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-200">
+                        <ChevronRight size={18} />
+                      </span>
+                    </button>
+                  ))}
                 </div>
               )}
 
