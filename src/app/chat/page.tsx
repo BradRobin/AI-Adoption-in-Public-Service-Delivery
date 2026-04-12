@@ -93,6 +93,8 @@ const TITLE_STOP_WORDS = new Set([
   'your',
 ])
 
+
+
 const TITLE_PHRASES = [
   { pattern: /report issue/i, label: 'Issue Report', weight: 10 },
   { pattern: /ai readiness|readiness assessment/i, label: 'AI Readiness', weight: 9 },
