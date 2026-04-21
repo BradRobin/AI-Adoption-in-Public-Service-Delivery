@@ -1352,6 +1352,7 @@ export async function POST(req: Request) {
           for (const strategy of strategies) {
             try {
               await strategy()
+              send('done', 'ok')
               return
             } catch (err) {
               lastErr = err
@@ -1364,7 +1365,7 @@ export async function POST(req: Request) {
       } catch (err) {
         // Log error for debugging but send user-friendly message to client
         console.error('Chat streaming error:', err)
-        const msg = 'I encountered an issue generating a response. Please try again in a moment.'
+        const msg = 'Sorry — I couldn\'t reach the AI service. I encountered an issue generating a response. Please try again in a moment.'
         send('error', msg)
       } finally {
         controller.close()
