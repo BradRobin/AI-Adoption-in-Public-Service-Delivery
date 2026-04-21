@@ -74,6 +74,18 @@ type UserProfileContext = {
 
 const PARP_AI_FEATURE: ParpAiFeature = 'chat_with_parp_ai'
 
+/**
+ * Free LLM Providers Configuration
+ * These are completely free tiers with no payment required
+ */
+const FREE_LLM_PROVIDERS = {
+  GROQ: 'groq', // Free API with extremely fast inference
+  REPLICATE: 'replicate', // Free tier for various models
+  HUGGINGFACE: 'huggingface', // Free inference API
+  MISTRAL: 'mistral', // Free API tier available
+  OLLAMA: 'ollama', // Local, completely free
+}
+
 function generateParpAiSystemInstructions(context: UserChatContext) {
   return `You are PARP AI operating inside the Chat with PARP AI dashboard card for the PARP Platform.
 
@@ -610,6 +622,149 @@ async function completeFromOpenAI(opts: {
   return json.choices?.[0]?.message?.content?.trim() ?? ''
 }
 
+async function completeFromGroq(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error(`Groq error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>
+  }
+  return json.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
+async function completeFromReplicate(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  // Replicate uses a different API format - model identifier includes version
+  const userMessages = opts.messages.filter((m) => m.role === 'user' || m.role === 'assistant')
+  const systemMessage = opts.messages.find((m) => m.role === 'system')?.content ?? ''
+  const prompt = userMessages.map((m) => `${m.role}: ${m.content}`).join('\n')
+
+  const res = await fetch('https://api.replicate.com/v1/predictions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Token ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      version: opts.model,
+      input: {
+        prompt: `${systemMessage}\n\n${prompt}`,
+        max_length: 1024,
+        temperature: 0.3,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error(`Replicate error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const json = (await res.json()) as {
+    output?: string[] | string
+  }
+
+  if (Array.isArray(json.output)) {
+    return json.output.join('').trim()
+  }
+  return typeof json.output === 'string' ? json.output.trim() : ''
+}
+
+async function completeFromHuggingFace(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const userMessage = opts.messages.find((m) => m.role === 'user')?.content ?? 'Hello'
+
+  const res = await fetch(`https://api-inference.huggingface.co/models/${opts.model}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      inputs: userMessage,
+      parameters: {
+        max_length: 1024,
+        temperature: 0.3,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error(`HuggingFace error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const json = (await res.json()) as Array<{
+    generated_text?: string
+  }>
+
+  if (Array.isArray(json) && json[0]?.generated_text) {
+    return json[0].generated_text.trim()
+  }
+
+  return ''
+}
+
+async function completeFromMistral(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error(`Mistral error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>
+  }
+  return json.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
 async function completeFromTogether(opts: {
   apiKey: string
   model: string
@@ -640,6 +795,128 @@ async function completeFromTogether(opts: {
     choices?: Array<{ message?: { content?: string } }>
   }
   return json.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
+async function streamFromGroq(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+  onToken: (token: string) => void
+}) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      stream: true,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const text = await res.text().catch(() => '')
+    console.error(`Groq error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    while (true) {
+      const sepIdx = buffer.indexOf('\n\n')
+      if (sepIdx === -1) break
+      const chunk = buffer.slice(0, sepIdx)
+      buffer = buffer.slice(sepIdx + 2)
+
+      const lines = chunk.split('\n').map((l) => l.trim())
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue
+        const data = line.slice('data:'.length).trim()
+        if (data === '[DONE]') return
+        try {
+          const obj = JSON.parse(data) as any
+          const token = obj?.choices?.[0]?.delta?.content
+          if (typeof token === 'string' && token.length > 0) {
+            opts.onToken(token)
+          }
+        } catch {
+          // Ignore malformed JSON
+        }
+      }
+    }
+  }
+}
+
+async function streamFromMistral(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+  onToken: (token: string) => void
+}) {
+  const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      stream: true,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const text = await res.text().catch(() => '')
+    console.error(`Mistral error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    while (true) {
+      const sepIdx = buffer.indexOf('\n\n')
+      if (sepIdx === -1) break
+      const chunk = buffer.slice(0, sepIdx)
+      buffer = buffer.slice(sepIdx + 2)
+
+      const lines = chunk.split('\n').map((l) => l.trim())
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue
+        const data = line.slice('data:'.length).trim()
+        if (data === '[DONE]') return
+        try {
+          const obj = JSON.parse(data) as any
+          const token = obj?.choices?.[0]?.delta?.content
+          if (typeof token === 'string' && token.length > 0) {
+            opts.onToken(token)
+          }
+        } catch {
+          // Ignore malformed JSON
+        }
+      }
+    }
+  }
 }
 
 async function streamFromTogether(opts: {
@@ -709,6 +986,14 @@ async function completeFromConfiguredProvider(opts: {
   provider: string
   ollamaBaseUrl: string
   ollamaModel: string
+  groqApiKey: string
+  groqModel: string
+  mistralApiKey: string
+  mistralModel: string
+  huggingfaceApiKey: string
+  huggingfaceModel: string
+  replicateApiKey: string
+  replicateModel: string
   togetherApiKey: string
   togetherModel: string
   messages: LlmMessage[]
@@ -720,11 +1005,44 @@ async function completeFromConfiguredProvider(opts: {
       messages: opts.messages,
     })
 
-  const tryTogether = async () => {
-    if (!opts.togetherApiKey) {
-      throw new Error('TOGETHER_API_KEY is not configured.')
-    }
+  const tryGroq = async () => {
+    if (!opts.groqApiKey) throw new Error('GROQ_API_KEY not configured')
+    return completeFromGroq({
+      apiKey: opts.groqApiKey,
+      model: opts.groqModel,
+      messages: opts.messages,
+    })
+  }
 
+  const tryMistral = async () => {
+    if (!opts.mistralApiKey) throw new Error('MISTRAL_API_KEY not configured')
+    return completeFromMistral({
+      apiKey: opts.mistralApiKey,
+      model: opts.mistralModel,
+      messages: opts.messages,
+    })
+  }
+
+  const tryHuggingFace = async () => {
+    if (!opts.huggingfaceApiKey) throw new Error('HUGGINGFACE_API_KEY not configured')
+    return completeFromHuggingFace({
+      apiKey: opts.huggingfaceApiKey,
+      model: opts.huggingfaceModel,
+      messages: opts.messages,
+    })
+  }
+
+  const tryReplicate = async () => {
+    if (!opts.replicateApiKey) throw new Error('REPLICATE_API_KEY not configured')
+    return completeFromReplicate({
+      apiKey: opts.replicateApiKey,
+      model: opts.replicateModel,
+      messages: opts.messages,
+    })
+  }
+
+  const tryTogether = async () => {
+    if (!opts.togetherApiKey) throw new Error('TOGETHER_API_KEY not configured')
     return completeFromTogether({
       apiKey: opts.togetherApiKey,
       model: opts.togetherModel,
@@ -732,20 +1050,31 @@ async function completeFromConfiguredProvider(opts: {
     })
   }
 
-  if (opts.provider === 'together') {
-    return tryTogether()
+  // Explicit provider selection
+  if (opts.provider === 'ollama') return tryOllama()
+  if (opts.provider === 'groq') return tryGroq()
+  if (opts.provider === 'mistral') return tryMistral()
+  if (opts.provider === 'huggingface') return tryHuggingFace()
+  if (opts.provider === 'replicate') return tryReplicate()
+  if (opts.provider === 'together') return tryTogether()
+
+  // Default 'auto' mode: Try free options first, fall back through them
+  // Order: Ollama (local) -> Groq (fastest free) -> Mistral -> HuggingFace -> Replicate
+  const strategies = [tryOllama, tryGroq, tryMistral, tryHuggingFace, tryReplicate, tryTogether]
+
+  let lastError: unknown
+  for (const strategy of strategies) {
+    try {
+      return await strategy()
+    } catch (err) {
+      lastError = err
+      console.warn(`Strategy failed:`, err instanceof Error ? err.message : err)
+      // Continue to next strategy
+    }
   }
 
-  if (opts.provider === 'ollama') {
-    return tryOllama()
-  }
-
-  // Default: try Together first, fall back to Ollama
-  try {
-    return await tryTogether()
-  } catch {
-    return tryOllama()
-  }
+  // If all else fails, throw the last error
+  throw lastError
 }
 
 async function handleParpAiChat(auth: { token?: string; userId?: string; user?: AuthenticatedUser | null }, body: ParpAiChatRequestBody) {
@@ -821,17 +1150,33 @@ async function handleParpAiChat(auth: { token?: string; userId?: string; user?: 
     { role: 'user', content: userMessage },
   ])
 
-  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'together').toLowerCase()
+  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'auto').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
-  const ollamaModel = process.env.PARP_AI_OLLAMA_MODEL ?? process.env.OLLAMA_MODEL ?? 'gemma2:2b'
+  const ollamaModel = process.env.PARP_AI_OLLAMA_MODEL ?? process.env.OLLAMA_MODEL ?? 'llama2'
+  const groqApiKey = process.env.PARP_AI_GROQ_API_KEY ?? process.env.GROQ_API_KEY ?? ''
+  const groqModel = process.env.PARP_AI_GROQ_MODEL ?? 'mixtral-8x7b-32768'
+  const mistralApiKey = process.env.PARP_AI_MISTRAL_API_KEY ?? process.env.MISTRAL_API_KEY ?? ''
+  const mistralModel = process.env.PARP_AI_MISTRAL_MODEL ?? 'mistral-medium'
+  const huggingfaceApiKey = process.env.PARP_AI_HUGGINGFACE_API_KEY ?? process.env.HUGGINGFACE_API_KEY ?? ''
+  const huggingfaceModel = process.env.PARP_AI_HUGGINGFACE_MODEL ?? 'mistralai/Mistral-7B-Instruct-v0.1'
+  const replicateApiKey = process.env.PARP_AI_REPLICATE_API_KEY ?? process.env.REPLICATE_API_KEY ?? ''
+  const replicateModel = process.env.PARP_AI_REPLICATE_MODEL ?? ''
   const togetherApiKey = process.env.PARP_AI_TOGETHER_API_KEY ?? process.env.TOGETHER_API_KEY ?? ''
-  const togetherModel = process.env.PARP_AI_TOGETHER_MODEL ?? 'meta-llama/Llama-2-7b-chat-hf'
+  const togetherModel = process.env.PARP_AI_TOGETHER_MODEL ?? process.env.TOGETHER_MODEL ?? 'meta-llama/Llama-2-7b-chat-hf'
 
   try {
     const assistantMessage = await completeFromConfiguredProvider({
       provider,
       ollamaBaseUrl,
       ollamaModel,
+      groqApiKey,
+      groqModel,
+      mistralApiKey,
+      mistralModel,
+      huggingfaceApiKey,
+      huggingfaceModel,
+      replicateApiKey,
+      replicateModel,
       togetherApiKey,
       togetherModel,
       messages: stitchedMessages,
@@ -939,9 +1284,17 @@ export async function POST(req: Request) {
   const stitched = buildLlmMessages(activeSystemPrompt, history)
 
   // Retrieve configuration from environment variables
-  const provider = (body.provider || process.env.LLM_PROVIDER || 'together').toLowerCase()
+  const provider = (body.provider || process.env.LLM_PROVIDER || 'auto').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
-  const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
+  const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama2'
+  const groqApiKey = process.env.GROQ_API_KEY ?? ''
+  const groqModel = process.env.GROQ_MODEL ?? 'mixtral-8x7b-32768'
+  const mistralApiKey = process.env.MISTRAL_API_KEY ?? ''
+  const mistralModel = process.env.MISTRAL_MODEL ?? 'mistral-medium'
+  const huggingfaceApiKey = process.env.HUGGINGFACE_API_KEY ?? ''
+  const huggingfaceModel = process.env.HUGGINGFACE_MODEL ?? 'mistralai/Mistral-7B-Instruct-v0.1'
+  const replicateApiKey = process.env.REPLICATE_API_KEY ?? ''
+  const replicateModel = process.env.REPLICATE_MODEL ?? ''
   const togetherApiKey = process.env.TOGETHER_API_KEY ?? ''
   const togetherModel = process.env.TOGETHER_MODEL ?? 'meta-llama/Llama-2-7b-chat-hf'
 
@@ -965,29 +1318,46 @@ export async function POST(req: Request) {
         })
       }
 
-      const tryTogether = async () => {
-        if (!togetherApiKey) throw new Error('TOGETHER_API_KEY is not configured.')
-        await streamFromTogether({
-          apiKey: togetherApiKey,
-          model: togetherModel,
+      const tryGroq = async () => {
+        if (!groqApiKey) throw new Error('GROQ_API_KEY not configured')
+        await streamFromGroq({
+          apiKey: groqApiKey,
+          model: groqModel,
+          messages: stitched,
+          onToken: (t) => send('token', t),
+        })
+      }
+
+      const tryMistral = async () => {
+        if (!mistralApiKey) throw new Error('MISTRAL_API_KEY not configured')
+        await streamFromMistral({
+          apiKey: mistralApiKey,
+          model: mistralModel,
           messages: stitched,
           onToken: (t) => send('token', t),
         })
       }
 
       try {
-        if (provider === 'together') {
-          await tryTogether()
-        } else if (provider === 'ollama') {
+        if (provider === 'ollama') {
           await tryOllama()
+        } else if (provider === 'groq') {
+          await tryGroq()
+        } else if (provider === 'mistral') {
+          await tryMistral()
         } else {
-          // auto: prefer Together, fall back to Ollama
-          try {
-            await tryTogether()
-          } catch (err) {
-            send('info', 'Temporarily using local model.')
-            await tryOllama()
+          // auto: prefer Ollama, fall back through free options
+          const strategies = [tryOllama, tryGroq, tryMistral]
+          let lastErr: unknown
+          for (const strategy of strategies) {
+            try {
+              await strategy()
+              return
+            } catch (err) {
+              lastErr = err
+            }
           }
+          throw lastErr
         }
 
         send('done', 'ok')
