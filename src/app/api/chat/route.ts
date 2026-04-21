@@ -439,7 +439,9 @@ async function streamFromOllama(opts: {
 
   if (!res.ok || !res.body) {
     const text = await res.text().catch(() => '')
-    throw new Error(`Ollama error (${res.status}): ${text || res.statusText}`)
+    // Log raw error internally but throw user-friendly message
+    console.error(`Ollama error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
   }
 
   const reader = res.body.getReader()
@@ -508,7 +510,9 @@ async function streamFromOpenAI(opts: {
 
   if (!res.ok || !res.body) {
     const text = await res.text().catch(() => '')
-    throw new Error(`OpenAI error (${res.status}): ${text || res.statusText}`)
+    // Log raw error internally but throw user-friendly message
+    console.error(`OpenAI error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
   }
 
   const reader = res.body.getReader()
@@ -563,7 +567,9 @@ async function completeFromOllama(opts: {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`Ollama error (${res.status}): ${text || res.statusText}`)
+    // Log raw error internally but throw user-friendly message
+    console.error(`Ollama error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
   }
 
   const json = (await res.json()) as {
@@ -593,7 +599,9 @@ async function completeFromOpenAI(opts: {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`OpenAI error (${res.status}): ${text || res.statusText}`)
+    // Log raw error internally but throw user-friendly message
+    console.error(`OpenAI error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
   }
 
   const json = (await res.json()) as {
@@ -602,13 +610,107 @@ async function completeFromOpenAI(opts: {
   return json.choices?.[0]?.message?.content?.trim() ?? ''
 }
 
+async function completeFromTogether(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+}) {
+  const res = await fetch('https://api.together.xyz/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    // Log raw error internally but throw user-friendly message
+    console.error(`Together.ai error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>
+  }
+  return json.choices?.[0]?.message?.content?.trim() ?? ''
+}
+
+async function streamFromTogether(opts: {
+  apiKey: string
+  model: string
+  messages: LlmMessage[]
+  onToken: (token: string) => void
+}) {
+  const res = await fetch('https://api.together.xyz/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${opts.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      messages: opts.messages,
+      stream: true,
+      temperature: 0.3,
+      max_tokens: 1024,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const text = await res.text().catch(() => '')
+    // Log raw error internally but throw user-friendly message
+    console.error(`Together.ai error (${res.status}):`, text)
+    throw new Error('Unable to generate response. Please try again in a moment.')
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    // Together.ai streams SSE lines like: "data: {...}\n\n"
+    while (true) {
+      const sepIdx = buffer.indexOf('\n\n')
+      if (sepIdx === -1) break
+      const chunk = buffer.slice(0, sepIdx)
+      buffer = buffer.slice(sepIdx + 2)
+
+      const lines = chunk.split('\n').map((l) => l.trim())
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue
+        const data = line.slice('data:'.length).trim()
+        if (data === '[DONE]') return
+        try {
+          const obj = JSON.parse(data) as any
+          const token = obj?.choices?.[0]?.delta?.content
+          if (typeof token === 'string' && token.length > 0) {
+            opts.onToken(token)
+          }
+        } catch {
+          // Ignore malformed JSON.
+        }
+      }
+    }
+  }
+}
+
 async function completeFromConfiguredProvider(opts: {
   provider: string
   ollamaBaseUrl: string
   ollamaModel: string
-  openAiBaseUrl: string
-  openAiKey: string
-  openAiModel: string
+  togetherApiKey: string
+  togetherModel: string
   messages: LlmMessage[]
 }) {
   const tryOllama = async () =>
@@ -618,35 +720,31 @@ async function completeFromConfiguredProvider(opts: {
       messages: opts.messages,
     })
 
-  const tryOpenAICompatible = async () => {
-    if (!opts.openAiKey) {
-      throw new Error('OPENAI_API_KEY is not set.')
+  const tryTogether = async () => {
+    if (!opts.togetherApiKey) {
+      throw new Error('TOGETHER_API_KEY is not configured.')
     }
 
-    return completeFromOpenAI({
-      apiKey: opts.openAiKey,
-      baseUrl: opts.openAiBaseUrl,
-      model: opts.openAiModel,
+    return completeFromTogether({
+      apiKey: opts.togetherApiKey,
+      model: opts.togetherModel,
       messages: opts.messages,
     })
   }
 
-  if (opts.provider === 'openai' || opts.provider === 'groq') {
-    return tryOpenAICompatible()
+  if (opts.provider === 'together') {
+    return tryTogether()
   }
 
   if (opts.provider === 'ollama') {
     return tryOllama()
   }
 
-  if (opts.provider === 'anthropic') {
-    throw new Error('Configured provider "anthropic" is not supported by this route yet.')
-  }
-
+  // Default: try Together first, fall back to Ollama
   try {
-    return await tryOllama()
+    return await tryTogether()
   } catch {
-    return tryOpenAICompatible()
+    return tryOllama()
   }
 }
 
@@ -723,21 +821,19 @@ async function handleParpAiChat(auth: { token?: string; userId?: string; user?: 
     { role: 'user', content: userMessage },
   ])
 
-  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'auto').toLowerCase()
+  const provider = (process.env.PARP_AI_LLM_PROVIDER || process.env.LLM_PROVIDER || 'together').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.PARP_AI_OLLAMA_MODEL ?? process.env.OLLAMA_MODEL ?? 'gemma2:2b'
-  const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
-  const openAiKey = process.env.PARP_AI_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY ?? ''
-  const openAiModel = process.env.PARP_AI_OPENAI_MODEL ?? process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
+  const togetherApiKey = process.env.PARP_AI_TOGETHER_API_KEY ?? process.env.TOGETHER_API_KEY ?? ''
+  const togetherModel = process.env.PARP_AI_TOGETHER_MODEL ?? 'meta-llama/Llama-2-7b-chat-hf'
 
   try {
     const assistantMessage = await completeFromConfiguredProvider({
       provider,
       ollamaBaseUrl,
       ollamaModel,
-      openAiBaseUrl,
-      openAiKey,
-      openAiModel,
+      togetherApiKey,
+      togetherModel,
       messages: stitchedMessages,
     })
 
@@ -751,8 +847,10 @@ async function handleParpAiChat(auth: { token?: string; userId?: string; user?: 
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error.'
-    return new Response(JSON.stringify({ error: message }), {
+    // Log error internally for debugging, return user-friendly message
+    console.error('PARP AI response generation failed:', error)
+    const userFriendlyMessage = 'I encountered an issue generating a response. Please try again in a moment.'
+    return new Response(JSON.stringify({ error: userFriendlyMessage }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })
@@ -841,12 +939,11 @@ export async function POST(req: Request) {
   const stitched = buildLlmMessages(activeSystemPrompt, history)
 
   // Retrieve configuration from environment variables
-  const provider = (body.provider || process.env.LLM_PROVIDER || 'auto').toLowerCase()
+  const provider = (body.provider || process.env.LLM_PROVIDER || 'together').toLowerCase()
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma2:2b'
-  const openAiBaseUrl = process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
-  const openAiKey = process.env.OPENAI_API_KEY ?? ''
-  const openAiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
+  const togetherApiKey = process.env.TOGETHER_API_KEY ?? ''
+  const togetherModel = process.env.TOGETHER_MODEL ?? 'meta-llama/Llama-2-7b-chat-hf'
 
   // Stream response back to the client using ReadableStream
   const stream = new ReadableStream<Uint8Array>({
@@ -868,35 +965,36 @@ export async function POST(req: Request) {
         })
       }
 
-      const tryOpenAI = async () => {
-        if (!openAiKey) throw new Error('OPENAI_API_KEY is not set.')
-        await streamFromOpenAI({
-          baseUrl: openAiBaseUrl,
-          apiKey: openAiKey,
-          model: openAiModel,
+      const tryTogether = async () => {
+        if (!togetherApiKey) throw new Error('TOGETHER_API_KEY is not configured.')
+        await streamFromTogether({
+          apiKey: togetherApiKey,
+          model: togetherModel,
           messages: stitched,
           onToken: (t) => send('token', t),
         })
       }
 
       try {
-        if (provider === 'openai') {
-          await tryOpenAI()
+        if (provider === 'together') {
+          await tryTogether()
         } else if (provider === 'ollama') {
           await tryOllama()
         } else {
-          // auto: prefer ollama, fall back to openai
+          // auto: prefer Together, fall back to Ollama
           try {
-            await tryOllama()
+            await tryTogether()
           } catch (err) {
-            send('info', 'Ollama unavailable, falling back to OpenAI.')
-            await tryOpenAI()
+            send('info', 'Temporarily using local model.')
+            await tryOllama()
           }
         }
 
         send('done', 'ok')
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown error.'
+        // Log error for debugging but send user-friendly message to client
+        console.error('Chat streaming error:', err)
+        const msg = 'I encountered an issue generating a response. Please try again in a moment.'
         send('error', msg)
       } finally {
         controller.close()

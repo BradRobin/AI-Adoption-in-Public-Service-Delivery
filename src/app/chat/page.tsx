@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file chat/page.tsx
  * @description Interactive AI chat interface page with streaming responses.
  * Features; conversation history, avatar speaking mode, and provider switching.
@@ -634,7 +634,7 @@ export default function ChatPage() {
               )
             }
             if (evt.event === 'error') {
-              setAssistantText(`Sorry — I couldn’t reach the AI service.\n\n${evt.data}`)
+              setAssistantText(`I encountered an issue generating a response. Please try again in a moment.`)
             }
             if (evt.event === 'done') {
               // no-op; loop will end when stream closes
@@ -652,18 +652,18 @@ export default function ChatPage() {
         ),
       )
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error.'
+      console.error('Chat error:', err); const friendlyMsg = 'I encountered an issue generating a response. Please try again in a moment.'
       setMessages((prev) =>
         prev.map((m) =>
           m.id === placeholderId
             ? {
               ...m,
-              content: `Sorry — I couldn’t reach the AI service. Please try again.\n\n${msg}`,
+              content: 'I encountered an issue generating a response. Please try again in a moment.',
             }
             : m,
         ),
       )
-      toast.error('Chat service is unavailable right now. Please try again.')
+      toast.error('I encountered an issue. Please try again in a moment.')
     } finally {
       // Capture the thinking duration for this message before resetting
       setThinkingDurations((prev) => ({ ...prev, [placeholderId]: thinkingTimeRef.current }))
@@ -1100,3 +1100,11 @@ export default function ChatPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
